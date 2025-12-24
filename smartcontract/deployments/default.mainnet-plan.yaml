@@ -9,23 +9,9 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: reentrancy-protection-note
+            contract-name: stackstactoe-fix
             expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
-            cost: 726935
-            path: contracts/mocks/reentrancy-protection-note.clar
-            anchor-block-only: true
-            clarity-version: 3
-        - contract-publish:
-            contract-name: sip010-token-mock
-            expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
-            cost: 727712
-            path: contracts/mocks/sip010-token-mock.clar
-            anchor-block-only: true
-            clarity-version: 3
-        - contract-publish:
-            contract-name: stackstactoe-game
-            expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
-            cost: 730619
+            cost: 667956
             path: contracts/stackstactoe.clar
             anchor-block-only: true
             clarity-version: 3

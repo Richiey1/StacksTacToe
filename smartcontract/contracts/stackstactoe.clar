@@ -88,9 +88,8 @@
 ;; Admin management
 (define-map admins principal bool)
 
-;; Supported SIP-010 tokens (STX is always supported by default)
-(define-map supported-tokens principal bool)
-(define-map token-names principal (string-ascii 20))
+;; TODO: SIP-010 token support will be added in future enhancement
+;; For now, only STX is supported
 
 ;; Player data
 (define-map players 
@@ -115,7 +114,6 @@
         player-one: principal,
         player-two: (optional principal),
         bet-amount: uint,
-        token-address: principal,
         board-size: uint,
         is-player-one-turn: bool,
         winner: (optional principal),
@@ -140,7 +138,6 @@
         challenged: principal,
         challenged-username: (string-utf8 32),
         bet-amount: uint,
-        token-address: principal,
         board-size: uint,
         created-at-block: uint,
         accepted: bool,
@@ -237,17 +234,7 @@
     )
 )
 
-(define-public (set-supported-token (token principal) (supported bool) (token-name (string-ascii 20)))
-    (begin
-        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
-        (map-set supported-tokens token supported)
-        (if supported
-            (map-set token-names token token-name)
-            true
-        )
-        (ok true)
-    )
-)
+
 
 (define-public (pause-contract)
     (begin
@@ -301,7 +288,7 @@
             (player-addr (map-get? username-to-address username))
         )
         (match player-addr
-            addr (ok { address: addr, player: (map-get? players addr) })
+            addr (ok { address: (some addr), player: (map-get? players addr) })
             (ok { address: none, player: none })
         )
     )
@@ -311,7 +298,7 @@
 ;; Game Functions
 ;; ============================================
 
-(define-public (create-game (bet-amount uint) (move-index uint) (token-address principal) (board-size uint))
+(define-public (create-game (bet-amount uint) (move-index uint) (board-size uint))
     (let
         (
             (game-id (var-get game-id-counter))
@@ -323,31 +310,18 @@
         (asserts! (or (is-eq board-size u3) (or (is-eq board-size u5) (is-eq board-size u7))) ERR_INVALID_BOARD_SIZE)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
-        ;; Validate token: if it's in supported-tokens map, it must be marked as true
-        (let ((is-sip010 (map-get? supported-tokens token-address)))
-            (if (is-some is-sip010)
-                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
-                true ;; Not in map = STX, which is always supported
-            )
-        )
-        
-        ;; Handle payment - if token is NOT in supported-tokens map, it's STX
-        (if (is-none (map-get? supported-tokens token-address))
-            (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
-            ;; For SIP-010 tokens
-            (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
-        )
+        ;; Handle STX payment
+        (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
         
         ;; Create game
         (map-set games game-id {
             player-one: tx-sender,
             player-two: none,
             bet-amount: bet-amount,
-            token-address: token-address,
             board-size: board-size,
             is-player-one-turn: false,
             winner: none,
-            last-move-block: block-height,
+            last-move-block: stacks-block-height,
             status: STATUS_ACTIVE
         })
         
@@ -376,26 +350,14 @@
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
         
-        ;; Validate token: if it's in supported-tokens map, it must be marked as true
-        (let ((is-sip010 (map-get? supported-tokens (get token-address game)))
-            (if (is-some is-sip010)
-                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
-                true ;; Not in map = STX, which is always supported
-            )
-        )
-        
-        ;; Handle payment
-        (if (is-none (map-get? supported-tokens (get token-address game)))
-            (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
-            ;; For SIP-010 tokens
-            (try! (contract-call? (get token-address game) transfer (get bet-amount game) tx-sender (as-contract tx-sender) none))
-        )
+        ;; Handle STX payment
+        (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
         
         ;; Update game
         (map-set games game-id (merge game {
             player-two: (some tx-sender),
             is-player-one-turn: true,
-            last-move-block: block-height
+            last-move-block: stacks-block-height
         }))
         
         ;; Set second move
@@ -437,7 +399,7 @@
             ;; Update game state
             (map-set games game-id (merge game {
                 is-player-one-turn: (not (get is-player-one-turn game)),
-                last-move-block: block-height
+                last-move-block: stacks-block-height
             }))
             
             (ok true)
@@ -609,12 +571,8 @@
 ;; Reward and Payout Functions
 ;; ============================================
 
-(define-private (transfer-payout (recipient principal) (amount uint) (token-address principal))
-    (if (is-none (map-get? supported-tokens token-address))
-        (as-contract (stx-transfer? amount tx-sender recipient))
-        ;; For SIP-010 tokens, call the transfer function
-        (as-contract (contract-call? token-address transfer amount tx-sender recipient none))
-    )
+(define-private (transfer-payout (recipient principal) (amount uint))
+    (as-contract (stx-transfer? amount tx-sender recipient))
 )
 
 
@@ -639,7 +597,7 @@
         
         ;; Transfer platform fee if any
         (if (> fee-amount u0)
-            (try! (transfer-payout (var-get platform-fee-recipient) fee-amount (get token-address game)))
+            (try! (transfer-payout (var-get platform-fee-recipient) fee-amount))
             true
         )
         
@@ -664,8 +622,8 @@
         }))
         
         ;; Refund both players
-        (try! (transfer-payout (get player-one game) refund-amount (get token-address game)))
-        (try! (transfer-payout player-two refund-amount (get token-address game)))
+        (try! (transfer-payout (get player-one game) refund-amount))
+        (try! (transfer-payout player-two refund-amount))
         
         ;; Update player stats for draw
         (try! (update-player-stats-draw (get player-one game) player-two))
@@ -698,7 +656,7 @@
         }))
         
         ;; Update leaderboard
-        (update-leaderboard winner)
+        (try! (update-leaderboard winner))
         
         (ok true)
     )
@@ -800,7 +758,7 @@
             (timeout-block (+ (get last-move-block game) (var-get move-timeout)))
         )
         (asserts! (is-eq (get status game) STATUS_ACTIVE) ERR_NOT_ACTIVE)
-        (asserts! (>= block-height timeout-block) ERR_TIMEOUT)
+        (asserts! (>= stacks-block-height timeout-block) ERR_TIMEOUT)
         
         ;; Winner is the player who was NOT supposed to move (last player to move)
         (let
@@ -862,13 +820,6 @@
     (ok (var-get platform-fee-percent))
 )
 
-(define-read-only (is-token-supported (token principal))
-    (ok (default-to false (map-get? supported-tokens token)))
-)
-
-(define-read-only (get-token-name (token principal))
-    (ok (map-get? token-names token))
-)
 
 (define-read-only (is-contract-paused)
     (ok (var-get contract-paused))
@@ -878,7 +829,7 @@
 ;; Challenge System
 ;; ============================================
 
-(define-public (create-challenge (challenged principal) (bet-amount uint) (token-address principal) (board-size uint))
+(define-public (create-challenge (challenged principal) (bet-amount uint) (board-size uint))
     (let
         (
             (challenge-id (var-get challenge-id-counter))
@@ -892,20 +843,8 @@
         (asserts! (> bet-amount u0) ERR_INVALID_BET)
         (asserts! (or (is-eq board-size u3) (is-eq board-size u5)) ERR_INVALID_BOARD_SIZE)
         
-        ;; Validate token: if it's in supported-tokens map, it must be marked as true
-        (let ((is-sip010 (map-get? supported-tokens token-address)))
-            (if (is-some is-sip010)
-                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
-                true ;; Not in map = STX, which is always supported
-            )
-        )
-        
-        ;; Handle payment - if token is NOT in supported-tokens map, it's STX
-        (if (is-none (map-get? supported-tokens token-address))
-            (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
-            ;; For SIP-010 tokens
-            (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
-        )
+        ;; Handle STX payment
+        (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
         
         ;; Create challenge
         (map-set challenges challenge-id {
@@ -914,9 +853,8 @@
             challenged: challenged,
             challenged-username: (get username challenged-data),
             bet-amount: bet-amount,
-            token-address: token-address,
             board-size: board-size,
-            created-at-block: block-height,
+            created-at-block: stacks-block-height,
             accepted: false,
             game-id: none
         })
@@ -940,12 +878,8 @@
         (asserts! (not (get accepted challenge)) ERR_CHALLENGE_ACCEPTED)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
-        ;; Handle payment
-        (if (is-none (map-get? supported-tokens (get token-address challenge)))
-            (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
-            ;; For SIP-010 tokens
-            (try! (contract-call? (get token-address challenge) transfer (get bet-amount challenge) tx-sender (as-contract tx-sender) none))
-        )
+        ;; Handle STX payment
+        (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
         
         ;; Mark challenge as accepted
         (map-set challenges challenge-id (merge challenge {
@@ -958,11 +892,10 @@
             player-one: (get challenger challenge),
             player-two: (some tx-sender),
             bet-amount: (get bet-amount challenge),
-            token-address: (get token-address challenge),
             board-size: (get board-size challenge),
             is-player-one-turn: false,
             winner: none,
-            last-move-block: block-height,
+            last-move-block: stacks-block-height,
             status: STATUS_ACTIVE
         })
         

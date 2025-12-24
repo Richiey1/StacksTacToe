@@ -5,7 +5,7 @@ authors = []
 telemetry = true
 cache_dir = './.cache'
 
-[contracts.stackstactoe-game]
+[contracts.stackstactoe-fix]
 path = 'contracts/stackstactoe.clar'
 clarity_version = 3
 epoch = 'latest'
@@ -22,3 +22,5 @@ callee_filter = false
 [repl.remote_data]
 enabled = false
 api_url = 'https://api.hiro.so'
+
+
