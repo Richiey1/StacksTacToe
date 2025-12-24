@@ -392,3 +392,43 @@
         (ok true)
     )
 )
+
+(define-public (play (game-id uint) (move-index uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (max-cells (* (get board-size game) (get board-size game)))
+            (cell-value (default-to MARK_EMPTY (map-get? game-boards { game-id: game-id, cell-index: move-index })))
+            (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
+        )
+        (asserts! (not (var-get contract-paused)) ERR_PAUSED)
+        (asserts! (is-eq (get status game) STATUS_ACTIVE) ERR_NOT_ACTIVE)
+        (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
+        (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
+        
+        ;; Check turn
+        (asserts! 
+            (if (get is-player-one-turn game)
+                (is-eq tx-sender (get player-one game))
+                (is-eq tx-sender player-two)
+            )
+            ERR_NOT_TURN
+        )
+        
+        ;; Set move
+        (let
+            (
+                (mark (if (get is-player-one-turn game) MARK_X MARK_O))
+            )
+            (map-set game-boards { game-id: game-id, cell-index: move-index } mark)
+            
+            ;; Update game state
+            (map-set games game-id (merge game {
+                is-player-one-turn: (not (get is-player-one-turn game)),
+                last-move-block: block-height
+            }))
+            
+            (ok true)
+        )
+    )
+)
