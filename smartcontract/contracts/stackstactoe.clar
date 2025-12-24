@@ -707,3 +707,104 @@
 (define-read-only (is-contract-paused)
     (ok (var-get contract-paused))
 )
+
+;; ============================================
+;; Challenge System
+;; ============================================
+
+(define-public (create-challenge (challenged principal) (bet-amount uint) (token-address principal) (board-size uint))
+    (let
+        (
+            (challenge-id (var-get challenge-id-counter))
+            (challenger-data (unwrap! (map-get? players tx-sender) ERR_NOT_REGISTERED))
+            (challenged-data (unwrap! (map-get? players challenged) ERR_NOT_REGISTERED))
+        )
+        (asserts! (not (var-get contract-paused)) ERR_PAUSED)
+        (asserts! (is-registered tx-sender) ERR_NOT_REGISTERED)
+        (asserts! (not (is-eq tx-sender challenged)) ERR_SELF_CHALLENGE)
+        (asserts! (is-registered challenged) ERR_NOT_REGISTERED)
+        (asserts! (> bet-amount u0) ERR_INVALID_BET)
+        (asserts! (default-to false (map-get? supported-tokens token-address)) ERR_TOKEN_NOT_SUPPORTED)
+        (asserts! (or (is-eq board-size u3) (is-eq board-size u5)) ERR_INVALID_BOARD_SIZE)
+        
+        ;; Handle payment
+        (if (is-eq token-address 'STX)
+            (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
+            true
+        )
+        
+        ;; Create challenge
+        (map-set challenges challenge-id {
+            challenger: tx-sender,
+            challenger-username: (get username challenger-data),
+            challenged: challenged,
+            challenged-username: (get username challenged-data),
+            bet-amount: bet-amount,
+            token-address: token-address,
+            board-size: board-size,
+            created-at-block: block-height,
+            accepted: false,
+            game-id: none
+        })
+        
+        ;; Increment counter
+        (var-set challenge-id-counter (+ challenge-id u1))
+        
+        (ok challenge-id)
+    )
+)
+
+(define-public (accept-challenge (challenge-id uint) (move-index uint))
+    (let
+        (
+            (challenge (unwrap! (map-get? challenges challenge-id) ERR_INVALID_ID))
+            (max-cells (* (get board-size challenge) (get board-size challenge)))
+            (game-id (var-get game-id-counter))
+        )
+        (asserts! (not (var-get contract-paused)) ERR_PAUSED)
+        (asserts! (is-eq tx-sender (get challenged challenge)) ERR_UNAUTHORIZED)
+        (asserts! (not (get accepted challenge)) ERR_CHALLENGE_ACCEPTED)
+        (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
+        
+        ;; Handle payment
+        (if (is-eq (get token-address challenge) 'STX)
+            (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
+            true
+        )
+        
+        ;; Mark challenge as accepted
+        (map-set challenges challenge-id (merge challenge {
+            accepted: true,
+            game-id: (some game-id)
+        }))
+        
+        ;; Create game from challenge
+        (map-set games game-id {
+            player-one: (get challenger challenge),
+            player-two: (some tx-sender),
+            bet-amount: (get bet-amount challenge),
+            token-address: (get token-address challenge),
+            board-size: (get board-size challenge),
+            is-player-one-turn: false,
+            winner: none,
+            last-move-block: block-height,
+            status: STATUS_ACTIVE
+        })
+        
+        ;; Set challenger's first move
+        (map-set game-boards { game-id: game-id, cell-index: move-index } MARK_X)
+        
+        ;; Increment game counter
+        (var-set game-id-counter (+ game-id u1))
+        
+        (ok game-id)
+    )
+)
+
+(define-read-only (get-challenge (challenge-id uint))
+    (ok (map-get? challenges challenge-id))
+)
+
+(define-read-only (get-latest-challenge-id)
+    (ok (var-get challenge-id-counter))
+)
