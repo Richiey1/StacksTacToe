@@ -308,3 +308,87 @@
         )
     )
 )
+
+;; ============================================
+;; Game Functions
+;; ============================================
+
+(define-public (create-game (bet-amount uint) (move-index uint) (token-address principal) (board-size uint))
+    (let
+        (
+            (game-id (var-get game-id-counter))
+            (max-cells (* board-size board-size))
+        )
+        (asserts! (not (var-get contract-paused)) ERR_PAUSED)
+        (asserts! (is-registered tx-sender) ERR_NOT_REGISTERED)
+        (asserts! (> bet-amount u0) ERR_INVALID_BET)
+        (asserts! (or (is-eq board-size u3) (or (is-eq board-size u5) (is-eq board-size u7))) ERR_INVALID_BOARD_SIZE)
+        (asserts! (default-to false (map-get? supported-tokens token-address)) ERR_TOKEN_NOT_SUPPORTED)
+        (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
+        
+        ;; Handle payment (STX transfer)
+        (if (is-eq token-address 'STX)
+            (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
+            ;; For SIP-010 tokens, we'll need to use contract-call?
+            ;; This will be implemented when token contracts are integrated
+            true
+        )
+        
+        ;; Create game
+        (map-set games game-id {
+            player-one: tx-sender,
+            player-two: none,
+            bet-amount: bet-amount,
+            token-address: token-address,
+            board-size: board-size,
+            is-player-one-turn: false,
+            winner: none,
+            last-move-block: block-height,
+            status: STATUS_ACTIVE
+        })
+        
+        ;; Set first move
+        (map-set game-boards { game-id: game-id, cell-index: move-index } MARK_X)
+        
+        ;; Increment counter
+        (var-set game-id-counter (+ game-id u1))
+        
+        (ok game-id)
+    )
+)
+
+(define-public (join-game (game-id uint) (move-index uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (max-cells (* (get board-size game) (get board-size game)))
+            (cell-value (default-to MARK_EMPTY (map-get? game-boards { game-id: game-id, cell-index: move-index })))
+        )
+        (asserts! (not (var-get contract-paused)) ERR_PAUSED)
+        (asserts! (is-registered tx-sender) ERR_NOT_REGISTERED)
+        (asserts! (is-eq (get status game) STATUS_ACTIVE) ERR_NOT_ACTIVE)
+        (asserts! (is-none (get player-two game)) ERR_GAME_STARTED)
+        (asserts! (not (is-eq tx-sender (get player-one game))) ERR_SELF_PLAY)
+        (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
+        (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
+        
+        ;; Handle payment
+        (if (is-eq (get token-address game) 'STX)
+            (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
+            ;; For SIP-010 tokens
+            true
+        )
+        
+        ;; Update game
+        (map-set games game-id (merge game {
+            player-two: (some tx-sender),
+            is-player-one-turn: true,
+            last-move-block: block-height
+        }))
+        
+        ;; Set second move
+        (map-set game-boards { game-id: game-id, cell-index: move-index } MARK_O)
+        
+        (ok true)
+    )
+)
