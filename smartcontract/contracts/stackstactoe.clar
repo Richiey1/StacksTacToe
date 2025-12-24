@@ -323,6 +323,14 @@
         (asserts! (or (is-eq board-size u3) (or (is-eq board-size u5) (is-eq board-size u7))) ERR_INVALID_BOARD_SIZE)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
+        ;; Validate token: if it's in supported-tokens map, it must be marked as true
+        (let ((is-sip010 (map-get? supported-tokens token-address)))
+            (if (is-some is-sip010)
+                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
+                true ;; Not in map = STX, which is always supported
+            )
+        )
+        
         ;; Handle payment - if token is NOT in supported-tokens map, it's STX
         (if (is-none (map-get? supported-tokens token-address))
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
@@ -367,6 +375,14 @@
         (asserts! (not (is-eq tx-sender (get player-one game))) ERR_SELF_PLAY)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
+        
+        ;; Validate token: if it's in supported-tokens map, it must be marked as true
+        (let ((is-sip010 (map-get? supported-tokens (get token-address game)))
+            (if (is-some is-sip010)
+                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
+                true ;; Not in map = STX, which is always supported
+            )
+        )
         
         ;; Handle payment
         (if (is-none (map-get? supported-tokens (get token-address game)))
@@ -875,6 +891,14 @@
         (asserts! (is-registered challenged) ERR_NOT_REGISTERED)
         (asserts! (> bet-amount u0) ERR_INVALID_BET)
         (asserts! (or (is-eq board-size u3) (is-eq board-size u5)) ERR_INVALID_BOARD_SIZE)
+        
+        ;; Validate token: if it's in supported-tokens map, it must be marked as true
+        (let ((is-sip010 (map-get? supported-tokens token-address)))
+            (if (is-some is-sip010)
+                (asserts! (unwrap-panic is-sip010) ERR_TOKEN_NOT_SUPPORTED)
+                true ;; Not in map = STX, which is always supported
+            )
+        )
         
         ;; Handle payment - if token is NOT in supported-tokens map, it's STX
         (if (is-none (map-get? supported-tokens token-address))
