@@ -465,9 +465,28 @@
                 (check-three-in-row game-id u6 u7 u8)
             )
         )
-        ;; For 5x5 and 7x7, we'd need more complex logic
-        ;; For now, we'll focus on 3x3
-        false
+        (if (is-eq board-size u5)
+            ;; 5x5 board - check all possible 3-in-a-row combinations
+            (or
+                ;; Row 0
+                (or (check-three-in-row game-id u0 u1 u2) (or (check-three-in-row game-id u1 u2 u3) (check-three-in-row game-id u2 u3 u4)))
+                (or
+                    ;; Row 1
+                    (or (check-three-in-row game-id u5 u6 u7) (or (check-three-in-row game-id u6 u7 u8) (check-three-in-row game-id u7 u8 u9)))
+                    (or
+                        ;; Row 2
+                        (or (check-three-in-row game-id u10 u11 u12) (or (check-three-in-row game-id u11 u12 u13) (check-three-in-row game-id u12 u13 u14)))
+                        (or
+                            ;; Row 3
+                            (or (check-three-in-row game-id u15 u16 u17) (or (check-three-in-row game-id u16 u17 u18) (check-three-in-row game-id u17 u18 u19)))
+                            ;; Row 4
+                            (or (check-three-in-row game-id u20 u21 u22) (or (check-three-in-row game-id u21 u22 u23) (check-three-in-row game-id u22 u23 u24)))
+                        )
+                    )
+                )
+            )
+            false
+        )
     )
 )
 
@@ -481,7 +500,28 @@
                 (check-three-in-row game-id u2 u5 u8)
             )
         )
-        false
+        (if (is-eq board-size u5)
+            ;; 5x5 board - check all possible 3-in-a-column combinations
+            (or
+                ;; Col 0
+                (or (check-three-in-row game-id u0 u5 u10) (or (check-three-in-row game-id u5 u10 u15) (check-three-in-row game-id u10 u15 u20)))
+                (or
+                    ;; Col 1
+                    (or (check-three-in-row game-id u1 u6 u11) (or (check-three-in-row game-id u6 u11 u16) (check-three-in-row game-id u11 u16 u21)))
+                    (or
+                        ;; Col 2
+                        (or (check-three-in-row game-id u2 u7 u12) (or (check-three-in-row game-id u7 u12 u17) (check-three-in-row game-id u12 u17 u22)))
+                        (or
+                            ;; Col 3
+                            (or (check-three-in-row game-id u3 u8 u13) (or (check-three-in-row game-id u8 u13 u18) (check-three-in-row game-id u13 u18 u23)))
+                            ;; Col 4
+                            (or (check-three-in-row game-id u4 u9 u14) (or (check-three-in-row game-id u9 u14 u19) (check-three-in-row game-id u14 u19 u24)))
+                        )
+                    )
+                )
+            )
+            false
+        )
     )
 )
 
@@ -492,7 +532,16 @@
             (check-three-in-row game-id u0 u4 u8)  ;; Top-left to bottom-right
             (check-three-in-row game-id u2 u4 u6)  ;; Top-right to bottom-left
         )
-        false
+        (if (is-eq board-size u5)
+            ;; 5x5 board - check all possible 3-in-a-diagonal combinations
+            (or
+                ;; Main diagonals (top-left to bottom-right)
+                (or (check-three-in-row game-id u0 u6 u12) (or (check-three-in-row game-id u1 u7 u13) (or (check-three-in-row game-id u5 u11 u17) (or (check-three-in-row game-id u6 u12 u18) (or (check-three-in-row game-id u7 u13 u19) (or (check-three-in-row game-id u10 u16 u22) (or (check-three-in-row game-id u11 u17 u23) (check-three-in-row game-id u12 u18 u24))))))))
+                ;; Anti-diagonals (top-right to bottom-left)
+                (or (check-three-in-row game-id u2 u6 u10) (or (check-three-in-row game-id u3 u7 u11) (or (check-three-in-row game-id u4 u8 u12) (or (check-three-in-row game-id u8 u12 u16) (or (check-three-in-row game-id u9 u13 u17) (or (check-three-in-row game-id u13 u17 u21) (or (check-three-in-row game-id u14 u18 u22) (check-three-in-row game-id u18 u22 u23))))))))
+            )
+            false
+        )
     )
 )
 
