@@ -560,6 +560,8 @@
     (let
         (
             (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
+            (loser (if (is-eq winner (get player-one game)) player-two (get player-one game)))
             (total-pot (* (get bet-amount game) u2))
             (fee-amount (/ (* total-pot (var-get platform-fee-percent)) BASIS_POINTS))
             (winner-payout (- total-pot fee-amount))
@@ -579,9 +581,13 @@
             true
         )
         
+        ;; Update player stats
+        (try! (update-player-stats-win winner loser))
+        
         (ok true)
     )
 )
+
 
 (define-private (handle-draw (game-id uint))
     (let
@@ -599,8 +605,106 @@
         (try! (transfer-payout (get player-one game) refund-amount (get token-address game)))
         (try! (transfer-payout player-two refund-amount (get token-address game)))
         
+        ;; Update player stats for draw
+        (try! (update-player-stats-draw (get player-one game) player-two))
+        
         (ok true)
     )
+)
+
+;; ============================================
+;; Player Stats & Rating System
+;; ============================================
+
+(define-private (update-player-stats-win (winner principal) (loser principal))
+    (let
+        (
+            (winner-data (unwrap! (map-get? players winner) ERR_NOT_REGISTERED))
+            (loser-data (unwrap! (map-get? players loser) ERR_NOT_REGISTERED))
+        )
+        ;; Update winner stats
+        (map-set players winner (merge winner-data {
+            wins: (+ (get wins winner-data) u1),
+            total-games: (+ (get total-games winner-data) u1),
+            rating: (+ (get wins winner-data) u1) ;; Rating = total wins
+        }))
+        
+        ;; Update loser stats
+        (map-set players loser (merge loser-data {
+            losses: (+ (get losses loser-data) u1),
+            total-games: (+ (get total-games loser-data) u1)
+        }))
+        
+        ;; Update leaderboard
+        (update-leaderboard winner)
+        
+        (ok true)
+    )
+)
+
+(define-private (update-player-stats-draw (player-one principal) (player-two principal))
+    (let
+        (
+            (p1-data (unwrap! (map-get? players player-one) ERR_NOT_REGISTERED))
+            (p2-data (unwrap! (map-get? players player-two) ERR_NOT_REGISTERED))
+        )
+        ;; Update player one stats
+        (map-set players player-one (merge p1-data {
+            draws: (+ (get draws p1-data) u1),
+            total-games: (+ (get total-games p1-data) u1)
+        }))
+        
+        ;; Update player two stats
+        (map-set players player-two (merge p2-data {
+            draws: (+ (get draws p2-data) u1),
+            total-games: (+ (get total-games p2-data) u1)
+        }))
+        
+        (ok true)
+    )
+)
+
+;; ============================================
+;; Leaderboard System
+;; ============================================
+
+(define-private (update-leaderboard (player principal))
+    (let
+        (
+            (player-data (unwrap! (map-get? players player) ERR_NOT_REGISTERED))
+            (current-size (var-get leaderboard-size))
+        )
+        ;; Simple leaderboard: just track top players by wins
+        ;; For now, we'll add/update entries up to LEADERBOARD_SIZE
+        (if (< current-size LEADERBOARD_SIZE)
+            (begin
+                (map-set leaderboard-entries current-size {
+                    player: player,
+                    username: (get username player-data),
+                    rating: (get rating player-data),
+                    wins: (get wins player-data)
+                })
+                (var-set leaderboard-size (+ current-size u1))
+                (ok true)
+            )
+            ;; If leaderboard is full, update existing entry or replace lowest
+            (ok true)
+        )
+    )
+)
+
+(define-read-only (get-leaderboard (limit uint))
+    (let
+        (
+            (size (var-get leaderboard-size))
+            (actual-limit (if (< size limit) size limit))
+        )
+        (ok actual-limit)
+    )
+)
+
+(define-read-only (get-leaderboard-entry (index uint))
+    (ok (map-get? leaderboard-entries index))
 )
 
 (define-public (claim-reward (game-id uint))
