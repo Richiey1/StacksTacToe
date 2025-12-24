@@ -663,3 +663,47 @@
         )
     )
 )
+
+;; ============================================
+;; Read-Only View Functions
+;; ============================================
+
+(define-read-only (get-game (game-id uint))
+    (ok (map-get? games game-id))
+)
+
+(define-read-only (get-game-board-cell (game-id uint) (cell-index uint))
+    (ok (get-cell game-id cell-index))
+)
+
+(define-read-only (get-latest-game-id)
+    (ok (var-get game-id-counter))
+)
+
+(define-read-only (get-claimable-reward (game-id uint))
+    (ok (map-get? claimable-rewards game-id))
+)
+
+(define-read-only (is-reward-claimed (game-id uint))
+    (ok (default-to false (map-get? reward-claimed game-id)))
+)
+
+(define-read-only (get-move-timeout)
+    (ok (var-get move-timeout))
+)
+
+(define-read-only (get-platform-fee)
+    (ok (var-get platform-fee-percent))
+)
+
+(define-read-only (is-token-supported (token principal))
+    (ok (default-to false (map-get? supported-tokens token)))
+)
+
+(define-read-only (get-token-name (token principal))
+    (ok (map-get? token-names token))
+)
+
+(define-read-only (is-contract-paused)
+    (ok (var-get contract-paused))
+)
