@@ -543,3 +543,123 @@
         )
     )
 )
+
+;; ============================================
+;; Reward and Payout Functions
+;; ============================================
+
+(define-private (transfer-payout (recipient principal) (amount uint) (token-address principal))
+    (if (is-eq token-address 'STX)
+        (as-contract (stx-transfer? amount tx-sender recipient))
+        ;; For SIP-010 tokens - to be implemented
+        (ok true)
+    )
+)
+
+(define-private (declare-winner (game-id uint) (winner principal))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (total-pot (* (get bet-amount game) u2))
+            (fee-amount (/ (* total-pot (var-get platform-fee-percent)) BASIS_POINTS))
+            (winner-payout (- total-pot fee-amount))
+        )
+        ;; Update game status
+        (map-set games game-id (merge game {
+            winner: (some winner),
+            status: STATUS_ENDED
+        }))
+        
+        ;; Store claimable reward
+        (map-set claimable-rewards game-id winner-payout)
+        
+        ;; Transfer platform fee if any
+        (if (> fee-amount u0)
+            (try! (transfer-payout (var-get platform-fee-recipient) fee-amount (get token-address game)))
+            true
+        )
+        
+        (ok true)
+    )
+)
+
+(define-private (handle-draw (game-id uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (refund-amount (get bet-amount game))
+            (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
+        )
+        ;; Update game status
+        (map-set games game-id (merge game {
+            status: STATUS_ENDED
+        }))
+        
+        ;; Refund both players
+        (try! (transfer-payout (get player-one game) refund-amount (get token-address game)))
+        (try! (transfer-payout player-two refund-amount (get token-address game)))
+        
+        (ok true)
+    )
+)
+
+(define-public (claim-reward (game-id uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (winner (unwrap! (get winner game) ERR_NO_REWARD))
+            (reward-amount (unwrap! (map-get? claimable-rewards game-id) ERR_NO_REWARD))
+            (already-claimed (default-to false (map-get? reward-claimed game-id)))
+        )
+        (asserts! (or (is-eq (get status game) STATUS_ENDED) (is-eq (get status game) STATUS_FORFEITED)) ERR_GAME_NOT_FINISHED)
+        (asserts! (not already-claimed) ERR_REWARD_CLAIMED)
+        (asserts! (is-eq tx-sender winner) ERR_NOT_WINNER)
+        
+        ;; Mark as claimed
+        (map-set reward-claimed game-id true)
+        (map-delete claimable-rewards game-id)
+        
+        ;; Transfer reward
+        (try! (transfer-payout winner reward-amount (get token-address game)))
+        
+        (ok true)
+    )
+)
+
+(define-public (forfeit-game (game-id uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
+            (timeout-block (+ (get last-move-block game) (var-get move-timeout)))
+        )
+        (asserts! (is-eq (get status game) STATUS_ACTIVE) ERR_NOT_ACTIVE)
+        (asserts! (>= block-height timeout-block) ERR_TIMEOUT)
+        
+        ;; Winner is the player who was NOT supposed to move (last player to move)
+        (let
+            (
+                (winner (if (get is-player-one-turn game) player-two (get player-one game)))
+                (total-pot (* (get bet-amount game) u2))
+                (fee-amount (/ (* total-pot (var-get platform-fee-percent)) BASIS_POINTS))
+                (winner-payout (- total-pot fee-amount))
+            )
+            ;; Update game status
+            (map-set games game-id (merge game {
+                winner: (some winner),
+                status: STATUS_FORFEITED
+            }))
+            
+            ;; Store claimable reward
+            (map-set claimable-rewards game-id winner-payout)
+            
+            ;; Transfer platform fee if any
+            (if (> fee-amount u0)
+                (try! (transfer-payout (var-get platform-fee-recipient) fee-amount (get token-address game)))
+                true
+            )
+            
+            (ok true)
+        )
+    )
+)
