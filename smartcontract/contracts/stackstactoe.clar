@@ -432,3 +432,114 @@
         )
     )
 )
+
+;; ============================================
+;; Win Detection Helper Functions
+;; ============================================
+
+(define-private (get-cell (game-id uint) (cell-index uint))
+    (default-to MARK_EMPTY (map-get? game-boards { game-id: game-id, cell-index: cell-index }))
+)
+
+(define-private (check-three-in-row (game-id uint) (idx1 uint) (idx2 uint) (idx3 uint))
+    (let
+        (
+            (cell1 (get-cell game-id idx1))
+            (cell2 (get-cell game-id idx2))
+            (cell3 (get-cell game-id idx3))
+        )
+        (and 
+            (not (is-eq cell1 MARK_EMPTY))
+            (is-eq cell1 cell2)
+            (is-eq cell2 cell3)
+        )
+    )
+)
+
+(define-private (check-winner-rows (game-id uint) (board-size uint))
+    (if (is-eq board-size u3)
+        ;; 3x3 board
+        (or
+            (check-three-in-row game-id u0 u1 u2)
+            (or
+                (check-three-in-row game-id u3 u4 u5)
+                (check-three-in-row game-id u6 u7 u8)
+            )
+        )
+        ;; For 5x5 and 7x7, we'd need more complex logic
+        ;; For now, we'll focus on 3x3
+        false
+    )
+)
+
+(define-private (check-winner-cols (game-id uint) (board-size uint))
+    (if (is-eq board-size u3)
+        ;; 3x3 board
+        (or
+            (check-three-in-row game-id u0 u3 u6)
+            (or
+                (check-three-in-row game-id u1 u4 u7)
+                (check-three-in-row game-id u2 u5 u8)
+            )
+        )
+        false
+    )
+)
+
+(define-private (check-winner-diagonals (game-id uint) (board-size uint))
+    (if (is-eq board-size u3)
+        ;; 3x3 board
+        (or
+            (check-three-in-row game-id u0 u4 u8)  ;; Top-left to bottom-right
+            (check-three-in-row game-id u2 u4 u6)  ;; Top-right to bottom-left
+        )
+        false
+    )
+)
+
+(define-private (check-board-full (game-id uint) (board-size uint))
+    (let
+        (
+            (max-cells (* board-size board-size))
+        )
+        (if (is-eq board-size u3)
+            ;; Check all 9 cells for 3x3
+            (and
+                (not (is-eq (get-cell game-id u0) MARK_EMPTY))
+                (and
+                    (not (is-eq (get-cell game-id u1) MARK_EMPTY))
+                    (and
+                        (not (is-eq (get-cell game-id u2) MARK_EMPTY))
+                        (and
+                            (not (is-eq (get-cell game-id u3) MARK_EMPTY))
+                            (and
+                                (not (is-eq (get-cell game-id u4) MARK_EMPTY))
+                                (and
+                                    (not (is-eq (get-cell game-id u5) MARK_EMPTY))
+                                    (and
+                                        (not (is-eq (get-cell game-id u6) MARK_EMPTY))
+                                        (and
+                                            (not (is-eq (get-cell game-id u7) MARK_EMPTY))
+                                            (not (is-eq (get-cell game-id u8) MARK_EMPTY))
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+            false
+        )
+    )
+)
+
+(define-private (has-winner (game-id uint) (board-size uint))
+    (or
+        (check-winner-rows game-id board-size)
+        (or
+            (check-winner-cols game-id board-size)
+            (check-winner-diagonals game-id board-size)
+        )
+    )
+)
