@@ -6,7 +6,7 @@ telemetry = true
 cache_dir = './.cache'
 
 [contracts.stackstactoe-game]
-path = 'contracts/game.clar'
+path = 'contracts/stackstactoe.clar'
 clarity_version = 3
 epoch = 'latest'
 
