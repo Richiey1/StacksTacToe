@@ -88,7 +88,7 @@
 ;; Admin management
 (define-map admins principal bool)
 
-;; Supported tokens (contract address = STX, other addresses = SIP-010 tokens)
+;; Supported SIP-010 tokens (STX is always supported by default)
 (define-map supported-tokens principal bool)
 (define-map token-names principal (string-ascii 20))
 
@@ -171,9 +171,7 @@
 ;; Set contract owner as admin
 (map-set admins CONTRACT_OWNER true)
 
-;; Set STX as supported token by default (using contract's own address as marker)
-(map-set supported-tokens (as-contract tx-sender) true)
-(map-set token-names (as-contract tx-sender) "STX")
+;; STX is always supported - no need to add to map
 
 ;; ============================================
 ;; Private Helper Functions
@@ -323,11 +321,10 @@
         (asserts! (is-registered tx-sender) ERR_NOT_REGISTERED)
         (asserts! (> bet-amount u0) ERR_INVALID_BET)
         (asserts! (or (is-eq board-size u3) (or (is-eq board-size u5) (is-eq board-size u7))) ERR_INVALID_BOARD_SIZE)
-        (asserts! (default-to false (map-get? supported-tokens token-address)) ERR_TOKEN_NOT_SUPPORTED)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
-        ;; Handle payment
-        (if (is-eq token-address (as-contract tx-sender))
+        ;; Handle payment - if token is NOT in supported-tokens map, it's STX
+        (if (is-none (map-get? supported-tokens token-address))
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
@@ -372,7 +369,7 @@
         (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
         
         ;; Handle payment
-        (if (is-eq (get token-address game) (as-contract tx-sender))
+        (if (is-none (map-get? supported-tokens (get token-address game)))
             (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? (get token-address game) transfer (get bet-amount game) tx-sender (as-contract tx-sender) none))
@@ -597,7 +594,7 @@
 ;; ============================================
 
 (define-private (transfer-payout (recipient principal) (amount uint) (token-address principal))
-    (if (is-eq token-address (as-contract tx-sender))
+    (if (is-none (map-get? supported-tokens token-address))
         (as-contract (stx-transfer? amount tx-sender recipient))
         ;; For SIP-010 tokens, call the transfer function
         (as-contract (contract-call? token-address transfer amount tx-sender recipient none))
@@ -877,11 +874,10 @@
         (asserts! (not (is-eq tx-sender challenged)) ERR_SELF_CHALLENGE)
         (asserts! (is-registered challenged) ERR_NOT_REGISTERED)
         (asserts! (> bet-amount u0) ERR_INVALID_BET)
-        (asserts! (default-to false (map-get? supported-tokens token-address)) ERR_TOKEN_NOT_SUPPORTED)
         (asserts! (or (is-eq board-size u3) (is-eq board-size u5)) ERR_INVALID_BOARD_SIZE)
         
-        ;; Handle payment
-        (if (is-eq token-address (as-contract tx-sender))
+        ;; Handle payment - if token is NOT in supported-tokens map, it's STX
+        (if (is-none (map-get? supported-tokens token-address))
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
@@ -921,7 +917,7 @@
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
         ;; Handle payment
-        (if (is-eq (get token-address challenge) (as-contract tx-sender))
+        (if (is-none (map-get? supported-tokens (get token-address challenge)))
             (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? (get token-address challenge) transfer (get bet-amount challenge) tx-sender (as-contract tx-sender) none))
