@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Navbar } from "@/components/Navbar";
-import { PageShell } from "@/components/PageShell";
+import { StacksProvider } from "@/contexts/StacksProvider";
+import { Navbar } from "@/components/common/Navbar";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,10 +28,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased stackstactoe-bg`}
       >
-        <Navbar />
-        <PageShell>{children}</PageShell>
+        <StacksProvider>
+          <div className="min-h-screen flex flex-col relative">
+            <Navbar />
+            <main className="flex-1 relative">
+              {children}
+            </main>
+          </div>
+          <Toaster position="bottom-right" />
+        </StacksProvider>
       </body>
     </html>
   );
