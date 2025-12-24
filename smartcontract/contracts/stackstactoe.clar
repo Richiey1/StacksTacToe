@@ -174,3 +174,137 @@
 ;; Set STX as supported token by default
 (map-set supported-tokens 'STX true)
 (map-set token-names 'STX "STX")
+
+;; ============================================
+;; Private Helper Functions
+;; ============================================
+
+(define-private (is-admin (caller principal))
+    (or 
+        (is-eq caller CONTRACT_OWNER)
+        (default-to false (map-get? admins caller))
+    )
+)
+
+(define-private (is-registered (player principal))
+    (default-to false (get registered (map-get? players player)))
+)
+
+;; ============================================
+;; Admin Functions
+;; ============================================
+
+(define-public (add-admin (admin principal))
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (ok (map-set admins admin true))
+    )
+)
+
+(define-public (remove-admin (admin principal))
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (ok (map-set admins admin false))
+    )
+)
+
+(define-public (set-move-timeout (new-timeout uint))
+    (begin
+        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (asserts! (and (> new-timeout u0) (<= new-timeout MAX_TIMEOUT)) ERR_INVALID_TIMEOUT)
+        (ok (var-set move-timeout new-timeout))
+    )
+)
+
+(define-public (set-platform-fee (new-fee-percent uint))
+    (begin
+        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (asserts! (<= new-fee-percent u1000) ERR_INVALID_FEE) ;; Max 10%
+        (ok (var-set platform-fee-percent new-fee-percent))
+    )
+)
+
+(define-public (set-platform-fee-recipient (recipient principal))
+    (begin
+        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (ok (var-set platform-fee-recipient recipient))
+    )
+)
+
+(define-public (set-k-factor (new-k-factor uint))
+    (begin
+        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (asserts! (and (> new-k-factor u0) (<= new-k-factor u1000)) ERR_INVALID_K_FACTOR)
+        (ok (var-set k-factor new-k-factor))
+    )
+)
+
+(define-public (set-supported-token (token principal) (supported bool) (token-name (string-ascii 20)))
+    (begin
+        (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (map-set supported-tokens token supported)
+        (if supported
+            (map-set token-names token token-name)
+            true
+        )
+        (ok true)
+    )
+)
+
+(define-public (pause-contract)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (ok (var-set contract-paused true))
+    )
+)
+
+(define-public (unpause-contract)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (ok (var-set contract-paused false))
+    )
+)
+
+;; ============================================
+;; Player Registration Functions
+;; ============================================
+
+(define-public (register-player (username (string-utf8 32)))
+    (let
+        (
+            (username-length (len username))
+        )
+        (asserts! (and (> username-length u0) (<= username-length MAX_USERNAME_LENGTH)) ERR_INVALID_USERNAME)
+        (asserts! (is-none (map-get? username-to-address username)) ERR_USERNAME_TAKEN)
+        (asserts! (not (is-registered tx-sender)) ERR_ALREADY_REGISTERED)
+        
+        (map-set players tx-sender {
+            username: username,
+            wins: u0,
+            losses: u0,
+            draws: u0,
+            total-games: u0,
+            rating: STARTING_RATING,
+            registered: true
+        })
+        
+        (map-set username-to-address username tx-sender)
+        (ok true)
+    )
+)
+
+(define-read-only (get-player (player principal))
+    (ok (map-get? players player))
+)
+
+(define-read-only (get-player-by-username (username (string-utf8 32)))
+    (let
+        (
+            (player-addr (map-get? username-to-address username))
+        )
+        (match player-addr
+            addr (ok { address: addr, player: (map-get? players addr) })
+            (ok { address: none, player: none })
+        )
+    )
+)
