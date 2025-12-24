@@ -326,12 +326,11 @@
         (asserts! (default-to false (map-get? supported-tokens token-address)) ERR_TOKEN_NOT_SUPPORTED)
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
-        ;; Handle payment (STX transfer)
+        ;; Handle payment
         (if (is-eq token-address 'STX)
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
-            ;; For SIP-010 tokens, we'll need to use contract-call?
-            ;; This will be implemented when token contracts are integrated
-            true
+            ;; For SIP-010 tokens
+            (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
         )
         
         ;; Create game
@@ -376,7 +375,7 @@
         (if (is-eq (get token-address game) 'STX)
             (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
-            true
+            (try! (contract-call? (get token-address game) transfer (get bet-amount game) tx-sender (as-contract tx-sender) none))
         )
         
         ;; Update game
@@ -551,10 +550,11 @@
 (define-private (transfer-payout (recipient principal) (amount uint) (token-address principal))
     (if (is-eq token-address 'STX)
         (as-contract (stx-transfer? amount tx-sender recipient))
-        ;; For SIP-010 tokens - to be implemented
-        (ok true)
+        ;; For SIP-010 tokens, call the transfer function
+        (as-contract (contract-call? token-address transfer amount tx-sender recipient none))
     )
 )
+
 
 (define-private (declare-winner (game-id uint) (winner principal))
     (let
@@ -834,7 +834,8 @@
         ;; Handle payment
         (if (is-eq token-address 'STX)
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
-            true
+            ;; For SIP-010 tokens
+            (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
         )
         
         ;; Create challenge
@@ -873,7 +874,8 @@
         ;; Handle payment
         (if (is-eq (get token-address challenge) 'STX)
             (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
-            true
+            ;; For SIP-010 tokens
+            (try! (contract-call? (get token-address challenge) transfer (get bet-amount challenge) tx-sender (as-contract tx-sender) none))
         )
         
         ;; Mark challenge as accepted
