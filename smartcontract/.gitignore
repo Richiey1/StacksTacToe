@@ -12,3 +12,7 @@ costs-reports.json
 node_modules
 stacks/
 x-temp/
+
+# Mock contracts (for testing only, not deployed)
+contracts/sip010-token-mock.clar
+contracts/reentrancy-protection-note.clar
