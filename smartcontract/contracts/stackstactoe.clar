@@ -88,7 +88,7 @@
 ;; Admin management
 (define-map admins principal bool)
 
-;; Supported tokens (principal 'STX for native STX)
+;; Supported tokens (contract address = STX, other addresses = SIP-010 tokens)
 (define-map supported-tokens principal bool)
 (define-map token-names principal (string-ascii 20))
 
@@ -171,9 +171,9 @@
 ;; Set contract owner as admin
 (map-set admins CONTRACT_OWNER true)
 
-;; Set STX as supported token by default
-(map-set supported-tokens 'STX true)
-(map-set token-names 'STX "STX")
+;; Set STX as supported token by default (using contract's own address as marker)
+(map-set supported-tokens (as-contract tx-sender) true)
+(map-set token-names (as-contract tx-sender) "STX")
 
 ;; ============================================
 ;; Private Helper Functions
@@ -327,7 +327,7 @@
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
         ;; Handle payment
-        (if (is-eq token-address 'STX)
+        (if (is-eq token-address (as-contract tx-sender))
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
@@ -372,7 +372,7 @@
         (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
         
         ;; Handle payment
-        (if (is-eq (get token-address game) 'STX)
+        (if (is-eq (get token-address game) (as-contract tx-sender))
             (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? (get token-address game) transfer (get bet-amount game) tx-sender (as-contract tx-sender) none))
@@ -597,7 +597,7 @@
 ;; ============================================
 
 (define-private (transfer-payout (recipient principal) (amount uint) (token-address principal))
-    (if (is-eq token-address 'STX)
+    (if (is-eq token-address (as-contract tx-sender))
         (as-contract (stx-transfer? amount tx-sender recipient))
         ;; For SIP-010 tokens, call the transfer function
         (as-contract (contract-call? token-address transfer amount tx-sender recipient none))
@@ -881,7 +881,7 @@
         (asserts! (or (is-eq board-size u3) (is-eq board-size u5)) ERR_INVALID_BOARD_SIZE)
         
         ;; Handle payment
-        (if (is-eq token-address 'STX)
+        (if (is-eq token-address (as-contract tx-sender))
             (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? token-address transfer bet-amount tx-sender (as-contract tx-sender) none))
@@ -921,7 +921,7 @@
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
         ;; Handle payment
-        (if (is-eq (get token-address challenge) 'STX)
+        (if (is-eq (get token-address challenge) (as-contract tx-sender))
             (try! (stx-transfer? (get bet-amount challenge) tx-sender (as-contract tx-sender)))
             ;; For SIP-010 tokens
             (try! (contract-call? (get token-address challenge) transfer (get bet-amount challenge) tx-sender (as-contract tx-sender) none))
