@@ -1,0 +1,32 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: reentrancy-protection-note
+            expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
+            cost: 726935
+            path: contracts/mocks/reentrancy-protection-note.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: sip010-token-mock
+            expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
+            cost: 727712
+            path: contracts/mocks/sip010-token-mock.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: stackstactoe-game
+            expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
+            cost: 730619
+            path: contracts/stackstactoe.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.2"

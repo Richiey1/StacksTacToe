@@ -744,7 +744,7 @@ mnemonic = "your twelve word mnemonic phrase goes here"
 ### 3. Generate Deployment Plan
 
 ```bash
-clarinet deployments generate --testnet --low-cost
+clarinet deployments generate --mainetnet --low-cost
 
 ```
 
@@ -753,7 +753,7 @@ This creates a deployment plan in `deployments/default.testnet-plan.yaml`.
 ### 4. Deploy Contract
 
 ```bash
-clarinet deployment apply -p deployments/default.testnet-plan.yaml
+clarinet deployment apply -p deployments/default.mainnet-plan.yaml
 ```
 
 Confirm the deployment when prompted (press `Y`).
