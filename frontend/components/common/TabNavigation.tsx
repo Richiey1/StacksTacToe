@@ -18,7 +18,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-4 w-full">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -28,15 +28,15 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-left w-full
+              flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl font-medium transition-all w-full
               ${isActive
-                ? "bg-white/20 text-white border-l-4 border-white"
-                : "bg-white/5 text-gray-400 border-l-4 border-transparent hover:bg-white/10 hover:text-white hover:border-white/30"
+                ? "bg-white/20 text-white border-2 border-white/40 shadow-lg"
+                : "bg-white/5 text-gray-400 border-2 border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20"
               }
             `}
           >
-            <Icon className="w-5 h-5 flex-shrink-0" />
-            <span className="text-base">{tab.label}</span>
+            <Icon className="w-8 h-8" />
+            <span className="text-sm font-semibold">{tab.label}</span>
           </button>
         );
       })}
