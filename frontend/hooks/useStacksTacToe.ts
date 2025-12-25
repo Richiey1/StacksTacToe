@@ -92,10 +92,44 @@ export function useStacksTacToe() {
     });
   }, [address]);
 
+  const forfeitGame = useCallback(async (gameId: number) => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'forfeit-game',
+      functionArgs: [uintCV(gameId)],
+      postConditionMode: PostConditionMode.Allow, // May transfer STX to winner
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
+  const claimReward = useCallback(async (gameId: number) => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'claim-reward',
+      functionArgs: [uintCV(gameId)],
+      postConditionMode: PostConditionMode.Allow, // Transfers STX to winner
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
   return {
     registerPlayer,
     createGame,
     joinGame,
     playMove,
+    forfeitGame,
+    claimReward,
   };
 }
