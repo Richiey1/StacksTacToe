@@ -11,16 +11,18 @@ import { toast } from "react-hot-toast";
 export function CreateGameContent() {
   const [betAmount, setBetAmount] = useState("");
   const [selectedMove, setSelectedMove] = useState<number | null>(null);
-  const [boardSize, setBoardSize] = useState<3 | 5 | 7>(3);
+  const [boardSize, setBoardSize] = useState<3 | 5>(3);
   const [error, setError] = useState<string | null>(null);
   const { isConnected, address } = useStacks();
   const { createGame, registerPlayer } = useStacksTacToe();
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [username, setUsername] = useState("");
 
   // Check if player is registered
-  const { player: playerData } = usePlayerData(address || undefined);
+  const { data: playerData } = usePlayerData(address || undefined);
 
   useEffect(() => {
     if (!isConnected) {
@@ -70,7 +72,6 @@ export function CreateGameContent() {
   };
 
   const handleRegister = async () => {
-    const username = prompt("Enter your username (max 32 characters):");
     if (!username || username.length === 0 || username.length > 32) {
       toast.error("Username must be between 1 and 32 characters");
       return;
@@ -80,6 +81,8 @@ export function CreateGameContent() {
       setIsRegistering(true);
       await registerPlayer(username);
       toast.success("Registration submitted...");
+      setShowRegisterModal(false);
+      setUsername("");
     } catch (err: any) {
       toast.error(err?.message || "Failed to register");
     } finally {
@@ -88,28 +91,71 @@ export function CreateGameContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Create New Game</h1>
-            <p className="text-gray-400">Set your bet amount and make your first move</p>
-          </div>
-
-          {!isRegistered && (
-            <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-              <p className="text-yellow-400 text-sm mb-3">
-                Register username to create and join games.
-              </p>
+    <>
+      {/* Registration Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-yellow-900/40 to-yellow-800/40 border-2 border-yellow-500/50 rounded-xl p-6 max-w-md w-full">
+            <p className="text-yellow-400 text-sm mb-4">
+              Register username to create and join games.
+            </p>
+            <label className="block text-yellow-400 text-sm mb-2">
+              Enter Username (max 32 characters)
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              maxLength={32}
+              className="w-full px-4 py-3 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg text-white placeholder-yellow-600 focus:outline-none focus:border-yellow-400 mb-4"
+              autoFocus
+            />
+            <div className="flex gap-3">
               <button
                 onClick={handleRegister}
-                disabled={isRegistering || isCreating}
-                className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg border border-yellow-500/30 transition-all disabled:opacity-50"
+                disabled={isRegistering || !username}
+                className="flex-1 bg-yellow-600/30 hover:bg-yellow-600/40 text-yellow-400 px-4 py-2 rounded-lg border-2 border-yellow-500/50 transition-all disabled:opacity-50 font-medium"
               >
-                {isRegistering ? "Registering..." : "Register Player Username"}
+                {isRegistering ? "Registering..." : "Register"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowRegisterModal(false);
+                  setUsername("");
+                }}
+                disabled={isRegistering}
+                className="flex-1 bg-yellow-900/30 hover:bg-yellow-900/40 text-yellow-400 px-4 py-2 rounded-lg border-2 border-yellow-500/50 transition-all disabled:opacity-50 font-medium"
+              >
+                Cancel
               </button>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Create New Game</h1>
+              <p className="text-gray-400">Set your bet amount and make your first move</p>
+            </div>
+
+            {!isRegistered && (
+              <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-sm mb-3">
+                  Register username to create and join games.
+                </p>
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  disabled={isRegistering || isCreating}
+                  className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg border border-yellow-500/30 transition-all disabled:opacity-50"
+                >
+                  Register Player Username
+                </button>
+              </div>
+            )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Board Size Selector */}
@@ -117,23 +163,27 @@ export function CreateGameContent() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Board Size
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {([3, 5, 7] as const).map((size) => (
+              <div className="grid grid-cols-2 gap-3">
+                {([
+                  { size: 3, label: "Classic" },
+                  { size: 5, label: "Advanced" }
+                ] as const).map(({ size, label }) => (
                   <button
                     key={size}
                     type="button"
                     onClick={() => setBoardSize(size)}
                     disabled={!isRegistered}
                     className={`
-                      px-4 py-2 rounded-lg border-2 transition-all font-medium
+                      px-4 py-3 rounded-lg border-2 transition-all font-medium flex flex-col items-center gap-1
                       ${boardSize === size
-                        ? "bg-white/20 border-white text-white"
+                        ? "bg-orange-500/20 border-orange-500 text-white"
                         : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20"
                       }
                       disabled:opacity-50 disabled:cursor-not-allowed
                     `}
                   >
-                    {size}x{size}
+                    <span className="text-lg font-bold">{size}×{size}</span>
+                    <span className="text-xs">{label}</span>
                   </button>
                 ))}
               </div>
@@ -221,5 +271,6 @@ export function CreateGameContent() {
         </div>
       </div>
     </div>
+    </>
   );
 }
