@@ -22,12 +22,18 @@ export function WalletButton({ wallet }: Props) {
   const { address, connect, disconnect, isReady, isSignedIn } = walletState;
   const [copied, setCopied] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const label = useMemo(
     () => formatAddress(address ?? null),
     [address],
   );
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -75,6 +81,19 @@ export function WalletButton({ wallet }: Props) {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+  // Show loading state during SSR/hydration
+  if (!isMounted) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 shadow-lg shadow-amber-500/25 transition-all duration-200 disabled:opacity-60"
+      >
+        <span className="relative">Connect Wallet</span>
+      </button>
+    );
+  }
 
   if (!isSignedIn) {
     return (
