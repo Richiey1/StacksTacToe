@@ -255,7 +255,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     try {
       setShowJoinConfirmModal(false);
       setIsPending(true);
-      const betAmount = Number((game as { betAmount: bigint }).betAmount) / 1_000_000;
+      const betAmount = Number(game.betAmount) / 1_000_000;
       await joinGame(Number(gameId), selectedJoinMove, betAmount);
       setSelectedJoinMove(null);
       toast.success("Joining game...");
@@ -319,7 +319,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const { playerOne, playerTwo, betAmount, winner } = game as {
     playerOne: string;
     playerTwo: string | null;
-    betAmount: bigint;
+    betAmount: number;
     winner: string | null;
   };
 
