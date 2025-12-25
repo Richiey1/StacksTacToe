@@ -10,11 +10,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@stacks/blockchain-api-client": "^8.13.6",
     "@stacks/connect": "^7.2.0",
+    "@stacks/network": "^7.3.1",
     "@stacks/transactions": "^7.2.0",
+    "@tanstack/react-query": "^5.90.12",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
     "next": "16.0.8",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "react-hot-toast": "^2.6.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

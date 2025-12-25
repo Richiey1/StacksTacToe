@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { callReadOnlyFunction, cvToValue, standardPrincipalCV, uintCV } from '@stacks/transactions';
+import { fetchCallReadOnlyFunction, cvToValue, standardPrincipalCV, uintCV } from '@stacks/transactions';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from '@/lib/stacksConfig';
 import { Player, LeaderboardEntry, Game } from '@/types/game';
 
@@ -10,7 +10,7 @@ export function usePlayerData(address?: string | null) {
       if (!address) return null;
 
       try {
-        const response = await callReadOnlyFunction({
+        const response = await fetchCallReadOnlyFunction({
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
           contractName: CONTRACT_NAME,
@@ -48,7 +48,7 @@ export function useLeaderboard() {
     queryKey: ['leaderboard'],
     queryFn: async (): Promise<LeaderboardEntry[]> => {
       try {
-        const response = await callReadOnlyFunction({
+        const response = await fetchCallReadOnlyFunction({
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
           contractName: CONTRACT_NAME,
@@ -75,7 +75,7 @@ export function useGame(gameId: number) {
     queryKey: ['game', gameId],
     queryFn: async (): Promise<Game | null> => {
       try {
-        const response = await callReadOnlyFunction({
+        const response = await fetchCallReadOnlyFunction({
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
           contractName: CONTRACT_NAME,
@@ -96,7 +96,7 @@ export function useGame(gameId: number) {
           boardSize: Number(game['board-size'].value),
           isPlayerOneTurn: game['is-player-one-turn'].value,
           winner: game.winner.value,
-          lastMoveBlock: Number(game['last-move-block'].value),
+          lastMoveBlock: Number(game['last-move-time'].value),
           status: Number(game.status.value), // Check if status is uint
         };
       } catch (error) {
@@ -138,7 +138,7 @@ export function useGameList(limit = 10) {
         
         // For this hackathon scope, let's just fetch IDs 0-9.
         for (let i = 0; i < limit; i++) {
-           const response = await callReadOnlyFunction({
+           const response = await fetchCallReadOnlyFunction({
             network: NETWORK,
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
@@ -157,7 +157,7 @@ export function useGameList(limit = 10) {
                boardSize: Number(game['board-size'].value),
                isPlayerOneTurn: game['is-player-one-turn'].value,
                winner: game.winner.value,
-               lastMoveBlock: Number(game['last-move-block'].value),
+               lastMoveBlock: Number(game['last-move-time'].value),
                status: Number(game.status.value),
              });
           }

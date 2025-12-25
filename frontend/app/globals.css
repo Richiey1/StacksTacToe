@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 .stackstactoe-bg {
   @apply bg-gradient-to-br from-gray-900 via-black to-gray-900;
@@ -31,6 +29,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

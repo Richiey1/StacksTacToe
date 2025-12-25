@@ -20,7 +20,7 @@ export function WalletButton({ wallet }: Props) {
   const { address, connect, disconnect, isReady, isSignedIn } = walletState;
 
   const label = useMemo(
-    () => formatAddress(address),
+    () => formatAddress(address ?? null),
     [address],
   );
 
