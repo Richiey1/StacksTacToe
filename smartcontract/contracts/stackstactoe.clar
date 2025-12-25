@@ -10,8 +10,8 @@
 (define-constant CONTRACT_OWNER tx-sender)
 
 ;; Game parameters
-(define-constant DEFAULT_MOVE_TIMEOUT u144) ;; ~24 hours in blocks (assuming 10 min blocks)
-(define-constant MAX_TIMEOUT u1008) ;; ~7 days in blocks
+(define-constant DEFAULT_MOVE_TIMEOUT u86400) ;; 24 hours in seconds
+(define-constant MAX_TIMEOUT u604800) ;; 7 days in seconds
 (define-constant DEFAULT_BOARD_SIZE u3)
 (define-constant LEADERBOARD_SIZE u100)
 (define-constant DEFAULT_K_FACTOR u100) ;; ELO rating change factor
@@ -117,7 +117,7 @@
         board-size: uint,
         is-player-one-turn: bool,
         winner: (optional principal),
-        last-move-block: uint,
+        last-move-time: uint,
         status: uint
     }
 )
@@ -321,7 +321,7 @@
             board-size: board-size,
             is-player-one-turn: false,
             winner: none,
-            last-move-block: stacks-block-height,
+            last-move-time: burn-block-time,
             status: STATUS_ACTIVE
         })
         
@@ -357,7 +357,7 @@
         (map-set games game-id (merge game {
             player-two: (some tx-sender),
             is-player-one-turn: true,
-            last-move-block: stacks-block-height
+            last-move-time: burn-block-time
         }))
         
         ;; Set second move
@@ -399,7 +399,7 @@
             ;; Update game state
             (map-set games game-id (merge game {
                 is-player-one-turn: (not (get is-player-one-turn game)),
-                last-move-block: stacks-block-height
+                last-move-time: burn-block-time
             }))
             
             (ok true)
@@ -744,7 +744,7 @@
         (map-delete claimable-rewards game-id)
         
         ;; Transfer reward
-        (try! (transfer-payout winner reward-amount (get token-address game)))
+        (try! (transfer-payout winner reward-amount))
         
         (ok true)
     )
@@ -755,10 +755,10 @@
         (
             (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
             (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
-            (timeout-block (+ (get last-move-block game) (var-get move-timeout)))
+            (timeout-time (+ (get last-move-time game) (var-get move-timeout)))
         )
         (asserts! (is-eq (get status game) STATUS_ACTIVE) ERR_NOT_ACTIVE)
-        (asserts! (>= stacks-block-height timeout-block) ERR_TIMEOUT)
+        (asserts! (>= burn-block-time timeout-time) ERR_TIMEOUT)
         
         ;; Winner is the player who was NOT supposed to move (last player to move)
         (let
@@ -779,7 +779,7 @@
             
             ;; Transfer platform fee if any
             (if (> fee-amount u0)
-                (try! (transfer-payout (var-get platform-fee-recipient) fee-amount (get token-address game)))
+                (try! (transfer-payout (var-get platform-fee-recipient) fee-amount))
                 true
             )
             
