@@ -7,7 +7,7 @@ cache_dir = './.cache'
 
 [contracts.stackstactoe-beta]
 path = 'contracts/stackstactoe.clar'
-clarity_version = 4
+clarity_version = 3
 epoch = 'latest'
 
 [repl.analysis]
