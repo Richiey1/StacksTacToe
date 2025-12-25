@@ -31,26 +31,33 @@ export default function Home() {
       ></div>
       
       {/* Content with proper z-index */}
-      <div className="relative z-10 max-w-6xl w-full space-y-6 sm:space-y-8 md:space-y-12">
+      <div className="relative z-10 max-w-7xl w-full space-y-6 sm:space-y-8">
         {/* Hero Carousel */}
         <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12">
           <HeroCarousel onTabChange={setActiveTab} />
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="mt-8 sm:mt-6 md:mt-8">
-          <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
+        {/* Sidebar + Content Layout */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+          {/* Sidebar Navigation */}
+          <aside className="md:w-64 flex-shrink-0">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+          </aside>
 
-        {/* Tab Content */}
-        {activeTab && (
-          <div className="mt-4 sm:mt-6 md:mt-8">
-            {activeTab === "games" && <GamesContent onTabChange={setActiveTab} />}
-            {activeTab === "create" && <CreateGameContent />}
-            {activeTab === "leaderboard" && <LeaderboardContent />}
-            {activeTab === "challenges" && <ChallengesContent />}
-          </div>
-        )}
+          {/* Main Content Area */}
+          <main className="flex-1 min-w-0">
+            {activeTab && (
+              <>
+                {activeTab === "games" && <GamesContent onTabChange={setActiveTab} />}
+                {activeTab === "create" && <CreateGameContent />}
+                {activeTab === "leaderboard" && <LeaderboardContent />}
+                {activeTab === "challenges" && <ChallengesContent />}
+              </>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );
