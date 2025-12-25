@@ -4,6 +4,7 @@ import { StacksProvider } from "@/contexts/StacksProvider";
 import { Navbar } from "@/components/common/Navbar";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StacksTacToe - Blockchain Tic-Tac-Toe",
-  description: "Play provably fair Tic-Tac-Toe games on the Stacks blockchain.",
+  title: "StacksTacToe - Decentralized Tic-Tac-Toe",
+  description: "Play Tic-Tac-Toe on the Stacks blockchain",
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function RootLayout({
   children,
@@ -28,17 +38,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased stackstactoe-bg`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black min-h-screen`}
       >
-        <StacksProvider>
-          <div className="min-h-screen flex flex-col relative">
+        <QueryClientProvider client={queryClient}>
+          <StacksProvider>
             <Navbar />
-            <main className="flex-1 relative">
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
               {children}
-            </main>
-          </div>
-          <Toaster position="bottom-right" />
-        </StacksProvider>
+            </div>
+            <Toaster position="top-right" />
+          </StacksProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

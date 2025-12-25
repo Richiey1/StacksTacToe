@@ -151,12 +151,15 @@ Replicate **every feature** from BlocxTacToe frontend into StacksTacToe, adapted
 **Status**: ✅ GamesList component created (262 lines)
 **Pushed to GitHub**: Yes
 
-### Phase 3: Pages (Priority 2) ⏳ IN PROGRESS
-- [ ] Enhance Create Game page
-- [ ] Create Play Game page (`/play/[gameId]`)
-- [ ] Implement Leaderboard page
-- [ ] Implement Challenges page
-- [ ] Create Admin page
+### Phase 3: Pages (Priority 2) ✅ COMPLETE
+- [x] Enhance Create Game page
+- [x] Create Play Game page (`/play/[gameId]`)
+- [x] Implement Leaderboard page
+- [x] Implement Challenges page (placeholder)
+- [x] Update home page with tab navigation
+
+**Status**: ✅ All pages created (6 components, ~800 lines)
+**Pushed to GitHub**: Yes
 
 ### Phase 4: Data & State Management (Priority 1)
 - [ ] Enhance `useGameData.ts` to fetch:
