@@ -22,7 +22,7 @@ export function PlayerDisplay({
   isFinishedGame = false,
   isDraw = false,
 }: PlayerDisplayProps) {
-  const { player } = usePlayerData(playerAddress);
+  const { data: player } = usePlayerData(playerAddress);
   const username =
     player && typeof player === "object" && "username" in player
       ? (player.username as string)
