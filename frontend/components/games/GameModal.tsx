@@ -8,7 +8,7 @@ import { CountdownTimer } from "@/components/games/CountdownTimer";
 import { ForfeitModal } from "@/components/games/ForfeitModal";
 import { JoinGameModal } from "@/components/games/JoinGameModal";
 import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { useGameData, usePlayerData } from "@/hooks/useGameData";
+import { useGame, usePlayerData } from "@/hooks/useGameData";
 import { Loader2, Coins, Users, AlertCircle, Clock, X, Trophy, Share2, RefreshCw } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -26,7 +26,9 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const queryClient = useQueryClient();
 
   // Get game data using hook
-  const { game, timeRemaining, isLoading: isLoadingGame } = useGameData(gameId);
+  const { data: gameData, isLoading: isLoadingGame } = useGame(Number(gameId));
+  const game = gameData;
+  const timeRemaining = game?.timeRemaining;
 
   const gameRef = useRef<HTMLDivElement>(null);
 
@@ -46,17 +48,9 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const [isPending, setIsPending] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get player usernames
-  const player1Address = game && typeof game === "object" && "playerOne" in game
-    ? (game as { playerOne: string }).playerOne
-    : undefined;
-
-  const player2Address = game && typeof game === "object" && "playerTwo" in game
-    ? (game as { playerTwo: string | null }).playerTwo
-    : undefined;
-
-  const { player: player1Data } = usePlayerData(player1Address || undefined);
-  const { player: player2Data } = usePlayerData(player2Address || undefined);
+  // Get player data for both players
+  const { data: player1Data } = usePlayerData(game?.player1);
+  const { data: player2Data } = usePlayerData(game?.player2);
 
   useEffect(() => {
     if (!isOpen) {

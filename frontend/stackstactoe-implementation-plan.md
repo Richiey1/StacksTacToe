@@ -140,15 +140,18 @@ Replicate **every feature** from BlocxTacToe frontend into StacksTacToe, adapted
 **Status**: ✅ All components created and committed (7 commits, ~1,100 lines)
 **Pushed to GitHub**: Yes
 
-### Phase 2: Game List & Display (Priority 1) ⏳ IN PROGRESS
-- [ ] Enhance `GamesList.tsx` with all features
-- [ ] Add game status badges
-- [ ] Add player username fetching
-- [ ] Add countdown timers to game cards
-- [ ] Add color coding system
-- [ ] Add responsive layout
+### Phase 2: Game List & Display (Priority 1) ✅ COMPLETE
+- [x] Enhance `GamesList.tsx` with all features
+- [x] Add game status badges
+- [x] Add player username fetching
+- [x] Add countdown timers to game cards
+- [x] Add color coding system
+- [x] Add responsive layout
 
-### Phase 3: Pages (Priority 2)
+**Status**: ✅ GamesList component created (262 lines)
+**Pushed to GitHub**: Yes
+
+### Phase 3: Pages (Priority 2) ⏳ IN PROGRESS
 - [ ] Enhance Create Game page
 - [ ] Create Play Game page (`/play/[gameId]`)
 - [ ] Implement Leaderboard page
@@ -203,17 +206,19 @@ Replicate **every feature** from BlocxTacToe frontend into StacksTacToe, adapted
 
 ## Progress Summary
 
-### ✅ Completed (Phase 1)
+### ✅ Completed (Phases 1 & 2)
 1. ✅ GameModal - Full game UI with all features
 2. ✅ Supporting components (CountdownTimer, PlayerDisplay, Modals)
 3. ✅ GameBoard with multi-size support
 4. ✅ Contract functions (forfeitGame, claimReward)
+5. ✅ GamesList - Comprehensive game cards with all features
+6. ✅ WalletButton - Dropdown menu with copy/disconnect
 
-### 🔄 Current Focus (Phase 2)
-- Enhance GamesList with detailed game cards
-- Add status badges and color coding
-- Implement player username displays
-- Add countdown timers to game cards
+### 🔄 Current Focus (Phase 3)
+- Enhance Create Game page
+- Create Play Game page with GameModal integration
+- Implement Leaderboard page
+- Implement Challenges page
 
 ### 📋 Next Steps
 1. Complete GamesList enhancement
