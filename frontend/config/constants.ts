@@ -1,6 +1,7 @@
-export const STACKS_NETWORK = 'mainnet';
-export const CONTRACT_ADDRESS = 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9';
-export const CONTRACT_NAME = 'stackstactoe-game';
+// Contract configuration
+export const STACKS_NETWORK = 'testnet'; // 'mainnet' or 'testnet'
+export const CONTRACT_ADDRESS = 'SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF';
+export const CONTRACT_NAME = 'stackstactoe-fix';
 export const CONTRACT_FULL_NAME = `${CONTRACT_ADDRESS}.${CONTRACT_NAME}`;
 
 export const APP_NAME = 'StacksTacToe';
