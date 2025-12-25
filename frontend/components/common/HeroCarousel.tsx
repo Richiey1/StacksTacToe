@@ -1,8 +1,9 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Grid3x3, Trophy, Zap, Shield } from 'lucide-react';
-import { TabType } from '@/app/page';
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+export type TabType = "games" | "create" | "leaderboard" | "challenges";
 
 interface HeroCarouselProps {
   onTabChange: (tab: TabType) => void;
@@ -10,32 +11,28 @@ interface HeroCarouselProps {
 
 const slides = [
   {
-    icon: Grid3x3,
-    title: 'Play Tic-Tac-Toe',
-    description: 'Challenge players in classic 3x3 or advanced 5x5 games',
-    color: 'text-orange-500',
-    action: 'games' as TabType,
+    title: "Play Tic-Tac-Toe",
+    subtitle: "On Stacks Blockchain",
+    description: "Compete with players worldwide in decentralized Tic-Tac-Toe",
+    action: "View Games",
+    tab: "games" as TabType,
+    gradient: "from-blue-500 to-purple-600",
   },
   {
-    icon: Trophy,
-    title: 'Compete & Win',
-    description: 'Climb the leaderboard and earn STX rewards',
-    color: 'text-blue-500',
-    action: 'leaderboard' as TabType,
+    title: "Create Your Game",
+    subtitle: "Set Your Stakes",
+    description: "Choose your bet amount and board size, make the first move",
+    action: "Create Game",
+    tab: "create" as TabType,
+    gradient: "from-orange-500 to-red-600",
   },
   {
-    icon: Zap,
-    title: 'Instant Matches',
-    description: 'Create or join games with STX betting',
-    color: 'text-yellow-500',
-    action: 'create' as TabType,
-  },
-  {
-    icon: Shield,
-    title: 'Provably Fair',
-    description: 'All games secured by Stacks blockchain',
-    color: 'text-green-500',
-    action: 'games' as TabType,
+    title: "Climb the Ranks",
+    subtitle: "Prove Your Skills",
+    description: "Compete for the top spot on the leaderboard",
+    action: "View Leaderboard",
+    tab: "leaderboard" as TabType,
+    gradient: "from-yellow-500 to-orange-600",
   },
 ];
 
@@ -50,49 +47,63 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
     return () => clearInterval(timer);
   }, []);
 
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
   const slide = slides[currentSlide];
-  const Icon = slide.icon;
 
   return (
-    <div className="relative">
-      <div className="glass rounded-2xl p-8 md:p-12 text-center">
-        <div className="flex justify-center mb-6">
-          <div className={`${slide.color} p-4 rounded-full bg-white/10`}>
-            <Icon className="w-12 h-12 md:w-16 md:h-16" />
-          </div>
+    <div className="relative overflow-hidden rounded-2xl">
+      <div className={`bg-gradient-to-r ${slide.gradient} p-8 sm:p-12 md:p-16 text-white`}>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-4">
+            {slide.title}
+          </h2>
+          <p className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 opacity-90">
+            {slide.subtitle}
+          </p>
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-80">
+            {slide.description}
+          </p>
+          <button
+            onClick={() => onTabChange(slide.tab)}
+            className="bg-white text-gray-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
+          >
+            {slide.action}
+          </button>
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">
-          <span className="text-orange-500">STACKS</span>
-          <span className="text-white">TacToe</span>
-        </h1>
-
-        <h2 className="text-xl md:text-2xl font-semibold text-white mb-3">
-          {slide.title}
-        </h2>
-
-        <p className="text-gray-300 text-base md:text-lg mb-6 max-w-2xl mx-auto">
-          {slide.description}
-        </p>
-
+        {/* Navigation Arrows */}
         <button
-          onClick={() => onTabChange(slide.action)}
-          className="bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+          onClick={prevSlide}
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all"
+          aria-label="Previous slide"
         >
-          Get Started
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
-        {/* Slide indicators */}
-        <div className="flex justify-center gap-2 mt-8">
+        {/* Dots Indicator */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlide
-                  ? 'bg-white w-8'
-                  : 'bg-white/30 hover:bg-white/50'
+                index === currentSlide ? "bg-white w-8" : "bg-white/50"
               }`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
