@@ -187,12 +187,6 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     };
   }, [gameStatus, isPlayerTurn, isOpen, fetchBoardData, queryClient, gameId]);
 
-  useEffect(() => {
-    if (timeRemaining !== undefined) {
-      setCanForfeit(timeRemaining === BigInt(0));
-    }
-  }, [timeRemaining]);
-
   const handleCellClick = async (index: number) => {
     if (!address) {
       toast.error("Please connect your wallet");
@@ -399,9 +393,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
                 <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="text-xs sm:text-sm">Time Remaining</span>
               </div>
-              {timeRemaining !== undefined && typeof timeRemaining === "bigint" && (
-                <CountdownTimer timeRemaining={timeRemaining} />
-              )}
+              <p className="text-white font-semibold text-sm sm:text-base">--:--</p>
             </div>
           </div>
 

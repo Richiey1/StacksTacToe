@@ -20,17 +20,17 @@ export function usePlayerData(address?: string | null) {
         });
 
         const data = cvToValue(response);
-        if (!data) return null;
+        if (!data || !data.value) return null;
 
         return {
           address,
-          username: data.value.username.value,
-          wins: Number(data.value.wins.value),
-          losses: Number(data.value.losses.value),
-          draws: Number(data.value.draws.value),
-          totalGames: Number(data.value['total-games'].value),
-          rating: Number(data.value.rating.value),
-          registered:  data.value.registered.value,
+          username: data.value.username?.value || "",
+          wins: Number(data.value.wins?.value || 0),
+          losses: Number(data.value.losses?.value || 0),
+          draws: Number(data.value.draws?.value || 0),
+          totalGames: Number(data.value["total-games"]?.value || 0),
+          rating: Number(data.value.rating?.value || 0),
+          registered: Boolean(data.value.registered?.value),
         };
       } catch (error) {
         console.error('Error fetching player data:', error);
