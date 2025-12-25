@@ -6,7 +6,7 @@ interface JoinGameModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  betAmount: bigint;
+  betAmount: number;
   isLoading?: boolean;
 }
 
