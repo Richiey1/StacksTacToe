@@ -30,8 +30,8 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
             className={`
               flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl font-medium transition-all w-full
               ${isActive
-                ? "bg-white/20 text-white border-2 border-white/40 shadow-lg"
-                : "bg-white/5 text-gray-400 border-2 border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20"
+                ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white border-2 border-orange-400 shadow-lg shadow-orange-500/50"
+                : "bg-white/5 text-gray-400 border-2 border-white/10 hover:bg-gradient-to-br hover:from-orange-500/20 hover:to-orange-600/20 hover:text-orange-400 hover:border-orange-500/50"
               }
             `}
           >

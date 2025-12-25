@@ -16,7 +16,7 @@ const slides = [
     description: "Compete with players worldwide in decentralized Tic-Tac-Toe",
     action: "View Games",
     tab: "games" as TabType,
-    gradient: "from-blue-500 to-purple-600",
+    gradient: "from-orange-500 to-orange-600",
   },
   {
     title: "Create Your Game",
