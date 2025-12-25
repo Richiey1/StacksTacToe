@@ -17,7 +17,6 @@ export default function Home() {
     <div 
       className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-16 sm:pt-20 pb-8 sm:pb-12 md:pt-24 md:pb-20 relative overflow-hidden"
       style={{
-        backgroundImage: `url('/stackstactoe-bg.png')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
