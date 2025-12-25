@@ -28,7 +28,6 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   // Get game data using hook
   const { data: gameData, isLoading: isLoadingGame } = useGame(Number(gameId));
   const game = gameData;
-  const timeRemaining = game?.timeRemaining;
 
   const gameRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +48,8 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get player data for both players
-  const { data: player1Data } = usePlayerData(game?.player1);
-  const { data: player2Data } = usePlayerData(game?.player2);
+  const { data: player1Data } = usePlayerData(game?.playerOne);
+  const { data: player2Data } = usePlayerData(game?.playerTwo);
 
   useEffect(() => {
     if (!isOpen) {
