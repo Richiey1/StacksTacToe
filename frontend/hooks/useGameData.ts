@@ -1,9 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCallReadOnlyFunction, cvToValue, standardPrincipalCV, uintCV } from '@stacks/transactions';
-import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from '@/lib/stacksConfig'
-;
+import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK, STACKS_API_URL } from '@/lib/stacksConfig';
 import { Player, LeaderboardEntry, Game } from '@/types/game';
-import { isGameActive } from '@/lib/gameUtils';
+import { isGameActive } from '../lib/gameUtils';
 
 // ============================================
 // Player Data Hooks
@@ -155,9 +154,10 @@ export function useGame(gameId: number, enablePolling = true) {
     },
     enabled: gameId >= 0,
     staleTime: 3000, // 3 seconds
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll every 5 seconds for active games, 30 seconds for others
       if (!enablePolling) return false;
+      const data = query.state.data;
       if (data && isGameActive(data)) return 5000;
       return 30000;
     },
@@ -256,10 +256,9 @@ export function useBoardState(gameId: number, boardSize: number) {
     },
     enabled: gameId >= 0 && boardSize > 0,
     staleTime: 3000, // 3 seconds
-    refetchInterval: (data, query) => {
+    refetchInterval: (query) => {
       // Poll every 5 seconds for active games
-      const game = query.state.data;
-      return game ? 5000 : false;
+      return query.state.data ? 5000 : false;
     },
   });
 }
@@ -301,10 +300,8 @@ export function useMoveTimeout() {
  */
 async function getCurrentBlockHeight(): Promise<number> {
   try {
-    // TODO: Fetch from Stacks API
-    // For now, return a mock value
-    // In production: fetch from https://api.mainnet.hiro.so/v2/info
-    const response = await fetch(`${NETWORK.coreApiUrl}/v2/info`);
+    // Fetch current block height from Stacks API
+    const response = await fetch(`${STACKS_API_URL}/v2/info`);
     const data = await response.json();
     return data.stacks_tip_height || 0;
   } catch (error) {
