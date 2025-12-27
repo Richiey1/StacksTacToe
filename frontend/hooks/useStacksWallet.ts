@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { showConnect } from "@stacks/connect";
 import { appDetails, userSession } from "@/lib/stacks-session";
+import { STACKS_NETWORK } from "@/config/constants";
 
 type StacksUserData = {
   profile?: {
@@ -72,9 +73,10 @@ export function useStacksWallet() {
 
   const address = useMemo(() => {
     if (!userData?.profile?.stxAddress) return null;
-    return (
-      userData.profile.stxAddress.testnet || userData.profile.stxAddress.mainnet
-    );
+    if (STACKS_NETWORK === 'mainnet') {
+      return userData.profile.stxAddress.mainnet || userData.profile.stxAddress.testnet;
+    }
+    return userData.profile.stxAddress.testnet || userData.profile.stxAddress.mainnet;
   }, [userData]);
 
   return {
