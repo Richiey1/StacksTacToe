@@ -8,7 +8,7 @@ import { TabType } from "@/components/common/TabNavigation";
 import { Plus, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
-import { cvToValue, hexToCV } from "@stacks/transactions";
+import { cvToValue, uintCV } from "@stacks/transactions";
 
 
 
@@ -33,7 +33,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
         functionName: "get-game",
-        functionArgs: [hexToCV(`0x${gameId.toString(16).padStart(32, '0')}`)],
+        functionArgs: [uintCV(gameId)],
         senderAddress: CONTRACT_ADDRESS,
       });
 
@@ -41,13 +41,13 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       
       if (!gameData || !gameData.value) return null;
 
-      const game = gameData.value;
-      const playerOne = game["player-one"].value;
-      const playerTwo = game["player-two"].value;
-      const betAmount = BigInt(game["bet-amount"].value);
-      const status = Number(game.status.value);
-      const winner = game.winner.value;
-      const boardSize = Number(game["board-size"]?.value || 3);
+      const game = gameData;
+      const playerOne = game["player-one"];
+      const playerTwo = game["player-two"];
+      const betAmount = BigInt(game["bet-amount"]);
+      const status = Number(game.status);
+      const winner = game.winner;
+      const boardSize = Number(game["board-size"] || 3);
 
       let gameStatus: "waiting" | "active" | "finished" = "waiting";
       if (status === 1 || status === 2) {
@@ -65,11 +65,11 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
             functionName: "get-time-remaining",
-            functionArgs: [hexToCV(`0x${gameId.toString(16).padStart(32, '0')}`)],
+            functionArgs: [uintCV(gameId)],
             senderAddress: CONTRACT_ADDRESS,
           });
           const timeValue = cvToValue(timeResult);
-          timeRemaining = BigInt(timeValue.value || 0);
+          timeRemaining = BigInt(timeValue || 0);
         } catch {
           // Ignore errors
         }
@@ -82,7 +82,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         player2: playerTwo && playerTwo !== "none" ? playerTwo : null,
         betAmount,
         status: gameStatus,
-        currentPlayer: game["is-player-one-turn"]?.value ? playerOne : playerTwo,
+        currentPlayer: game["is-player-one-turn"] ? playerOne : playerTwo,
         winner: winner && winner !== "none" ? winner : null,
         createdAt: new Date(),
         timeRemaining,
@@ -109,7 +109,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       });
 
       const latestId = cvToValue(latestIdResult);
-      const gameCount = Number(latestId.value || 0);
+      const gameCount = Number(latestId || 0);
 
       const allGames: Game[] = [];
       

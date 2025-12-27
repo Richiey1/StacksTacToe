@@ -1,6 +1,7 @@
 'use client'
 
 import { WalletButton } from '@/components/WalletButton';
+import { WalletConnectButton } from '@/components/WalletConnectButton';
 import { Grid3x3 } from 'lucide-react';
 
 export function Navbar() {
@@ -20,7 +21,10 @@ export function Navbar() {
           </div>
 
           {/* Wallet Button */}
-          <WalletButton />
+          <div className="flex items-center gap-3">
+             <WalletConnectButton />
+             <WalletButton />
+          </div>
         </div>
       </div>
     </nav>

@@ -4,6 +4,7 @@ import { StacksProvider } from "@/contexts/StacksProvider";
 import { Navbar } from "@/components/common/Navbar";
 import { Toaster } from "react-hot-toast";
 import { Providers } from "@/components/Providers";
+import { ReownProvider } from "@/contexts/ReownProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,13 +33,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black min-h-screen`}
       >
         <Providers>
-          <StacksProvider>
-            <Navbar />
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-              {children}
-            </div>
-            <Toaster position="top-right" />
-          </StacksProvider>
+          <ReownProvider>
+            <StacksProvider>
+              <Navbar />
+              <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+                {children}
+              </div>
+              <Toaster position="top-right" />
+            </StacksProvider>
+          </ReownProvider>
         </Providers>
       </body>
     </html>
