@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useStacks } from "@/contexts/StacksProvider";
 import { GamesList, Game } from "@/components/games/GamesList";
 import { GameModal } from "@/components/games/GameModal";
+import { TabType } from "@/components/common/TabNavigation";
 import { Plus, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
 import { cvToValue, hexToCV } from "@stacks/transactions";
 
-export type TabType = "games" | "create" | "leaderboard" | "challenges";
+
 
 interface GamesContentProps {
   onTabChange?: (tab: TabType) => void;

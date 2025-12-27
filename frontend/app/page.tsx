@@ -8,11 +8,18 @@ import { GamesContent } from "@/components/common/GamesContent";
 import { CreateGameContent } from "@/components/common/CreateGameContent";
 import { LeaderboardContent } from "@/components/common/LeaderboardContent";
 import { ChallengesContent } from "@/components/common/ChallengesContent";
+import { AdminPanel } from "@/components/admin/AdminPanel";
+import { TabType } from "@/components/common/TabNavigation";
+import { useStacks } from "@/contexts/StacksProvider";
+import { CONTRACT_ADDRESS } from "@/lib/stacksConfig";
 
-export type TabType = "games" | "create" | "leaderboard" | "challenges";
+
 
 function HomeContent() {
   const [activeTab, setActiveTab] = useState<TabType | null>("games");
+  const { address } = useStacks();
+  const isAdmin = address && (address === CONTRACT_ADDRESS || address === "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM");
+  
   const searchParams = useSearchParams();
   const gameIdParam = searchParams.get('gameId');
   const [initialGameId, setInitialGameId] = useState<bigint | null>(null);
@@ -57,7 +64,7 @@ function HomeContent() {
           {/* Sidebar Navigation */}
           <aside className="md:w-64 flex-shrink-0">
             <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
-              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} showAdmin={!!isAdmin} />
             </div>
           </aside>
 
@@ -69,6 +76,7 @@ function HomeContent() {
                 {activeTab === "create" && <CreateGameContent />}
                 {activeTab === "leaderboard" && <LeaderboardContent />}
                 {activeTab === "challenges" && <ChallengesContent />}
+                {activeTab === "admin" && isAdmin && <AdminPanel />}
               </>
             )}
           </main>
