@@ -8,9 +8,11 @@ import {
   PostConditionMode,
 } from '@stacks/transactions';
 import { useCallback } from 'react';
+import { useInvalidateGameQueries } from './useGameData';
 
 export function useStacksTacToe() {
   const { address } = useStacks();
+  const { invalidatePlayer, invalidateGameList, invalidateGame, invalidateLeaderboard } = useInvalidateGameQueries();
 
   const registerPlayer = useCallback(async (username: string) => {
     if (!address) return;
@@ -24,9 +26,14 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Deny,
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate player data and leaderboard after registration
+        if (address) {
+          invalidatePlayer(address);
+          invalidateLeaderboard();
+        }
       },
     });
-  }, [address]);
+  }, [address, invalidatePlayer, invalidateLeaderboard]);
 
   const createGame = useCallback(async (betAmount: number, moveIndex: number, boardSize: number) => {
     if (!address) return;
@@ -47,9 +54,11 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Allow, // Check this: STX transfer usually needs Allow or specific post conditions
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate game list after creating a game
+        invalidateGameList();
       },
     });
-  }, [address]);
+  }, [address, invalidateGameList]);
 
   const joinGame = useCallback(async (gameId: number, moveIndex: number, betAmount: number) => {
     if (!address) return;
@@ -69,9 +78,12 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Allow, // Needs to transfer STX
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate specific game and game list after joining
+        invalidateGame(gameId);
+        invalidateGameList();
       },
     });
-  }, [address]);
+  }, [address, invalidateGame, invalidateGameList]);
 
   const playMove = useCallback(async (gameId: number, moveIndex: number) => {
     if (!address) return;
@@ -88,9 +100,11 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Deny,
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate game data after making a move
+        invalidateGame(gameId);
       },
     });
-  }, [address]);
+  }, [address, invalidateGame]);
 
   const forfeitGame = useCallback(async (gameId: number) => {
     if (!address) return;
@@ -104,9 +118,13 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Allow, // May transfer STX to winner
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate game data and leaderboard after forfeit
+        invalidateGame(gameId);
+        invalidateGameList();
+        invalidateLeaderboard();
       },
     });
-  }, [address]);
+  }, [address, invalidateGame, invalidateGameList, invalidateLeaderboard]);
 
   const claimReward = useCallback(async (gameId: number) => {
     if (!address) return;
@@ -120,9 +138,11 @@ export function useStacksTacToe() {
       postConditionMode: PostConditionMode.Allow, // Transfers STX to winner
       onFinish: (data) => {
         console.log('Transaction:', data.txId);
+        // Invalidate game data after claiming reward
+        invalidateGame(gameId);
       },
     });
-  }, [address]);
+  }, [address, invalidateGame]);
 
   return {
     registerPlayer,
