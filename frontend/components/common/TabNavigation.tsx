@@ -1,21 +1,26 @@
 "use client";
 
-import { Gamepad2, PlusCircle, Trophy, Swords } from "lucide-react";
+import { Gamepad2, PlusCircle, Trophy, Swords, Settings } from "lucide-react";
 
-export type TabType = "games" | "create" | "leaderboard" | "challenges";
+export type TabType = "games" | "create" | "leaderboard" | "challenges" | "admin";
 
 interface TabNavigationProps {
   activeTab: TabType | null;
   onTabChange: (tab: TabType) => void;
+  showAdmin?: boolean;
 }
 
-export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
-  const tabs = [
-    { id: "games" as const, label: "Games", icon: Gamepad2 },
-    { id: "create" as const, label: "Create", icon: PlusCircle },
-    { id: "leaderboard" as const, label: "Leaderboard", icon: Trophy },
-    { id: "challenges" as const, label: "Challenges", icon: Swords },
+export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: TabNavigationProps) {
+  const tabs: { id: TabType; label: string; icon: any }[] = [
+    { id: "games", label: "Games", icon: Gamepad2 },
+    { id: "create", label: "Create", icon: PlusCircle },
+    { id: "leaderboard", label: "Leaderboard", icon: Trophy },
+    { id: "challenges", label: "Challenges", icon: Swords },
   ];
+
+  if (showAdmin) {
+    tabs.push({ id: "admin", label: "Admin", icon: Settings });
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full">
