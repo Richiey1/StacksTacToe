@@ -250,7 +250,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   if (!isOpen) return null;
 
   // Show loading state
-  if (loadingGame || isLoadingGame || !game || typeof game !== "object" || !("playerOne" in game)) {
+  if (isLoadingGame || !game || typeof game !== "object" || !("playerOne" in game)) {
     return (
       <>
         <div
@@ -472,12 +472,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
             )}
           </div>
 
-          {error && (
-            <div className="mt-3 sm:mt-4 flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-xs sm:text-sm">
-              <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-              <span className="break-words">{error}</span>
-            </div>
-          )}
+
         </div>
       </div>
 
