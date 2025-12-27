@@ -144,6 +144,70 @@ export function useStacksTacToe() {
     });
   }, [address, invalidateGame]);
 
+  const setPlatformFee = useCallback(async (feePercent: number) => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'set-platform-fee',
+      functionArgs: [uintCV(feePercent)],
+      postConditionMode: PostConditionMode.Deny,
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
+  const setMoveTimeout = useCallback(async (timeoutDetails: number) => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'set-move-timeout',
+      functionArgs: [uintCV(timeoutDetails)],
+      postConditionMode: PostConditionMode.Deny,
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
+  const pauseContract = useCallback(async () => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'pause-contract',
+      functionArgs: [],
+      postConditionMode: PostConditionMode.Deny,
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
+  const unpauseContract = useCallback(async () => {
+    if (!address) return;
+
+    await openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'unpause-contract',
+      functionArgs: [],
+      postConditionMode: PostConditionMode.Deny,
+      onFinish: (data) => {
+        console.log('Transaction:', data.txId);
+      },
+    });
+  }, [address]);
+
   return {
     registerPlayer,
     createGame,
@@ -151,5 +215,9 @@ export function useStacksTacToe() {
     playMove,
     forfeitGame,
     claimReward,
+    setPlatformFee,
+    setMoveTimeout,
+    pauseContract,
+    unpauseContract,
   };
 }
