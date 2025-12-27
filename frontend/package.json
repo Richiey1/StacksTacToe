@@ -4,8 +4,8 @@
   "description": "Frontend for StacksTacToe - A decentralized Tic-Tac-Toe game on Stacks blockchain",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
