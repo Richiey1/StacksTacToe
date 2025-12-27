@@ -161,16 +161,23 @@ Replicate **every feature** from BlocxTacToe frontend into StacksTacToe, adapted
 **Status**: ✅ All pages created (6 components, ~800 lines)
 **Pushed to GitHub**: Yes
 
-### Phase 4: Data & State Management (Priority 1)
-- [ ] Enhance `useGameData.ts` to fetch:
+### Phase 4: Data & State Management (Priority 1) ✅ COMPLETE
+- [x] Enhance `useGameData.ts` to fetch:
   - Player usernames
   - Time remaining
   - Board state (all cells)
   - Claimable rewards
   - Reward claimed status
-- [ ] Add polling for real-time updates
-- [ ] Add query invalidation after transactions
-- [ ] Optimize with React Query caching
+- [x] Add polling for real-time updates
+- [x] Add query invalidation after transactions
+- [x] Optimize with React Query caching
+
+**Status**: ✅ All hooks implemented (10+ hooks, ~450 lines)
+**Commits**: 3 modular commits
+- `feat: enhance useGameData with comprehensive hooks and polling`
+- `feat: add game utility functions for state management`
+- `feat: integrate query invalidation into contract hooks`
+
 
 ### Phase 5: Contract Integration (Priority 1)
 - [ ] Verify `createGame` function
