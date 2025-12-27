@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { HeroCarousel } from "@/components/common/HeroCarousel";
 import { TabNavigation } from "@/components/common/TabNavigation";
 import { GamesContent } from "@/components/common/GamesContent";
@@ -10,8 +11,22 @@ import { ChallengesContent } from "@/components/common/ChallengesContent";
 
 export type TabType = "games" | "create" | "leaderboard" | "challenges";
 
-export default function Home() {
+function HomeContent() {
   const [activeTab, setActiveTab] = useState<TabType | null>("games");
+  const searchParams = useSearchParams();
+  const gameIdParam = searchParams.get('gameId');
+  const [initialGameId, setInitialGameId] = useState<bigint | null>(null);
+
+  useEffect(() => {
+    if (gameIdParam) {
+      try {
+        setInitialGameId(BigInt(gameIdParam));
+        setActiveTab("games");
+      } catch (e) {
+        console.error("Invalid game ID param");
+      }
+    }
+  }, [gameIdParam]);
 
   return (
     <div 
@@ -50,7 +65,7 @@ export default function Home() {
           <main className="flex-1 min-w-0">
             {activeTab && (
               <>
-                {activeTab === "games" && <GamesContent onTabChange={setActiveTab} />}
+                {activeTab === "games" && <GamesContent onTabChange={setActiveTab} initialGameId={initialGameId} />}
                 {activeTab === "create" && <CreateGameContent />}
                 {activeTab === "leaderboard" && <LeaderboardContent />}
                 {activeTab === "challenges" && <ChallengesContent />}
@@ -60,5 +75,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <HomeContent />
+    </Suspense>
   );
 }
