@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, Coins, Users, Play, Loader2, AlertTriangle, Grid3x3, Trophy } from "lucide-react";
+import { Clock, Coins, Users, Play, Loader2, AlertTriangle, Grid3x3, Trophy, Share2 } from "lucide-react";
 import { useStacks } from "@/contexts/StacksProvider";
+import { toast } from "react-hot-toast";
 import { CountdownTimer } from "./CountdownTimer";
 import { PlayerDisplay } from "./PlayerDisplay";
 
@@ -123,6 +124,22 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                 
                 {/* Buttons on same level as status badges on mobile - only show Join Game for waiting games */}
                 <div className="flex gap-2 md:hidden">
+                  {/* Share Button for My Waiting Game */}
+                  {game.status === "waiting" && game.player1.toLowerCase() === address?.toLowerCase() && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Copy link to clipboard
+                        const link = `${window.location.origin}/play/${game.gameId}`;
+                        navigator.clipboard.writeText(link);
+                        toast.success("Game link copied to clipboard!");
+                      }}
+                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-xs font-semibold transition-all border border-white/20"
+                    >
+                      <Share2 className="w-3 h-3" />
+                      Share
+                    </button>
+                  )}
                   {canJoinGame(game) && (
                     <button
                       onClick={(e) => {
@@ -229,8 +246,24 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
               )}
             </div>
 
-            {/* Buttons for desktop (hidden on mobile) - only show Join Game for waiting games */}
+            {/* Buttons for desktop (hidden on mobile) */}
             <div className="hidden md:flex gap-2">
+              {/* Share Button for My Waiting Game */}
+              {game.status === "waiting" && game.player1.toLowerCase() === address?.toLowerCase() && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Copy link to clipboard
+                    const link = `${window.location.origin}/play/${game.gameId}`;
+                    navigator.clipboard.writeText(link);
+                    toast.success("Game link copied to clipboard!");
+                  }}
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-all border border-white/20"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
+              )}
               {canJoinGame(game) && (
                 <button
                   onClick={(e) => {

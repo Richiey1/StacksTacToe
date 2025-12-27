@@ -13,13 +13,14 @@ export type TabType = "games" | "create" | "leaderboard" | "challenges";
 
 interface GamesContentProps {
   onTabChange?: (tab: TabType) => void;
+  initialGameId?: bigint | null;
 }
 
-export function GamesContent({ onTabChange }: GamesContentProps) {
+export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGameId, setSelectedGameId] = useState<bigint | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGameId, setSelectedGameId] = useState<bigint | null>(initialGameId || null);
+  const [isModalOpen, setIsModalOpen] = useState(!!initialGameId);
   const [showActiveGames, setShowActiveGames] = useState(false);
   const [showPastGames, setShowPastGames] = useState(false);
   const { address } = useStacks();

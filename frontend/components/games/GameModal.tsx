@@ -1,14 +1,24 @@
-"use client";
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useStacks } from "@/contexts/StacksProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import { GameBoard, BoardState, CellValue } from "@/components/games/GameBoard";
+import { GameBoard, BoardState } from "@/components/games/GameBoard";
 import { CountdownTimer } from "@/components/games/CountdownTimer";
 import { ForfeitModal } from "@/components/games/ForfeitModal";
 import { JoinGameModal } from "@/components/games/JoinGameModal";
 import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { useGame, usePlayerData } from "@/hooks/useGameData";
+import { 
+  useGame, 
+  usePlayerData, 
+  useBoardState, 
+  useTimeRemaining, 
+  useRewardClaimed,
+  useMoveTimeout
+} from "@/hooks/useGameData";
+import { 
+  canForfeitGame, 
+  isGameActive, 
+  formatTimeRemaining 
+} from "@/lib/gameUtils";
 import { Loader2, Coins, Users, AlertCircle, Clock, X, Trophy, Share2, RefreshCw } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -24,28 +34,35 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const { address } = useStacks();
   const { playMove, joinGame, forfeitGame, claimReward } = useStacksTacToe();
   const queryClient = useQueryClient();
+  const gameIdNum = Number(gameId);
 
-  // Get game data using hook
-  const { data: gameData, isLoading: isLoadingGame } = useGame(Number(gameId));
+  // Get game data using hooks
+  const { data: gameData, isLoading: isLoadingGame } = useGame(gameIdNum, isOpen);
   const game = gameData;
+  const boardSize = game?.boardSize || 3;
+  
+  // New hooks for enhanced data
+  const { data: boardData } = useBoardState(gameIdNum, boardSize);
+  const { data: timeRemaining } = useTimeRemaining(gameIdNum);
+  const { data: isRewardClaimed } = useRewardClaimed(gameIdNum);
+  const { data: moveTimeout } = useMoveTimeout();
 
   const gameRef = useRef<HTMLDivElement>(null);
 
-  const [board, setBoard] = useState<BoardState>(Array(9).fill(null));
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [canJoin, setCanJoin] = useState(false);
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
-  const [loadingGame, setLoadingGame] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [winningCells, setWinningCells] = useState<number[]>([]);
   const [canForfeit, setCanForfeit] = useState(false);
   const [showForfeitModal, setShowForfeitModal] = useState(false);
   const [selectedJoinMove, setSelectedJoinMove] = useState<number | null>(null);
   const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [boardSize, setBoardSize] = useState<number>(3);
   const [isPending, setIsPending] = useState(false);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Format board data for GameBoard component
+  const board: BoardState = boardData 
+    ? boardData.map(cell => cell === 0 ? null : (cell === 1 ? 'X' : 'O'))
+    : Array(boardSize * boardSize).fill(null);
 
   // Get player data for both players
   const { data: player1Data } = usePlayerData(game?.playerOne);
@@ -54,16 +71,11 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   useEffect(() => {
     if (!isOpen) {
       // Reset state when modal closes
-      setBoard(Array(9).fill(null));
       setGameStatus("waiting");
       setCanJoin(false);
       setIsPlayerTurn(false);
-      setLoadingGame(true);
-      setError(null);
-      setWinningCells([]);
       setCanForfeit(false);
       setSelectedJoinMove(null);
-      setBoardSize(3);
     }
   }, [isOpen]);
 
@@ -85,107 +97,44 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     };
   }, [isOpen, onClose]);
 
-  // Update game state function
-  const updateGameState = useCallback(() => {
-    if (!game || !address || typeof game !== "object") return;
-    if (!("playerOne" in game)) return;
-
-    setLoadingGame(false);
-
-    const { playerOne, playerTwo, status, winner, isPlayerOneTurn, boardSize: gameBoardSize } = game as {
-      playerOne: string;
-      playerTwo: string | null;
-      status: number;
-      winner: string | null;
-      isPlayerOneTurn: boolean;
-      boardSize: number;
-    };
-
-    // Set board size and initialize board if needed
-    if (gameBoardSize) {
-      setBoardSize(gameBoardSize);
-      const maxCells = gameBoardSize * gameBoardSize;
-      setBoard((prevBoard) => {
-        if (prevBoard.length !== maxCells) {
-          return Array(maxCells).fill(null);
-        }
-        return prevBoard;
-      });
-    }
+  // Update game state
+  useEffect(() => {
+    if (!game || !address) return;
 
     // Determine game status
     let statusEnum: GameStatus = "waiting";
-    if (status === 1) { // Ended
+    if (game.status === 1 || game.status === 2) { // Ended or Forfeited
       statusEnum = "finished";
-    } else if (status === 2) { // Forfeited
-      statusEnum = "finished";
-    } else if (playerTwo && playerTwo !== address) {
+    } else if (game.playerTwo && game.playerTwo !== address) {
+      statusEnum = "active";
+    } else if (game.playerTwo) { // Active even if I am playerTwo
       statusEnum = "active";
     }
     setGameStatus(statusEnum);
 
     // Check if player can join
-    if (statusEnum === "waiting" && address.toLowerCase() !== playerOne.toLowerCase()) {
+    if (statusEnum === "waiting" && address.toLowerCase() !== game.playerOne.toLowerCase()) {
       setCanJoin(true);
     } else {
       setCanJoin(false);
     }
 
     // Check if it's player's turn
-    if (statusEnum === "active" && playerTwo) {
-      const currentPlayer = isPlayerOneTurn ? playerOne : playerTwo;
+    if (statusEnum === "active" && game.playerTwo) {
+      const currentPlayer = game.isPlayerOneTurn ? game.playerOne : game.playerTwo;
       setIsPlayerTurn(address.toLowerCase() === currentPlayer.toLowerCase());
     } else {
       setIsPlayerTurn(false);
     }
-  }, [game, address]);
-
-  // Fetch board data (simplified - in production, fetch from contract)
-  const fetchBoardData = useCallback(async () => {
-    if (!game || typeof game !== "object" || !("boardSize" in game)) return;
-
-    const size = (game as { boardSize: number }).boardSize || 3;
-    setBoardSize(size);
-    const maxCells = size * size;
-
-    // TODO: Fetch actual board data from contract using fetchCallReadOnlyFunction
-    // For now, initialize empty board
-    setBoard(Array(maxCells).fill(null));
-  }, [game]);
-
-  useEffect(() => {
-    if (game && typeof game === "object" && "playerOne" in game) {
-      updateGameState();
-    }
-  }, [updateGameState]);
-
-  useEffect(() => {
-    if (game && typeof game === "object" && "playerOne" in game && "boardSize" in game) {
-      fetchBoardData();
-    }
-  }, [fetchBoardData]);
-
-  // Poll for board updates during active games
-  useEffect(() => {
-    if (gameStatus === "active" && !isPlayerTurn && isOpen) {
-      pollingIntervalRef.current = setInterval(() => {
-        fetchBoardData();
-        queryClient.invalidateQueries({ queryKey: ["game", gameId.toString()] });
-      }, 5000);
+    
+    // Check forfeit eligibility
+    if (statusEnum === "active" && !isPlayerTurn && moveTimeout && game.lastMoveBlock > 0) {
+      setCanForfeit(timeRemaining === 0);
     } else {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+      setCanForfeit(false);
     }
 
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
-  }, [gameStatus, isPlayerTurn, isOpen, fetchBoardData, queryClient, gameId]);
+  }, [game, address, isPlayerTurn, timeRemaining, moveTimeout]);
 
   const handleCellClick = async (index: number) => {
     if (!address) {
@@ -208,7 +157,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
       }
       try {
         setIsPending(true);
-        await playMove(Number(gameId), index);
+        await playMove(gameIdNum, index);
         toast.success("Move submitted...");
       } catch (err: any) {
         toast.error(err?.message || "Failed to make move");
@@ -221,7 +170,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const handleForfeit = async () => {
     try {
       setIsPending(true);
-      await forfeitGame(Number(gameId));
+      await forfeitGame(gameIdNum);
       setShowForfeitModal(false);
       toast.success("Forfeit transaction submitted...");
     } catch (err: any) {
@@ -233,6 +182,10 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
   const handleClaimReward = async () => {
     try {
+      if (isRewardClaimed) {
+        toast.error("Reward already claimed");
+        return;
+      }
       setIsPending(true);
       await claimReward(Number(gameId));
       toast.success("Reward claimed successfully!");
@@ -393,7 +346,11 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
                 <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="text-xs sm:text-sm">Time Remaining</span>
               </div>
-              <p className="text-white font-semibold text-sm sm:text-base">--:--</p>
+              <p className={`font-semibold text-sm sm:text-base ${
+                (timeRemaining || 0) < 3600 && (timeRemaining || 0) > 0 ? "text-red-400" : "text-white"
+              }`}>
+                {gameStatus === "active" ? formatTimeRemaining(timeRemaining || 0) : "--:--"}
+              </p>
             </div>
           </div>
 
@@ -459,11 +416,11 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
                 {winner.toLowerCase() === address?.toLowerCase() && (
                   <button
                     onClick={handleClaimReward}
-                    disabled={isPending}
+                    disabled={isPending || isRewardClaimed}
                     className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all text-xs sm:text-sm disabled:opacity-50"
                   >
                     <Trophy className="w-4 h-4" />
-                    Claim Reward
+                    {isRewardClaimed ? "Reward Claimed" : "Claim Reward"}
                   </button>
                 )}
               </div>
@@ -498,7 +455,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
               onCellClick={handleCellClick}
               disabled={gameStatus === "finished" || (gameStatus === "active" && !isPlayerTurn) || (gameStatus === "waiting" && !canJoin)}
               winner={winner ? (isPlayer1 ? "X" : "O") : null}
-              winningCells={winningCells}
+              winningCells={[]} // TODO: Implement winning cells calculation
               boardSize={boardSize}
             />
           </div>
@@ -510,7 +467,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
                 onClick={() => setShowForfeitModal(true)}
                 className="px-4 sm:px-6 py-1.5 sm:py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg border border-red-500/30 transition-all text-xs sm:text-sm md:text-base"
               >
-                Forfeit Game
+                Forfeit Game (Opponent Timed Out)
               </button>
             )}
           </div>
