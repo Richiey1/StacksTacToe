@@ -266,16 +266,37 @@
         (let
             (
                 (mark (if (get is-player-one-turn game) MARK_X MARK_O))
+                (current-player (if (get is-player-one-turn game) 
+                    (get player-one game) 
+                    player-two))
+                (board-size (get board-size game))
             )
             (map-set game-boards { game-id: game-id, cell-index: move-index } mark)
             
-            ;; Update game state
-            (map-set games game-id (merge game {
-                is-player-one-turn: (not (get is-player-one-turn game)),
-                last-move-block: stacks-block-height
-            }))
-            
-            (ok true)
+            ;; Check for winner AFTER the move
+            (if (has-winner game-id board-size)
+                ;; Winner found - declare winner and end game
+                (begin
+                    (try! (declare-winner game-id current-player))
+                    (ok true)
+                )
+                ;; No winner - check for draw
+                (if (check-board-full game-id board-size)
+                    ;; Board is full - it's a draw
+                    (begin
+                        (try! (handle-draw game-id))
+                        (ok true)
+                    )
+                    ;; No winner, no draw - continue game
+                    (begin
+                        (map-set games game-id (merge game {
+                            is-player-one-turn: (not (get is-player-one-turn game)),
+                            last-move-block: stacks-block-height
+                        }))
+                        (ok true)
+                    )
+                )
+            )
         )
     )
 )
