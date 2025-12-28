@@ -41,6 +41,21 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const game = gameData;
   const boardSize = game?.boardSize || 3;
   
+  // Helper function to extract primitive value from nested Clarity objects
+  const extractValue = (val: any): string => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    // Recursively extract .value until we get a primitive
+    if (val.value !== undefined) return extractValue(val.value);
+    return String(val);
+  };
+  
+  // Extract and convert player addresses and winner to strings early
+  const playerOne = game ? extractValue(game.playerOne) : '';
+  const playerTwo = game?.playerTwo ? extractValue(game.playerTwo) : null;
+  const winner = game?.winner ? extractValue(game.winner) : null;
+  const betAmount = game?.betAmount || 0;
+  
   // New hooks for enhanced data
   const { data: boardData } = useBoardState(gameIdNum, boardSize);
   const { data: timeRemaining } = useTimeRemaining(gameIdNum);
@@ -65,8 +80,8 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     : Array(boardSize * boardSize).fill(null);
 
   // Get player data for both players
-  const { data: player1Data } = usePlayerData(game?.playerOne);
-  const { data: player2Data } = usePlayerData(game?.playerTwo);
+  const { data: player1Data } = usePlayerData(playerOne);
+  const { data: player2Data } = usePlayerData(playerTwo);
 
   useEffect(() => {
     if (!isOpen) {
@@ -113,15 +128,15 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     setGameStatus(statusEnum);
 
     // Check if player can join
-    if (statusEnum === "waiting" && address.toLowerCase() !== game.playerOne.toLowerCase()) {
+    if (statusEnum === "waiting" && address.toLowerCase() !== playerOne.toLowerCase()) {
       setCanJoin(true);
     } else {
       setCanJoin(false);
     }
 
     // Check if it's player's turn
-    if (statusEnum === "active" && game.playerTwo) {
-      const currentPlayer = game.isPlayerOneTurn ? game.playerOne : game.playerTwo;
+    if (statusEnum === "active" && playerTwo) {
+      const currentPlayer = game.isPlayerOneTurn ? playerOne : playerTwo;
       setIsPlayerTurn(address.toLowerCase() === currentPlayer.toLowerCase());
     } else {
       setIsPlayerTurn(false);
@@ -267,28 +282,6 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
       </>
     );
   }
-
-  // Safely extract game data and ensure they are strings
-  const { playerOne: p1, playerTwo: p2, betAmount, winner: w } = game as {
-    playerOne: any;
-    playerTwo: any;
-    betAmount: number;
-    winner: any;
-  };
-  
-  // Helper function to extract primitive value from nested Clarity objects
-  const extractValue = (val: any): string => {
-    if (!val) return '';
-    if (typeof val === 'string') return val;
-    // Recursively extract .value until we get a primitive
-    if (val.value !== undefined) return extractValue(val.value);
-    return String(val);
-  };
-  
-  // Convert to strings to handle Clarity value objects
-  const playerOne = extractValue(p1);
-  const playerTwo = p2 ? extractValue(p2) : null;
-  const winner = w ? extractValue(w) : null;
 
   const isPlayer1 = address?.toLowerCase() === playerOne.toLowerCase();
   const isPlayer2 = playerTwo && address?.toLowerCase() === playerTwo.toLowerCase();
