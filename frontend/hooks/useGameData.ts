@@ -85,7 +85,7 @@ export function useLeaderboard() {
       }
     },
     staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // Refetch every minute
+    // Removed refetchInterval - only refresh manually or after mutations
   });
 }
 
@@ -160,13 +160,7 @@ export function useGame(gameId: number, enablePolling = true) {
     },
     enabled: gameId >= 0,
     staleTime: 3000, // 3 seconds
-    refetchInterval: (query) => {
-      // Poll every 5 seconds for active games, 30 seconds for others
-      if (!enablePolling) return false;
-      const data = query.state.data;
-      if (data && isGameActive(data)) return 5000;
-      return 30000;
-    },
+    // Removed refetchInterval - only refresh manually or after mutations
   });
 }
 
@@ -221,7 +215,7 @@ export function useGameList(limit = 20) {
     },
     enabled: latestGameId !== undefined && latestGameId > 0,
     staleTime: 5000, // 5 seconds
-    refetchInterval: 10000, // Refetch every 10 seconds
+    // Removed refetchInterval - only refresh manually or after mutations
   });
 }
 
@@ -262,10 +256,7 @@ export function useBoardState(gameId: number, boardSize: number) {
     },
     enabled: gameId >= 0 && boardSize > 0,
     staleTime: 3000, // 3 seconds
-    refetchInterval: (query) => {
-      // Poll every 5 seconds for active games
-      return query.state.data ? 5000 : false;
-    },
+    // Removed refetchInterval - only refresh manually or after mutations
   });
 }
 
@@ -340,7 +331,7 @@ export function useTimeRemaining(gameId: number) {
     },
     enabled: !!game && !!moveTimeout && isGameActive(game),
     staleTime: 10000, // 10 seconds
-    refetchInterval: 10000, // Update every 10 seconds
+    refetchInterval: 30000, // Update every 30 seconds (reduced from 10s)
   });
 }
 
