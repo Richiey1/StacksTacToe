@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useStacksWallet } from "@/hooks/useStacksWallet";
-import { Copy, LogOut, Check, ChevronDown } from "lucide-react";
+import { Copy, LogOut, Check, ChevronDown, Wallet } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 type WalletState = ReturnType<typeof useStacksWallet>;
@@ -115,27 +115,21 @@ export function WalletButton({ wallet }: Props) {
       <button
         type="button"
         onClick={toggleDropdown}
-        className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 hover:bg-white/15 transition-all"
+        className="flex items-center gap-2 rounded-lg bg-orange-600/10 px-4 py-2 font-medium text-orange-500 transition-colors hover:bg-orange-600/20"
       >
-        <span className="text-sm font-medium text-white">{label}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+        <Wallet className="h-4 w-4" />
+        <span className="text-sm">{label}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
         <div className="absolute right-0 mt-2 w-56 rounded-xl bg-gray-800/95 backdrop-blur-md border border-white/10 shadow-xl overflow-hidden z-50">
-          {/* Wallet Info */}
+          {/* Wallet Address */}
           <div className="px-4 py-3 border-b border-white/10">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">
-                  {address?.slice(0, 2).toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Stacks Wallet</p>
-                <p className="text-xs text-gray-400">{label}</p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-orange-500" />
+              <p className="text-sm font-medium text-white">{label}</p>
             </div>
           </div>
 
