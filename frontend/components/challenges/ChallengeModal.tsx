@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { X, Swords, Coins, Grid3x3 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Swords, Coins, Grid3x3, Wallet } from "lucide-react";
+import { useStacks } from "@/contexts/StacksProvider";
 import { useStacksTacToe } from "@/hooks/useStacksTacToe";
 import { toast } from "react-hot-toast";
+import { STACKS_API_URL } from "@/lib/stacksConfig";
 
 interface ChallengeModalProps {
   isOpen: boolean;
@@ -11,11 +13,37 @@ interface ChallengeModalProps {
 }
 
 export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
+  const { address } = useStacks();
   const { createGame } = useStacksTacToe();
-  const [betAmount, setBetAmount] = useState("1");
+  const [betAmount, setBetAmount] = useState("0.3");
   const [boardSize, setBoardSize] = useState<3 | 5>(3);
   const [firstMove, setFirstMove] = useState(4); // Center cell for 3x3
   const [isCreating, setIsCreating] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
+
+  // Fetch STX balance
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!address) return;
+      
+      setLoadingBalance(true);
+      try {
+        const response = await fetch(`${STACKS_API_URL}/extended/v1/address/${address}/balances`);
+        const data = await response.json();
+        const stxBalance = parseInt(data.stx.balance) / 1_000_000;
+        setBalance(stxBalance);
+      } catch (error) {
+        console.error("Failed to fetch balance:", error);
+      } finally {
+        setLoadingBalance(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchBalance();
+    }
+  }, [address, isOpen]);
 
   if (!isOpen) return null;
 
@@ -51,8 +79,8 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Swords className="w-6 h-6 text-blue-400" />
+            <div className="p-2 bg-orange-500/20 rounded-lg">
+              <Swords className="w-6 h-6 text-orange-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">Create Challenge</h2>
           </div>
@@ -78,9 +106,24 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
             onChange={(e) => setBetAmount(e.target.value)}
             min="0.1"
             step="0.1"
-            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500"
             placeholder="Enter bet amount"
           />
+          
+          {/* Wallet Balance */}
+          <div className="mt-2 flex items-center gap-2 text-sm">
+            <Wallet className="w-4 h-4 text-gray-400" />
+            {loadingBalance ? (
+              <span className="text-gray-400">Loading balance...</span>
+            ) : balance !== null ? (
+              <span className="text-gray-400">
+                Wallet Balance: <span className="text-white font-medium">{balance.toFixed(6)} STX</span>
+              </span>
+            ) : (
+              <span className="text-gray-400">Unable to load balance</span>
+            )}
+          </div>
+          
           <p className="text-xs text-gray-500 mt-2">Minimum: 0.1 STX</p>
         </div>
 
@@ -88,16 +131,17 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-300 mb-3">
             <div className="flex items-center gap-2">
-              <Grid3x3 className="w-4 h-4 text-blue-400" />
+              <Grid3x3 className="w-4 h-4 text-orange-400" />
               Board Size
             </div>
           </label>
           <div className="grid grid-cols-2 gap-3">
             <button
+              type="button"
               onClick={() => handleBoardSizeChange(3)}
-              className={`p-4 rounded-lg border-2 transition-all $\{
+              className={`p-4 rounded-lg border-2 transition-all ${
                 boardSize === 3
-                  ? "border-blue-500 bg-blue-500/20 text-white"
+                  ? "border-orange-500 bg-orange-500/20 text-white"
                   : "border-white/10 bg-white/5 text-gray-400 hover:border-white/20"
               }`}
             >
@@ -105,10 +149,11 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
               <div className="text-xs">Classic</div>
             </button>
             <button
+              type="button"
               onClick={() => handleBoardSizeChange(5)}
-              className={`p-4 rounded-lg border-2 transition-all $\{
+              className={`p-4 rounded-lg border-2 transition-all ${
                 boardSize === 5
-                  ? "border-blue-500 bg-blue-500/20 text-white"
+                  ? "border-orange-500 bg-orange-500/20 text-white"
                   : "border-white/10 bg-white/5 text-gray-400 hover:border-white/20"
               }`}
             >
@@ -148,7 +193,7 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
           <button
             onClick={handleCreate}
             disabled={isCreating || !betAmount}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
+            className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
           >
             {isCreating ? "Creating..." : "Create Challenge"}
           </button>

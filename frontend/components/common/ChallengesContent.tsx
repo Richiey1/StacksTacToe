@@ -55,8 +55,8 @@ export function ChallengesContent() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30">
-              <Swords className="w-6 h-6 text-blue-400" />
+            <div className="p-3 bg-orange-500/20 rounded-xl border border-orange-500/30">
+              <Swords className="w-6 h-6 text-orange-400" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Challenges</h1>
@@ -66,7 +66,7 @@ export function ChallengesContent() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-blue-500/25"
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-orange-500/25"
           >
             <Plus className="w-5 h-5" />
             Create Challenge

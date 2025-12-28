@@ -251,15 +251,17 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      // Invalidate and refetch immediately
       await queryClient.invalidateQueries({ queryKey: ["game", gameId.toString()] });
-      toast.success("Game data refreshed");
+      await queryClient.refetchQueries({ queryKey: ["game", gameId.toString()] });
+      toast.success("Game refreshed!");
     } catch (error) {
       console.error("Refresh error:", error);
-      toast.success("Refreshing...");
+      toast.error("Failed to refresh");
     } finally {
       setTimeout(() => {
         setIsRefreshing(false);
-      }, 1000);
+      }, 500);
     }
   };
 
