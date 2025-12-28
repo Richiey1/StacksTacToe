@@ -27,6 +27,15 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
   const { address } = useStacks();
 
   const loadGameData = useCallback(async (gameId: bigint): Promise<Game | null> => {
+    // Helper function to recursively extract primitive values from Clarity objects
+    const extractValue = (val: any): string => {
+      if (!val) return '';
+      if (typeof val === 'string') return val;
+      // Recursively extract .value until we get a primitive
+      if (val.value !== undefined) return extractValue(val.value);
+      return String(val);
+    };
+    
     try {
       console.log(`[loadGameData] Fetching game ${gameId}...`);
       const result = await fetchCallReadOnlyFunction({
@@ -34,7 +43,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
         functionName: "get-game",
-        functionArgs: [uintCV(gameId)],
+        functionArgs: [uintCV(Number(gameId))],
         senderAddress: CONTRACT_ADDRESS,
       });
 
@@ -59,9 +68,9 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       const playerOneRaw = gameFields["player-one"].value;
       const playerTwoRaw = gameFields["player-two"].value;
       
-      // Ensure addresses are strings (handle any remaining Clarity value objects)
-      const playerOne = typeof playerOneRaw === 'string' ? playerOneRaw : String(playerOneRaw || '');
-      const playerTwo = typeof playerTwoRaw === 'string' ? playerTwoRaw : String(playerTwoRaw || '');
+      // Use extractValue to handle deeply nested Clarity objects
+      const playerOne = extractValue(playerOneRaw);
+      const playerTwo = extractValue(playerTwoRaw);
       
       const betAmount = BigInt(gameFields["bet-amount"].value);
       const status = Number(gameFields.status.value);
