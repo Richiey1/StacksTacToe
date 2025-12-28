@@ -69,8 +69,8 @@ export function AdminPanel() {
 
   const handleSetTimeout = async () => {
     const timeout = parseInt(timeoutInput);
-    if (isNaN(timeout) || timeout < 10) {
-      toast.error("Timeout must be at least 10 blocks");
+    if (isNaN(timeout) || timeout < 1 || timeout > 1008) {
+      toast.error("Timeout must be between 1 and 1008 blocks (max ~7 days)");
       return;
     }
     setIsUpdating(true);
@@ -215,7 +215,7 @@ export function AdminPanel() {
                     <Save className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">144 blocks ≈ 24 hours</p>
+                <p className="text-xs text-gray-500 mt-2">Min 1 block (~10 min) - Max 1008 blocks (~7 days)</p>
               </div>
             </div>
           </div>
