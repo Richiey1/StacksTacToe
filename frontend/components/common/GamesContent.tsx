@@ -28,6 +28,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
 
   const loadGameData = useCallback(async (gameId: bigint): Promise<Game | null> => {
     try {
+      console.log(`[loadGameData] Fetching game ${gameId}...`);
       const result = await fetchCallReadOnlyFunction({
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
@@ -37,17 +38,31 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         senderAddress: CONTRACT_ADDRESS,
       });
 
+      console.log(`[loadGameData] Raw result for game ${gameId}:`, result);
       const gameData = cvToValue(result);
+      console.log(`[loadGameData] cvToValue result for game ${gameId}:`, gameData);
       
-      if (!gameData || !gameData.value) return null;
+      // Contract returns (ok (optional {...})), check if game exists
+      if (!gameData || !gameData.value) {
+        console.log(`[loadGameData] Game ${gameId} has no value, returning null`);
+        return null;
+      }
 
-      const game = gameData;
-      const playerOne = game["player-one"];
-      const playerTwo = game["player-two"];
-      const betAmount = BigInt(game["bet-amount"]);
-      const status = Number(game.status);
-      const winner = game.winner;
-      const boardSize = Number(game["board-size"] || 3);
+      const game = gameData.value;
+      console.log(`[loadGameData] Game ${gameId} data:`, game);
+      
+      // The game object has ANOTHER .value property containing the actual fields
+      const gameFields = game.value;
+      console.log(`[loadGameData] Game ${gameId} fields:`, gameFields);
+      
+      // Each field ALSO has a .value property!
+      const playerOne = gameFields["player-one"].value;
+      const playerTwo = gameFields["player-two"].value;
+      const betAmount = BigInt(gameFields["bet-amount"].value);
+      const status = Number(gameFields.status.value);
+      const winner = gameFields.winner.value;
+      const boardSize = Number(gameFields["board-size"].value || 3);
+      const isPlayerOneTurn = gameFields["is-player-one-turn"].value;
 
       let gameStatus: "waiting" | "active" | "finished" = "waiting";
       if (status === 1 || status === 2) {
@@ -75,25 +90,29 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         }
       }
 
-      return {
+      const gameObject = {
         id: gameId.toString(),
         gameId,
         player1: playerOne,
         player2: playerTwo && playerTwo !== "none" ? playerTwo : null,
         betAmount,
         status: gameStatus,
-        currentPlayer: game["is-player-one-turn"] ? playerOne : playerTwo,
+        currentPlayer: isPlayerOneTurn ? playerOne : playerTwo,
         winner: winner && winner !== "none" ? winner : null,
         createdAt: new Date(),
         timeRemaining,
         canForfeit: timeRemaining === BigInt(0),
         boardSize,
       } as Game;
+      
+      console.log(`[loadGameData] Returning game object for ${gameId}:`, gameObject);
+      return gameObject;
     } catch (error) {
       console.error(`Failed to load game ${gameId}:`, error);
       return null;
     }
   }, []);
+
 
   const loadGames = useCallback(async () => {
     setLoading(true);
@@ -108,16 +127,26 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         senderAddress: CONTRACT_ADDRESS,
       });
 
-      const latestId = cvToValue(latestIdResult);
-      const gameCount = Number(latestId || 0);
+      console.log("Latest ID Result:", latestIdResult);
+      const latestIdData = cvToValue(latestIdResult);
+      console.log("Latest ID Data after cvToValue:", latestIdData);
+      
+      // Contract returns (ok uint), cvToValue returns {type: 'uint', value: '9'}
+      // We need to access the .value property
+      const gameCount = Number(latestIdData.value || 0);
+      console.log("Game count:", gameCount);
 
       const allGames: Game[] = [];
       
       // Load games in batches
       for (let i = 0; i < gameCount; i++) {
+        console.log(`Loading game ${i}...`);
         const game = await loadGameData(BigInt(i));
         if (game) {
+          console.log(`Game ${i} loaded:`, game);
           allGames.push(game);
+        } else {
+          console.log(`Game ${i} returned null`);
         }
         // Small delay to avoid overwhelming the network
         if (i % 5 === 0 && i > 0) {
@@ -125,12 +154,14 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         }
       }
 
+      console.log("All games loaded:", allGames);
       setGames(allGames);
     } catch (error) {
       console.error("Failed to load games:", error);
     } finally {
       setLoading(false);
     }
+
   }, [loadGameData]);
 
   useEffect(() => {
