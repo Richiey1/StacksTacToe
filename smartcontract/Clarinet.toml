@@ -5,7 +5,7 @@ authors = []
 telemetry = true
 cache_dir = './.cache'
 
-[contracts.stackstactoe-beta]
+[contracts.stackstactoe-alpha]
 path = 'contracts/stackstactoe.clar'
 clarity_version = 3
 epoch = 'latest'

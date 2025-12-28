@@ -36,7 +36,7 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
-            contract-name: stackstactoe-beta
+            contract-name: stackstactoe-alpha
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/stackstactoe.clar
             clarity-version: 3
