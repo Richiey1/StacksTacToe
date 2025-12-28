@@ -269,7 +269,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   }
 
   // Safely extract game data and ensure they are strings
-  const { playerOne: p1, playerTwo: p2, betAmount, winner } = game as {
+  const { playerOne: p1, playerTwo: p2, betAmount, winner: w } = game as {
     playerOne: any;
     playerTwo: any;
     betAmount: number;
@@ -288,6 +288,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   // Convert to strings to handle Clarity value objects
   const playerOne = extractValue(p1);
   const playerTwo = p2 ? extractValue(p2) : null;
+  const winner = w ? extractValue(w) : null;
 
   const isPlayer1 = address?.toLowerCase() === playerOne.toLowerCase();
   const isPlayer2 = playerTwo && address?.toLowerCase() === playerTwo.toLowerCase();
