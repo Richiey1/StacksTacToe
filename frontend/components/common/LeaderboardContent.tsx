@@ -1,50 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Trophy, Medal, Award } from "lucide-react";
-import { fetchCallReadOnlyFunction } from "@stacks/transactions";
-import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
-import { cvToValue } from "@stacks/transactions";
+import { useState } from "react";
+import { Trophy, Medal, Award, Loader2 } from "lucide-react";
+import { useLeaderboard } from "@/hooks/useGameData";
+import { LeaderboardFilters } from "@/components/leaderboard/LeaderboardFilters";
+import { PlayerProfileModal } from "@/components/leaderboard/PlayerProfileModal";
 
-interface LeaderboardPlayer {
+interface PlayerStats {
   address: string;
-  username: string;
+  totalGames: number;
   wins: number;
-  rating: number;
-  rank: number;
+  losses: number;
+  draws: number;
+  winRate: number;
+  totalEarnings: number;
+  currentStreak: number;
+  bestStreak: number;
 }
 
 export function LeaderboardContent() {
-  const [players, setPlayers] = useState<LeaderboardPlayer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: leaderboardData, isLoading } = useLeaderboard();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"wins" | "games" | "winRate">("wins");
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerStats | null>(null);
 
-  useEffect(() => {
-    const loadLeaderboard = async () => {
-      try {
-        // Get total players
-        const totalPlayersResult = await fetchCallReadOnlyFunction({
-          network: NETWORK,
-          contractAddress: CONTRACT_ADDRESS,
-          contractName: CONTRACT_NAME,
-          functionName: "get-total-players",
-          functionArgs: [],
-          senderAddress: CONTRACT_ADDRESS,
-        });
+  // Transform leaderboard data
+  const players = (leaderboardData || []).map((player: any) => {
+    const totalGames = player.gamesPlayed || 0;
+    const wins = player.wins || 0;
+    const losses = player.losses || 0;
+    const draws = totalGames - wins - losses;
+    const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
 
-        const totalPlayers = Number(cvToValue(totalPlayersResult).value || 0);
-        
-        // For now, show placeholder data
-        // TODO: Implement actual player data fetching
-        setPlayers([]);
-      } catch (error) {
-        console.error("Failed to load leaderboard:", error);
-      } finally {
-        setLoading(false);
-      }
+    return {
+      address: player.player,
+      totalGames,
+      wins,
+      losses,
+      draws,
+      winRate,
+      totalEarnings: 0, // TODO: Calculate from game history
+      currentStreak: 0, // TODO: Calculate from recent games
+      bestStreak: 0, // TODO: Calculate from game history
     };
+  });
 
-    loadLeaderboard();
-  }, []);
+  // Filter players
+  const filteredPlayers = players.filter((player) =>
+    player.address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sort players
+  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+    if (sortBy === "wins") return b.wins - a.wins;
+    if (sortBy === "games") return b.totalGames - a.totalGames;
+    if (sortBy === "winRate") return b.winRate - a.winRate;
+    return 0;
+  });
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-400" />;
@@ -54,47 +66,88 @@ export function LeaderboardContent() {
   };
 
   return (
-    <div className="px-2 sm:px-4 py-4 sm:py-6 md:px-8 md:py-12">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <div className="px-4 py-8 md:px-8 max-w-6xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
             Leaderboard
           </h1>
-          <p className="text-gray-400">Top players ranked by rating and wins</p>
+          <p className="text-gray-400">Top players ranked by performance</p>
         </div>
 
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Total Players</p>
+            <p className="text-2xl font-bold text-white">{players.length}</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Total Games</p>
+            <p className="text-2xl font-bold text-white">
+              {players.reduce((sum, p) => sum + p.totalGames, 0)}
+            </p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Avg Win Rate</p>
+            <p className="text-2xl font-bold text-white">
+              {players.length > 0
+                ? (players.reduce((sum, p) => sum + p.winRate, 0) / players.length).toFixed(1)
+                : "0"}%
+            </p>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <LeaderboardFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
+
+        {/* Leaderboard Table */}
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-          {loading ? (
+          {isLoading ? (
             <div className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+              <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto" />
             </div>
-          ) : players.length === 0 ? (
+          ) : sortedPlayers.length === 0 ? (
             <div className="p-12 text-center">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-400 text-lg">No players yet</p>
-              <p className="text-gray-500 text-sm mt-2">Be the first to register and play!</p>
+              <p className="text-gray-400 text-lg">
+                {searchTerm ? "No players found" : "No players yet"}
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                {searchTerm ? "Try a different search term" : "Be the first to play!"}
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-white/10">
-              {players.map((player, index) => (
+              {sortedPlayers.map((player, index) => (
                 <div
                   key={player.address}
-                  className="flex items-center justify-between p-4 sm:p-6 hover:bg-white/5 transition-colors"
+                  onClick={() => setSelectedPlayer(player)}
+                  className="flex items-center justify-between p-4 sm:p-6 hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 flex items-center justify-center">
-                      {getRankIcon(player.rank)}
+                      {getRankIcon(index + 1)}
                     </div>
                     <div>
-                      <p className="text-white font-semibold">{player.username}</p>
+                      <p className="text-white font-semibold">
+                        Player #{index + 1}
+                      </p>
                       <p className="text-gray-400 text-sm font-mono">
                         {player.address.slice(0, 6)}...{player.address.slice(-4)}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-white font-bold">{player.rating} pts</p>
-                    <p className="text-gray-400 text-sm">{player.wins} wins</p>
+                    <p className="text-white font-bold">{player.wins} wins</p>
+                    <p className="text-gray-400 text-sm">
+                      {player.winRate.toFixed(1)}% win rate
+                    </p>
                   </div>
                 </div>
               ))}
@@ -102,6 +155,13 @@ export function LeaderboardContent() {
           )}
         </div>
       </div>
-    </div>
+
+      {/* Player Profile Modal */}
+      <PlayerProfileModal
+        isOpen={!!selectedPlayer}
+        onClose={() => setSelectedPlayer(null)}
+        stats={selectedPlayer}
+      />
+    </>
   );
 }
