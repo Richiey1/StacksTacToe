@@ -4,7 +4,7 @@ import { ChallengeCard } from "./ChallengeCard";
 import { Loader2 } from "lucide-react";
 
 interface Challenge {
-  gameId: bigint;
+  gameId: number;
   creator: string;
   betAmount: number;
   boardSize: number;
@@ -15,38 +15,38 @@ interface Challenge {
 interface ChallengeListProps {
   challenges: Challenge[];
   isLoading: boolean;
-  onAccept: (gameId: bigint) => void;
-  onCancel?: (gameId: bigint) => void;
+  onAccept: (gameId: number) => void;
+  onCancel?: (gameId: number) => void;
 }
 
 export function ChallengeList({ challenges, isLoading, onAccept, onCancel }: ChallengeListProps) {
   if (isLoading) {
     return (
-      \u003cdiv className="flex items-center justify-center py-12"\u003e
-        \u003cLoader2 className="w-8 h-8 animate-spin text-blue-500" /\u003e
-      \u003c/div\u003e
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
     );
   }
 
   if (challenges.length === 0) {
     return (
-      \u003cdiv className="text-center py-12"\u003e
-        \u003cp className="text-gray-400"\u003eNo open challenges available\u003c/p\u003e
-        \u003cp className="text-sm text-gray-500 mt-2"\u003eCreate a challenge to get started!\u003c/p\u003e
-      \u003c/div\u003e
+      <div className="text-center py-12">
+        <p className="text-gray-400">No open challenges available</p>
+        <p className="text-sm text-gray-500 mt-2">Create a challenge to get started!</p>
+      </div>
     );
   }
 
   return (
-    \u003cdiv className="grid gap-4"\u003e
+    <div className="grid gap-4">
       {challenges.map((challenge) => (
-        \u003cChallengeCard
+        <ChallengeCard
           key={challenge.gameId.toString()}
           challenge={challenge}
           onAccept={onAccept}
           onCancel={onCancel}
-        /\u003e
+        />
       ))}
-    \u003c/div\u003e
+    </div>
   );
 }
