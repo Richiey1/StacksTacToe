@@ -118,7 +118,8 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
     // Determine game status
     let statusEnum: GameStatus = "waiting";
-    if (game.status === 1 || game.status === 2) { // Ended or Forfeited
+    // Check if game is finished: either status is ended/forfeited OR there's a winner
+    if (game.status === 1 || game.status === 2 || winner) {
       statusEnum = "finished";
     } else if (game.playerTwo && game.playerTwo !== address) {
       statusEnum = "active";
