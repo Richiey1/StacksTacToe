@@ -17,6 +17,11 @@ export function usePlayerData(address?: string | null) {
   return useQuery({
     queryKey: ['player', address],
     queryFn: async (): Promise<Player | null> => {
+      // Contract doesn't have get-player function yet
+      // Return null until the contract is updated
+      return null;
+      
+      /* Commented out until contract has get-player function
       if (!address) return null;
 
       try {
@@ -46,8 +51,9 @@ export function usePlayerData(address?: string | null) {
         console.error('Error fetching player data:', error);
         return null;
       }
+      */
     },
-    enabled: !!address,
+    enabled: false, // Disabled until contract has get-player function
     staleTime: 30000, // 30 seconds
     retry: 1, // Only retry once for missing contract function
   });

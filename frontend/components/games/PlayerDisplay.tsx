@@ -22,7 +22,10 @@ export function PlayerDisplay({
   isFinishedGame = false,
   isDraw = false,
 }: PlayerDisplayProps) {
-  const { data: player } = usePlayerData(playerAddress);
+  // Ensure playerAddress is a string
+  const addressString = typeof playerAddress === 'string' ? playerAddress : String(playerAddress || '');
+  
+  const { data: player } = usePlayerData(addressString);
   const username =
     player && typeof player === "object" && "username" in player
       ? (player.username as string)
@@ -91,7 +94,7 @@ export function PlayerDisplay({
         </span>
         <div className="flex items-center gap-1 flex-wrap">
           <span className={`font-mono text-xs ${textColor}`}>
-            {playerAddress.slice(0, 6)}...{playerAddress.slice(-4)}
+            {addressString.slice(0, 6)}...{addressString.slice(-4)}
           </span>
           {username && (
             <span className={`${usernameColor} text-xs`}>({username})</span>
