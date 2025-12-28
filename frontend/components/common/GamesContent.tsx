@@ -67,14 +67,15 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       // Each field ALSO has a .value property!
       const playerOneRaw = gameFields["player-one"].value;
       const playerTwoRaw = gameFields["player-two"].value;
+      const winnerRaw = gameFields.winner.value;
       
       // Use extractValue to handle deeply nested Clarity objects
       const playerOne = extractValue(playerOneRaw);
       const playerTwo = extractValue(playerTwoRaw);
+      const winner = extractValue(winnerRaw);
       
       const betAmount = BigInt(gameFields["bet-amount"].value);
       const status = Number(gameFields.status.value);
-      const winner = gameFields.winner.value;
       const boardSize = Number(gameFields["board-size"].value || 3);
       const isPlayerOneTurn = gameFields["is-player-one-turn"].value;
 
