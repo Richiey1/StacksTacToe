@@ -276,9 +276,18 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     winner: any;
   };
   
+  // Helper function to extract primitive value from nested Clarity objects
+  const extractValue = (val: any): string => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    // Recursively extract .value until we get a primitive
+    if (val.value !== undefined) return extractValue(val.value);
+    return String(val);
+  };
+  
   // Convert to strings to handle Clarity value objects
-  const playerOne = typeof p1 === 'string' ? p1 : String(p1 || '');
-  const playerTwo = p2 ? (typeof p2 === 'string' ? p2 : String(p2)) : null;
+  const playerOne = extractValue(p1);
+  const playerTwo = p2 ? extractValue(p2) : null;
 
   const isPlayer1 = address?.toLowerCase() === playerOne.toLowerCase();
   const isPlayer2 = playerTwo && address?.toLowerCase() === playerTwo.toLowerCase();

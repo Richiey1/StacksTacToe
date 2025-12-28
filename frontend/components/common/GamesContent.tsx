@@ -56,8 +56,13 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       console.log(`[loadGameData] Game ${gameId} fields:`, gameFields);
       
       // Each field ALSO has a .value property!
-      const playerOne = gameFields["player-one"].value;
-      const playerTwo = gameFields["player-two"].value;
+      const playerOneRaw = gameFields["player-one"].value;
+      const playerTwoRaw = gameFields["player-two"].value;
+      
+      // Ensure addresses are strings (handle any remaining Clarity value objects)
+      const playerOne = typeof playerOneRaw === 'string' ? playerOneRaw : String(playerOneRaw || '');
+      const playerTwo = typeof playerTwoRaw === 'string' ? playerTwoRaw : String(playerTwoRaw || '');
+      
       const betAmount = BigInt(gameFields["bet-amount"].value);
       const status = Number(gameFields.status.value);
       const winner = gameFields.winner.value;
