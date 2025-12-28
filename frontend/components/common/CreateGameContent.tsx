@@ -4,14 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStacks } from "@/contexts/StacksProvider";
 import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { Loader2, Coins, AlertCircle } from "lucide-react";
+import { Loader2, Coins, AlertCircle, Wallet } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { STACKS_API_URL } from "@/lib/stacksConfig";
 
 export function CreateGameContent() {
   const [betAmount, setBetAmount] = useState("");
   const [selectedMove, setSelectedMove] = useState<number | null>(null);
   const [boardSize, setBoardSize] = useState<3 | 5>(3);
   const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
   const { isConnected, address } = useStacks();
   const { createGame } = useStacksTacToe();
   const router = useRouter();
@@ -23,6 +26,27 @@ export function CreateGameContent() {
       return;
     }
   }, [isConnected, router]);
+
+  // Fetch STX balance
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!address) return;
+      
+      setLoadingBalance(true);
+      try {
+        const response = await fetch(`${STACKS_API_URL}/extended/v1/address/${address}/balances`);
+        const data = await response.json();
+        const stxBalance = parseInt(data.stx.balance) / 1_000_000; // Convert microSTX to STX
+        setBalance(stxBalance);
+      } catch (error) {
+        console.error("Failed to fetch balance:", error);
+      } finally {
+        setLoadingBalance(false);
+      }
+    };
+
+    fetchBalance();
+  }, [address]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,6 +139,21 @@ export function CreateGameContent() {
                   required
                 />
               </div>
+              
+              {/* Wallet Balance */}
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <Wallet className="w-4 h-4 text-gray-400" />
+                {loadingBalance ? (
+                  <span className="text-gray-400">Loading balance...</span>
+                ) : balance !== null ? (
+                  <span className="text-gray-400">
+                    Wallet Balance: <span className="text-white font-medium">{balance.toFixed(6)} STX</span>
+                  </span>
+                ) : (
+                  <span className="text-gray-400">Unable to load balance</span>
+                )}
+              </div>
+              
               <p className="mt-2 text-xs text-gray-400">
                 Both players must pay this amount. Winner takes all.
               </p>
