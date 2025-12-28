@@ -35,6 +35,15 @@ StacksTacToe brings the classic game of Tic-Tac-Toe to the blockchain, allowing 
 - 💰 **Optional Wagering**: Play for fun or with STX stakes
 - 📊 **Game History**: Track your wins, losses, and draws
 
+## Deployed Contract
+
+**Mainnet:**
+- **Contract**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha`
+- **Network**: Stacks Mainnet
+- **Clarity Version**: 3
+
+The frontend is configured to interact with this contract via `frontend/config/constants.ts`.
+
 ## Project Structure
 
 ```

@@ -20,6 +20,14 @@ StacksTacToe is a **competitive PvP betting game** that brings the classic Tic-T
 - **BTC** - Bitcoin (via cross-chain bridge)
 - **USDCx** - USDC on Stacks
 
+## Deployed Contract
+
+**Mainnet Contract:**
+- **Address**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha`
+- **Network**: Stacks Mainnet
+- **Clarity Version**: 3
+- **Explorer**: [View on Explorer](https://explorer.hiro.so/txid/SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha?chain=mainnet)
+
 ## Features (Coming Soon)
 
 - 🎮 **PvP Betting** - Winner-takes-all matches with real stakes
