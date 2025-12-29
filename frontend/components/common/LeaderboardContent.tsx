@@ -68,6 +68,20 @@ export function LeaderboardContent() {
   return (
     <>
       <div className="px-4 py-8 md:px-8 max-w-6xl mx-auto">
+        {/* Coming Soon Banner */}
+        <div className="mb-8 relative">
+          <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-500/50 rounded-2xl p-6 text-center backdrop-blur-sm">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Trophy className="w-8 h-8 text-orange-400" />
+              <h2 className="text-2xl md:text-3xl font-bold text-orange-400">Coming Soon</h2>
+              <Trophy className="w-8 h-8 text-orange-400" />
+            </div>
+            <p className="text-gray-300 text-sm md:text-base">
+              Leaderboard feature is currently under development. Stay tuned!
+            </p>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">

@@ -40,7 +40,7 @@ export function ChallengeCard({ challenge, onAccept, onCancel }: ChallengeCardPr
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
             <Trophy className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -85,7 +85,7 @@ export function ChallengeCard({ challenge, onAccept, onCancel }: ChallengeCardPr
           <button
             onClick={handleAccept}
             disabled={isAccepting}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
+            className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
           >
             {isAccepting ? "Accepting..." : "Accept Challenge"}
           </button>
