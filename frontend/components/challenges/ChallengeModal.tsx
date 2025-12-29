@@ -50,8 +50,8 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
   const handleCreate = async () => {
     const betMicroSTX = parseFloat(betAmount) * 1_000_000;
     
-    if (betMicroSTX < 100000) {
-      toast.error("Minimum bet is 0.1 STX");
+    if (betMicroSTX <= 0) {
+      toast.error("Bet amount must be greater than 0 STX");
       return;
     }
 
@@ -104,8 +104,8 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
             type="number"
             value={betAmount}
             onChange={(e) => setBetAmount(e.target.value)}
-            min="0.1"
-            step="0.1"
+            min="0.001"
+            step="0.001"
             className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500"
             placeholder="Enter bet amount"
           />
@@ -124,7 +124,7 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
             )}
           </div>
           
-          <p className="text-xs text-gray-500 mt-2">Minimum: 0.1 STX</p>
+          <p className="text-xs text-gray-500 mt-2">Minimum: 0.001 STX</p>
         </div>
 
         {/* Board Size */}
