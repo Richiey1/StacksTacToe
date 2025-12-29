@@ -160,7 +160,7 @@ export function LeaderboardContent() {
 
         {/* Coming Soon Overlay - Centered */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-gray-900/95 border-2 border-orange-500/50 rounded-2xl p-8 md:p-12 text-center backdrop-blur-sm shadow-2xl max-w-md pointer-events-auto">
+          <div className="bg-[#1a1d3a]/95 border-2 border-orange-500/50 rounded-2xl p-8 md:p-12 text-center backdrop-blur-sm shadow-2xl max-w-md pointer-events-auto">
             <div className="flex items-center justify-center mb-4">
               <Trophy className="w-12 h-12 text-orange-400" />
             </div>
