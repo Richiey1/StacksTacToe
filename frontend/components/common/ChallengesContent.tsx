@@ -51,72 +51,56 @@ export function ChallengesContent() {
 
   return (
     <>
-      <div className="px-4 py-8 md:px-8 max-w-6xl mx-auto relative">
-        {/* Coming Soon Overlay */}
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-2xl">
-          <div className="text-center p-8">
-            <div className="inline-block p-4 bg-orange-500/20 rounded-full mb-4">
-              <Swords className="w-16 h-16 text-orange-400" />
+      <div className="px-4 py-8 md:px-8 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-500/20 rounded-xl border border-orange-500/30">
+              <Swords className="w-6 h-6 text-orange-400" />
             </div>
-            <h2 className="text-4xl font-bold text-white mb-2">Coming Soon</h2>
-            <p className="text-gray-300 text-lg">
-              The Challenges feature is being enhanced and will be available soon!
+            <div>
+              <h1 className="text-3xl font-bold text-white">Challenges</h1>
+              <p className="text-gray-400">Create or accept challenges</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-orange-500/25"
+          >
+            <Plus className="w-5 h-5" />
+            Create Challenge
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Open Challenges</p>
+            <p className="text-2xl font-bold text-white">{allChallenges.length}</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Total Pot</p>
+            <p className="text-2xl font-bold text-white">
+              {(allChallenges.reduce((sum, c) => sum + c.betAmount, 0) / 1_000_000 * 2).toFixed(1)} STX
+            </p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-gray-400 mb-1">Avg Bet</p>
+            <p className="text-2xl font-bold text-white">
+              {allChallenges.length > 0 
+                ? (allChallenges.reduce((sum, c) => sum + c.betAmount, 0) / allChallenges.length / 1_000_000).toFixed(2)
+                : '0'} STX
             </p>
           </div>
         </div>
 
-        {/* Blurred Content */}
-        <div className="blur-sm pointer-events-none">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-500/20 rounded-xl border border-orange-500/30">
-                <Swords className="w-6 h-6 text-orange-400" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">Challenges</h1>
-                <p className="text-gray-400">Create or accept challenges</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-orange-500/25"
-            >
-              <Plus className="w-5 h-5" />
-              Create Challenge
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-              <p className="text-sm text-gray-400 mb-1">Open Challenges</p>
-              <p className="text-2xl font-bold text-white">{allChallenges.length}</p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-              <p className="text-sm text-gray-400 mb-1">Total Pot</p>
-              <p className="text-2xl font-bold text-white">
-                {(allChallenges.reduce((sum, c) => sum + c.betAmount, 0) / 1_000_000 * 2).toFixed(1)} STX
-              </p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-              <p className="text-sm text-gray-400 mb-1">Avg Bet</p>
-              <p className="text-2xl font-bold text-white">
-                {allChallenges.length > 0 
-                  ? (allChallenges.reduce((sum, c) => sum + c.betAmount, 0) / allChallenges.length / 1_000_000).toFixed(2)
-                  : '0'} STX
-              </p>
-            </div>
-          </div>
-
-          {/* Challenge List */}
-          <ChallengeList
-            challenges={filteredChallenges}
-            isLoading={isLoading}
-            onAccept={handleAcceptChallenge}
-          />
-        </div>
+        {/* Challenge List */}
+        <ChallengeList
+          challenges={filteredChallenges}
+          isLoading={isLoading}
+          onAccept={handleAcceptChallenge}
+        />
       </div>
 
       {/* Create Challenge Modal */}
