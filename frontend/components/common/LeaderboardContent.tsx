@@ -162,13 +162,13 @@ export function LeaderboardContent() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="bg-gray-900/95 border-2 border-orange-500/50 rounded-2xl p-8 md:p-12 text-center backdrop-blur-sm shadow-2xl max-w-md pointer-events-auto">
             <div className="flex items-center justify-center mb-4">
-              <Swords className="w-12 h-12 text-orange-400" />
+              <Trophy className="w-12 h-12 text-orange-400" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-orange-400 mb-3">
               Coming Soon
             </h2>
             <p className="text-gray-300 text-base md:text-lg">
-              The Challenges feature is being enhanced and will be available soon!
+              The Leaderboard feature is being enhanced and will be available soon!
             </p>
           </div>
         </div>
