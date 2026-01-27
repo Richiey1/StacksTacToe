@@ -1,56 +1,66 @@
 @import "tailwindcss";
 
-.stackstactoe-bg {
-  @apply bg-gradient-to-br from-gray-900 via-black to-gray-900;
+@theme {
+  --color-game-dark: #050505;
+  --color-game-panel: #1a1a1a;
+  --color-game-primary: #4ade80; /* Neon Green */
+  --color-game-secondary: #f472b6; /* Pink */
+  --color-game-accent: #facc15; /* Yellow */
+  --color-game-border: #333333;
+  
+  --font-game: var(--font-press-start-2p), monospace;
 }
 
-/* Custom scrollbar */
+@layer utilities {
+  .bg-game-pattern {
+    background-color: var(--color-game-dark);
+    background-image: 
+      linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .nes-container {
+    @apply border-4 border-game-primary bg-game-dark p-6 relative;
+    box-shadow: 4px 4px 0px 0px rgba(74, 222, 128, 0.2);
+  }
+
+  .nes-btn {
+    @apply px-6 py-3 bg-game-panel border-2 border-game-primary text-game-primary text-xs uppercase cursor-pointer transition-all active:translate-y-1;
+    box-shadow: 2px 2px 0px 0px var(--color-game-primary);
+  }
+
+  .nes-btn:hover {
+    @apply bg-game-primary text-black;
+  }
+
+  .nes-btn-secondary {
+    @apply border-game-secondary text-game-secondary;
+    box-shadow: 2px 2px 0px 0px var(--color-game-secondary);
+  }
+
+  .nes-btn-secondary:hover {
+    @apply bg-game-secondary text-white;
+  }
+
+  .retro-text-shadow {
+    text-shadow: 2px 2px 0px #000000;
+  }
+}
+
+/* Base resets for pixel look */
+body {
+  image-rendering: pixelated;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  @apply bg-game-dark border-l-2 border-game-border;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #f97316 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  @apply bg-game-primary;
+  border: 2px solid var(--color-game-dark);
 }
