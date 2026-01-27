@@ -10,8 +10,6 @@ import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
 import { cvToValue, uintCV } from "@stacks/transactions";
 
-
-
 interface GamesContentProps {
   onTabChange?: (tab: TabType) => void;
   initialGameId?: bigint | null;
@@ -217,25 +215,25 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2 retro-text-shadow">
                 All Games
               </h1>
               <p className="text-xs sm:text-sm md:text-base text-gray-400">
                 Join existing games or create a new one
               </p>
             </div>
-            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex gap-4 sm:gap-6 w-full sm:w-auto">
               <button
                 onClick={loadGames}
                 disabled={loading}
-                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all border border-white/20 disabled:opacity-50 text-xs sm:text-sm"
+                className="nes-btn text-xs sm:text-sm flex items-center gap-2"
               >
                 <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${loading ? "animate-spin" : ""}`} />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
               <button
                 onClick={() => onTabChange?.("create")}
-                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all border border-white/20 text-xs sm:text-sm flex-1 sm:flex-initial"
+                className="nes-btn text-xs sm:text-sm flex items-center gap-2"
               >
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Create Game</span>
@@ -246,7 +244,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
 
           {loading && games.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
+              <Loader2 className="w-8 h-8 text-game-primary animate-spin" />
             </div>
           ) : (
             <>
@@ -271,7 +269,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                     ) : (
                       <ChevronDown className="w-5 h-5" />
                     )}
-                    <span className="text-lg sm:text-xl font-semibold">
+                    <span className="text-lg sm:text-xl font-semibold retro-text-shadow">
                       My Active Games ({myActiveGames.length})
                     </span>
                   </button>
@@ -298,7 +296,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                     ) : (
                       <ChevronDown className="w-5 h-5" />
                     )}
-                    <span className="text-lg sm:text-xl font-semibold">
+                    <span className="text-lg sm:text-xl font-semibold retro-text-shadow">
                       My Past Games ({myPastGames.length})
                     </span>
                   </button>
@@ -319,7 +317,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                   <div className="text-gray-300 text-lg mb-4">No games available</div>
                   <button
                     onClick={() => onTabChange?.("create")}
-                    className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-all border border-white/20"
+                    className="nes-btn text-white px-6 py-3"
                   >
                     Create New Game
                   </button>
