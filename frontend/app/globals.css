@@ -4,23 +4,56 @@
   @apply bg-gradient-to-br from-gray-900 via-black to-gray-900;
 }
 
+/* Retro Font Utility */
+.font-pixel {
+  font-family: var(--font-press-start-2p), monospace;
+}
+
+/* Retro Button - Orange/Black Theme */
+.btn-retro {
+  @apply font-pixel uppercase text-xs px-4 py-3 cursor-pointer transition-all active:translate-y-1;
+  background-color: #000000;
+  color: #F97316; /* Orange-500 */
+  border: 2px solid #F97316;
+  box-shadow: 4px 4px 0px 0px #F97316;
+}
+
+.btn-retro:hover {
+  background-color: #F97316;
+  color: #000000;
+  box-shadow: 2px 2px 0px 0px #F97316;
+}
+
+.btn-retro-secondary {
+  @apply font-pixel uppercase text-xs px-4 py-3 cursor-pointer transition-all active:translate-y-1;
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 4px 4px 0px 0px #ffffff;
+}
+
+.btn-retro-secondary:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: #000;
+  border-left: 1px solid #333;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  background: #F97316;
+  border: 2px solid #000;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #ea580c; /* Orange-600 */
 }
 
 /* Animations */
