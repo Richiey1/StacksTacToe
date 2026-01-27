@@ -7,23 +7,27 @@ import { Grid3x3 } from 'lucide-react';
 
 export function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <Grid3x3 className="w-7 h-7 text-orange-500" strokeWidth={2.5} />
-            <span className="text-2xl font-bold">
-              <span className="text-orange-500">STACKS</span>
-              <span className="text-white">TacToe</span>
-            </span>
-          </Link>
-
-          {/* Wallet Button */}
-          <div className="flex items-center gap-3">
-             <WalletConnectButton />
-             <WalletButton />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-game-dark border-b-4 border-game-primary h-24">
+      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-4 cursor-pointer group">
+          <div className="border-2 border-game-primary p-1 bg-game-panel group-hover:bg-game-primary group-hover:text-black transition-colors">
+            <Grid3x3 className="w-8 h-8" />
           </div>
+          <span className="text-xl md:text-2xl font-bold tracking-widest text-white retro-text-shadow">
+            <span className="text-game-primary">STACKS</span>
+            <span className="text-white">TAC</span>
+            <span className="text-game-secondary">TOE</span>
+          </span>
+        </Link>
+
+        {/* Wallet Button */}
+        <div className="flex items-center gap-4">
+           {/* Wrapped in div to apply potential retro styling to children if possible, 
+               but WalletButton might be a complex component. 
+               For now, we leave it, but maybe wrap it in a NES-container style if needed. */}
+           <WalletConnectButton />
+           <WalletButton />
         </div>
       </div>
     </nav>
