@@ -10,8 +10,6 @@ import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
 import { cvToValue, uintCV } from "@stacks/transactions";
 
-
-
 interface GamesContentProps {
   onTabChange?: (tab: TabType) => void;
   initialGameId?: bigint | null;
@@ -27,11 +25,9 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
   const { address } = useStacks();
 
   const loadGameData = useCallback(async (gameId: bigint): Promise<Game | null> => {
-    // Helper function to recursively extract primitive values from Clarity objects
     const extractValue = (val: any): string => {
       if (!val) return '';
       if (typeof val === 'string') return val;
-      // Recursively extract .value until we get a primitive
       if (val.value !== undefined) return extractValue(val.value);
       return String(val);
     };
@@ -47,29 +43,19 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         senderAddress: CONTRACT_ADDRESS,
       });
 
-      console.log(`[loadGameData] Raw result for game ${gameId}:`, result);
       const gameData = cvToValue(result);
-      console.log(`[loadGameData] cvToValue result for game ${gameId}:`, gameData);
       
-      // Contract returns (ok (optional {...})), check if game exists
       if (!gameData || !gameData.value) {
-        console.log(`[loadGameData] Game ${gameId} has no value, returning null`);
         return null;
       }
 
       const game = gameData.value;
-      console.log(`[loadGameData] Game ${gameId} data:`, game);
-      
-      // The game object has ANOTHER .value property containing the actual fields
       const gameFields = game.value;
-      console.log(`[loadGameData] Game ${gameId} fields:`, gameFields);
       
-      // Each field ALSO has a .value property!
       const playerOneRaw = gameFields["player-one"].value;
       const playerTwoRaw = gameFields["player-two"].value;
       const winnerRaw = gameFields.winner.value;
       
-      // Use extractValue to handle deeply nested Clarity objects
       const playerOne = extractValue(playerOneRaw);
       const playerTwo = extractValue(playerTwoRaw);
       const winner = extractValue(winnerRaw);
@@ -86,7 +72,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         gameStatus = "active";
       }
 
-      // Get time remaining for active games
       let timeRemaining: bigint | null = null;
       if (gameStatus === "active") {
         try {
@@ -120,7 +105,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         boardSize,
       } as Game;
       
-      console.log(`[loadGameData] Returning game object for ${gameId}:`, gameObject);
       return gameObject;
     } catch (error) {
       console.error(`Failed to load game ${gameId}:`, error);
@@ -132,7 +116,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
   const loadGames = useCallback(async () => {
     setLoading(true);
     try {
-      // Get latest game ID
       const latestIdResult = await fetchCallReadOnlyFunction({
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
@@ -142,34 +125,21 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         senderAddress: CONTRACT_ADDRESS,
       });
 
-      console.log("Latest ID Result:", latestIdResult);
       const latestIdData = cvToValue(latestIdResult);
-      console.log("Latest ID Data after cvToValue:", latestIdData);
-      
-      // Contract returns (ok uint), cvToValue returns {type: 'uint', value: '9'}
-      // We need to access the .value property
       const gameCount = Number(latestIdData.value || 0);
-      console.log("Game count:", gameCount);
 
       const allGames: Game[] = [];
       
-      // Load games in batches
       for (let i = 0; i < gameCount; i++) {
-        console.log(`Loading game ${i}...`);
         const game = await loadGameData(BigInt(i));
         if (game) {
-          console.log(`Game ${i} loaded:`, game);
           allGames.push(game);
-        } else {
-          console.log(`Game ${i} returned null`);
         }
-        // Small delay to avoid overwhelming the network
         if (i % 5 === 0 && i > 0) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 
-      console.log("All games loaded:", allGames);
       setGames(allGames);
     } catch (error) {
       console.error("Failed to load games:", error);
@@ -191,7 +161,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedGameId(null);
-    // Refresh games after modal closes
     loadGames();
   };
 
@@ -217,7 +186,7 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2 font-pixel">
                 All Games
               </h1>
               <p className="text-xs sm:text-sm md:text-base text-gray-400">
@@ -228,14 +197,14 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
               <button
                 onClick={loadGames}
                 disabled={loading}
-                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all border border-white/20 disabled:opacity-50 text-xs sm:text-sm"
+                className="btn-retro flex items-center gap-2 disabled:opacity-50"
               >
                 <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${loading ? "animate-spin" : ""}`} />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
               <button
                 onClick={() => onTabChange?.("create")}
-                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all border border-white/20 text-xs sm:text-sm flex-1 sm:flex-initial"
+                className="btn-retro flex items-center gap-2"
               >
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Create Game</span>
@@ -250,7 +219,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
             </div>
           ) : (
             <>
-              {/* Waiting Games (Always Visible) */}
               {waitingGames.length > 0 && (
                 <GamesList 
                   games={waitingGames} 
@@ -259,12 +227,11 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                 />
               )}
 
-              {/* My Active Games Section */}
               {myActiveGames.length > 0 && (
                 <div className={waitingGames.length > 0 ? "mt-6 sm:mt-8" : ""}>
                   <button
                     onClick={() => setShowActiveGames(!showActiveGames)}
-                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4"
+                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4 font-pixel"
                   >
                     {showActiveGames ? (
                       <ChevronUp className="w-5 h-5" />
@@ -286,12 +253,11 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                 </div>
               )}
 
-              {/* My Past Games Section */}
               {myPastGames.length > 0 && (
                 <div className="mt-6 sm:mt-8">
                   <button
                     onClick={() => setShowPastGames(!showPastGames)}
-                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4"
+                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4 font-pixel"
                   >
                     {showPastGames ? (
                       <ChevronUp className="w-5 h-5" />
@@ -313,13 +279,12 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                 </div>
               )}
 
-              {/* No games message */}
               {games.length === 0 && !loading && (
                 <div className="text-center py-12">
-                  <div className="text-gray-300 text-lg mb-4">No games available</div>
+                  <div className="text-gray-300 text-lg mb-4 font-pixel">No games available</div>
                   <button
                     onClick={() => onTabChange?.("create")}
-                    className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-all border border-white/20"
+                    className="btn-retro"
                   >
                     Create New Game
                   </button>
