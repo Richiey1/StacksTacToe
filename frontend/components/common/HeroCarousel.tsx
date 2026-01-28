@@ -15,7 +15,7 @@ const slides = [
     description: "Compete with players worldwide in decentralized Tic-Tac-Toe",
     action: "View Games",
     tab: "games" as TabType,
-    gradient: "from-orange-500 to-orange-600",
+    color: "bg-orange-600",
   },
   {
     title: "Create Your Game",
@@ -23,7 +23,7 @@ const slides = [
     description: "Choose your bet amount and board size, make the first move",
     action: "Create Game",
     tab: "create" as TabType,
-    gradient: "from-orange-500 to-red-600",
+    color: "bg-red-600",
   },
   {
     title: "Climb the Ranks",
@@ -31,7 +31,7 @@ const slides = [
     description: "Compete for the top spot on the leaderboard",
     action: "View Leaderboard",
     tab: "leaderboard" as TabType,
-    gradient: "from-yellow-500 to-orange-600",
+    color: "bg-amber-600",
   },
 ];
 
@@ -57,16 +57,30 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
   const slide = slides[currentSlide];
 
   return (
-    <div className="relative overflow-hidden border-4 border-game-primary bg-game-dark shadow-[4px_4px_0px_0px_rgba(74,222,128,0.5)]">
-      <div className={`p-8 sm:p-12 md:p-16 text-white bg-gradient-to-r ${slide.gradient} opacity-90`}>
+    <div className="relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff]">
+      {/* Retro Pixel Pattern Overlay */}
+      <div 
+        className={`absolute inset-0 ${slide.color}`}
+        style={{
+          backgroundImage: `
+            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)
+          `,
+          backgroundSize: '4px 4px',
+          backgroundPosition: '0 0, 2px 2px',
+          opacity: 0.2
+        }}
+      ></div>
+
+      <div className="relative p-8 sm:p-12 md:p-16 text-white z-10">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 font-pixel leading-relaxed retro-text-shadow">
             {slide.title}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-black bg-white/20 inline-block px-4 py-2 backdrop-blur-sm">
+          <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-black bg-white inline-block px-4 py-2 shadow-[2px_2px_0px_0px_#000]">
             {slide.subtitle}
           </p>
-          <p className="text-xs sm:text-sm md:text-base mb-6 sm:mb-8 font-pixel leading-loose max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm md:text-base mb-6 sm:mb-8 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
             {slide.description}
           </p>
           <button
@@ -80,14 +94,14 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
         {/* Navigation Arrows */}
         <button
           onClick={prevSlide}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black border-2 border-white p-2 transition-all"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black hover:bg-gray-900 border-2 border-white p-2 transition-all active:translate-y-1"
           aria-label="Previous slide"
         >
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black border-2 border-white p-2 transition-all"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black hover:bg-gray-900 border-2 border-white p-2 transition-all active:translate-y-1"
           aria-label="Next slide"
         >
           <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -100,7 +114,7 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-4 h-4 border-2 border-white transition-all ${
-                index === currentSlide ? "bg-white" : "bg-transparent"
+                index === currentSlide ? "bg-white" : "bg-black"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
