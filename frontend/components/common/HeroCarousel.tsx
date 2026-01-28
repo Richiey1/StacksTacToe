@@ -77,7 +77,7 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 font-pixel leading-relaxed retro-text-shadow">
             {slide.title}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-black bg-white inline-block px-4 py-2 shadow-[2px_2px_0px_0px_#000]">
+          <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-white drop-shadow-md">
             {slide.subtitle}
           </p>
           <p className="text-xs sm:text-sm md:text-base mb-6 sm:mb-8 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
