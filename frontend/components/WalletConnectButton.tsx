@@ -9,13 +9,13 @@ export function WalletConnectButton() {
   return (
     <button
       onClick={() => open()}
-      className="flex items-center gap-2 rounded-lg bg-orange-600/10 px-4 py-2 font-medium text-orange-500 transition-colors hover:bg-orange-600/20"
+      className="btn-retro flex items-center gap-2"
     >
       <Smartphone className="h-4 w-4" />
-      <span>
+      <span className="font-pixel text-[10px] sm:text-xs">
         {isConnected && address
           ? `${address.slice(0, 6)}...${address.slice(-4)}`
-          : "Mobile Connect"}
+          : "MOBILE WALLET"}
       </span>
     </button>
   );
