@@ -36,17 +36,33 @@ function HomeContent() {
   return (
     <div className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-28 pb-12 relative overflow-hidden bg-game-pattern">
       <div className="relative z-10 max-w-7xl w-full space-y-8">
-        {/* Hero Carousel - Now Retro Style */}
+        {/* Hero Carousel */}
         <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12 nes-container">
           <HeroCarousel onTabChange={setActiveTab} />
         </div>
 
         {/* Sidebar + Content Layout */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Navigation - Pushed down to align with content header */}
+          {/* Sidebar Navigation */}
           <aside className="md:w-64 flex-shrink-0 md:mt-24">
-            <div className="nes-container h-full">
-              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} showAdmin={!!isAdmin} />
+            <div className="nes-container h-full relative overflow-hidden">
+              {/* Pixelated Pattern Overlay for Sidebar */}
+              <div 
+                className="absolute inset-0 bg-orange-900/20"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+                    linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)
+                  `,
+                  backgroundSize: '4px 4px',
+                  backgroundPosition: '0 0, 2px 2px',
+                  opacity: 0.1
+                }}
+              ></div>
+              
+              <div className="relative z-10">
+                <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} showAdmin={!!isAdmin} />
+              </div>
             </div>
           </aside>
 
