@@ -40,7 +40,7 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
               }
             `}
           >
-            <Icon className="w-6 h-6" />
+            <Icon className="w-8 h-8" />
             <span className="flex-1">{tab.label}</span>
             {isActive && <span className="animate-pulse">◄</span>}
           </button>
