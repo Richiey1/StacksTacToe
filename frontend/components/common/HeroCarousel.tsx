@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Gamepad2, Globe, Coins, Grid3x3, Crown, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Gamepad2, Globe, Coins, Grid3x3, Crown, TrendingUp, Plus } from "lucide-react";
 import { TabType } from "@/components/common/TabNavigation";
 
 interface HeroCarouselProps {
@@ -74,27 +74,32 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
 
       <div className="relative p-8 sm:p-12 md:p-16 text-white z-10">
         <div className="max-w-3xl mx-auto text-center space-y-6">
+          
+          {/* Feature Icons Section - Moved to Top */}
+          <div className="flex justify-center items-center gap-6 mb-2">
+            {slide.icons.map((Icon, index) => (
+              <div key={index} className="flex items-center gap-6">
+                <div 
+                  className="bg-black/20 p-3 rounded-full border-2 border-white/50 backdrop-blur-sm transform hover:scale-110 transition-transform duration-300"
+                >
+                  <Icon className="w-8 h-8 text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]" />
+                </div>
+                {index < slide.icons.length - 1 && (
+                  <Plus className="w-6 h-6 text-white/50" />
+                )}
+              </div>
+            ))}
+          </div>
+
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 font-pixel leading-relaxed retro-text-shadow">
             {slide.title}
           </h2>
           <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-white drop-shadow-md">
             {slide.subtitle}
           </p>
-          <p className="text-xs sm:text-sm md:text-base mb-8 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
+          <p className="text-xs sm:text-sm md:text-base mb-2 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
             {slide.description}
           </p>
-          
-          {/* Feature Icons Section - Replaces Button */}
-          <div className="flex justify-center gap-8 md:gap-12 mt-8">
-            {slide.icons.map((Icon, index) => (
-              <div 
-                key={index}
-                className="bg-black/20 p-4 rounded-full border-2 border-white/50 backdrop-blur-sm transform hover:scale-110 transition-transform duration-300"
-              >
-                <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]" />
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Navigation Arrows */}
