@@ -13,8 +13,6 @@ import { TabType } from "@/components/common/TabNavigation";
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS } from "@/lib/stacksConfig";
 
-
-
 function HomeContent() {
   const [activeTab, setActiveTab] = useState<TabType | null>("games");
   const { address } = useStacks();
@@ -36,49 +34,35 @@ function HomeContent() {
   }, [gameIdParam]);
 
   return (
-    <div 
-      className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-16 sm:pt-20 pb-8 sm:pb-12 md:pt-24 md:pb-20 relative overflow-hidden"
-      style={{
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Blur overlay with dark gradient */}
-      <div 
-        className="absolute inset-0 backdrop-blur-xl"
-        style={{
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.85) 100%)',
-        }}
-      ></div>
-      
-      {/* Content with proper z-index */}
-      <div className="relative z-10 max-w-7xl w-full space-y-6 sm:space-y-8">
-        {/* Hero Carousel */}
-        <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12">
+    <div className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-28 pb-12 relative overflow-hidden bg-game-pattern">
+      <div className="relative z-10 max-w-7xl w-full space-y-8">
+        {/* Hero Carousel - Now Retro Style */}
+        <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12 nes-container">
           <HeroCarousel onTabChange={setActiveTab} />
         </div>
 
         {/* Sidebar + Content Layout */}
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="md:w-64 flex-shrink-0">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar Navigation - Pushed down to align with content header */}
+          <aside className="md:w-64 flex-shrink-0 md:mt-24">
+            <div className="nes-container h-full">
               <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} showAdmin={!!isAdmin} />
             </div>
           </aside>
 
           {/* Main Content Area */}
           <main className="flex-1 min-w-0">
-            {activeTab && (
-              <>
-                {activeTab === "games" && <GamesContent onTabChange={setActiveTab} initialGameId={initialGameId} />}
-                {activeTab === "create" && <CreateGameContent />}
-                {activeTab === "leaderboard" && <LeaderboardContent />}
-                {activeTab === "challenges" && <ChallengesContent />}
-                {activeTab === "admin" && isAdmin && <AdminPanel />}
-              </>
-            )}
+            <div className="nes-container min-h-[500px]">
+              {activeTab && (
+                <>
+                  {activeTab === "games" && <GamesContent onTabChange={setActiveTab} initialGameId={initialGameId} />}
+                  {activeTab === "create" && <CreateGameContent />}
+                  {activeTab === "leaderboard" && <LeaderboardContent />}
+                  {activeTab === "challenges" && <ChallengesContent />}
+                  {activeTab === "admin" && isAdmin && <AdminPanel />}
+                </>
+              )}
+            </div>
           </main>
         </div>
       </div>
@@ -88,7 +72,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+    <Suspense fallback={<div className="min-h-screen bg-game-dark" />}>
       <HomeContent />
     </Suspense>
   );
