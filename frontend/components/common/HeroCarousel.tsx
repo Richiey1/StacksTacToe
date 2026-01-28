@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-export type TabType = "games" | "create" | "leaderboard" | "challenges";
+import { TabType } from "@/components/common/TabNavigation";
 
 interface HeroCarouselProps {
   onTabChange: (tab: TabType) => void;
@@ -58,21 +57,21 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
   const slide = slides[currentSlide];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
-      <div className={`bg-gradient-to-r ${slide.gradient} p-8 sm:p-12 md:p-16 text-white`}>
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-4">
+    <div className="relative overflow-hidden border-4 border-game-primary bg-game-dark shadow-[4px_4px_0px_0px_rgba(74,222,128,0.5)]">
+      <div className={`p-8 sm:p-12 md:p-16 text-white bg-gradient-to-r ${slide.gradient} opacity-90`}>
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 font-pixel leading-relaxed retro-text-shadow">
             {slide.title}
           </h2>
-          <p className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 opacity-90">
+          <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-black bg-white/20 inline-block px-4 py-2 backdrop-blur-sm">
             {slide.subtitle}
           </p>
-          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-80">
+          <p className="text-xs sm:text-sm md:text-base mb-6 sm:mb-8 font-pixel leading-loose max-w-2xl mx-auto">
             {slide.description}
           </p>
           <button
             onClick={() => onTabChange(slide.tab)}
-            className="bg-white text-gray-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
+            className="btn-retro-secondary bg-black border-2 border-white text-white hover:bg-white hover:text-black transform hover:scale-105"
           >
             {slide.action}
           </button>
@@ -81,27 +80,27 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
         {/* Navigation Arrows */}
         <button
           onClick={prevSlide}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black border-2 border-white p-2 transition-all"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black border-2 border-white p-2 transition-all"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
 
         {/* Dots Indicator */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlide ? "bg-white w-8" : "bg-white/50"
+              className={`w-4 h-4 border-2 border-white transition-all ${
+                index === currentSlide ? "bg-white" : "bg-transparent"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
