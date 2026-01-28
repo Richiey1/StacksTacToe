@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Gamepad2, Globe, Coins, Grid3x3, Crown, TrendingUp } from "lucide-react";
 import { TabType } from "@/components/common/TabNavigation";
 
 interface HeroCarouselProps {
@@ -13,7 +13,7 @@ const slides = [
     title: "Play Tic-Tac-Toe",
     subtitle: "On Stacks Blockchain",
     description: "Compete with players worldwide in decentralized Tic-Tac-Toe",
-    action: "View Games",
+    icons: [Gamepad2, Globe],
     tab: "games" as TabType,
     color: "bg-orange-600",
   },
@@ -21,7 +21,7 @@ const slides = [
     title: "Create Your Game",
     subtitle: "Set Your Stakes",
     description: "Choose your bet amount and board size, make the first move",
-    action: "Create Game",
+    icons: [Coins, Grid3x3],
     tab: "create" as TabType,
     color: "bg-red-600",
   },
@@ -29,7 +29,7 @@ const slides = [
     title: "Climb the Ranks",
     subtitle: "Prove Your Skills",
     description: "Compete for the top spot on the leaderboard",
-    action: "View Leaderboard",
+    icons: [Crown, TrendingUp],
     tab: "leaderboard" as TabType,
     color: "bg-amber-600",
   },
@@ -80,15 +80,21 @@ export function HeroCarousel({ onTabChange }: HeroCarouselProps) {
           <p className="text-sm sm:text-base md:text-lg font-bold mb-4 sm:mb-6 font-pixel uppercase tracking-widest text-white drop-shadow-md">
             {slide.subtitle}
           </p>
-          <p className="text-xs sm:text-sm md:text-base mb-6 sm:mb-8 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
+          <p className="text-xs sm:text-sm md:text-base mb-8 font-pixel leading-loose max-w-2xl mx-auto drop-shadow-md">
             {slide.description}
           </p>
-          <button
-            onClick={() => onTabChange(slide.tab)}
-            className="btn-retro-secondary bg-black border-2 border-white text-white hover:bg-white hover:text-black transform hover:scale-105"
-          >
-            {slide.action}
-          </button>
+          
+          {/* Feature Icons Section - Replaces Button */}
+          <div className="flex justify-center gap-8 md:gap-12 mt-8">
+            {slide.icons.map((Icon, index) => (
+              <div 
+                key={index}
+                className="bg-black/20 p-4 rounded-full border-2 border-white/50 backdrop-blur-sm transform hover:scale-110 transition-transform duration-300"
+              >
+                <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]" />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Navigation Arrows */}
