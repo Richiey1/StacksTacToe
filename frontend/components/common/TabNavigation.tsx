@@ -23,7 +23,7 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-6 w-full p-4">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -33,15 +33,16 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl font-medium transition-all w-full
+              flex items-center gap-4 px-6 py-4 transition-all w-full text-left font-pixel uppercase text-xs md:text-sm border-4
               ${isActive
-                ? "bg-gradient-to-br from-orange-500/20 to-orange-600/20 text-orange-400 border-2 border-orange-500/50"
-                : "bg-white/5 text-gray-400 border-2 border-white/10 hover:bg-gradient-to-br hover:from-orange-500/20 hover:to-orange-600/20 hover:text-orange-400 hover:border-orange-500/50"
+                ? "bg-game-primary text-black border-game-primary shadow-[4px_4px_0px_0px_#fff]"
+                : "bg-black text-white border-white hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_#4ade80]"
               }
             `}
           >
-            <Icon className="w-8 h-8" />
-            <span className="text-sm font-semibold">{tab.label}</span>
+            <Icon className="w-6 h-6" />
+            <span className="flex-1">{tab.label}</span>
+            {isActive && <span className="animate-pulse">◄</span>}
           </button>
         );
       })}
