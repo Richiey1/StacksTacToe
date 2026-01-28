@@ -45,10 +45,10 @@ function HomeContent() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Navigation */}
           <aside className="md:w-64 flex-shrink-0 md:mt-24">
-            <div className="nes-container h-full relative overflow-hidden">
-              {/* Pixelated Pattern Overlay for Sidebar */}
+            <div className="h-full relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff] p-6">
+              {/* Pixelated Pattern Overlay - Matching Hero 'Games' Slide */}
               <div 
-                className="absolute inset-0 bg-orange-900/20"
+                className="absolute inset-0 bg-orange-600"
                 style={{
                   backgroundImage: `
                     linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
@@ -56,7 +56,7 @@ function HomeContent() {
                   `,
                   backgroundSize: '4px 4px',
                   backgroundPosition: '0 0, 2px 2px',
-                  opacity: 0.1
+                  opacity: 0.2
                 }}
               ></div>
               
