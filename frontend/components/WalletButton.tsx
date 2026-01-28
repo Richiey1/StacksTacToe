@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 type WalletState = ReturnType<typeof useStacksWallet>;
 
 const formatAddress = (address: string | null) => {
-  if (!address) return "Connect Wallet";
+  if (!address) return "CONNECT WALLET";
   if (address.length <= 10) return address;
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 };
@@ -30,12 +30,10 @@ export function WalletButton({ wallet }: Props) {
     [address],
   );
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -64,17 +62,17 @@ export function WalletButton({ wallet }: Props) {
     try {
       await navigator.clipboard.writeText(address);
       setCopied(true);
-      toast.success("Address copied to clipboard!");
+      toast.success("Address copied!");
       setTimeout(() => setCopied(false), 2000);
       setIsDropdownOpen(false);
     } catch (err) {
-      toast.error("Failed to copy address");
+      toast.error("Failed to copy");
     }
   };
 
   const handleDisconnect = () => {
     disconnect();
-    toast.success("Wallet disconnected");
+    toast.success("Disconnected");
     setIsDropdownOpen(false);
   };
 
@@ -82,15 +80,14 @@ export function WalletButton({ wallet }: Props) {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // Show loading state during SSR/hydration
   if (!isMounted) {
     return (
       <button
         type="button"
         disabled
-        className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 shadow-lg shadow-amber-500/25 transition-all duration-200 disabled:opacity-60"
+        className="btn-retro disabled:opacity-60"
       >
-        <span className="relative">Connect Wallet</span>
+        <span className="relative">LOADING...</span>
       </button>
     );
   }
@@ -101,9 +98,8 @@ export function WalletButton({ wallet }: Props) {
         type="button"
         onClick={handleConnect}
         disabled={!isReady}
-        className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 shadow-lg shadow-amber-500/25 transition-all duration-200 hover:shadow-amber-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-retro disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
         <span className="relative">{label}</span>
       </button>
     );
@@ -115,21 +111,21 @@ export function WalletButton({ wallet }: Props) {
       <button
         type="button"
         onClick={toggleDropdown}
-        className="flex items-center gap-2 rounded-lg bg-orange-600/10 px-4 py-2 font-medium text-orange-500 transition-colors hover:bg-orange-600/20"
+        className="btn-retro flex items-center gap-2"
       >
         <Wallet className="h-4 w-4" />
-        <span className="text-sm">{label}</span>
+        <span className="text-[10px] sm:text-xs">{label}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl bg-gray-800/95 backdrop-blur-md border border-white/10 shadow-xl overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-black border-4 border-white shadow-xl z-50">
           {/* Wallet Address */}
-          <div className="px-4 py-3 border-b border-white/10">
+          <div className="px-4 py-3 border-b-2 border-white bg-gray-900">
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-orange-500" />
-              <p className="text-sm font-medium text-white">{label}</p>
+              <p className="text-[10px] font-pixel text-orange-500 break-all">{address}</p>
             </div>
           </div>
 
@@ -138,25 +134,25 @@ export function WalletButton({ wallet }: Props) {
             {/* Copy Address */}
             <button
               onClick={handleCopy}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-500 hover:text-black transition-colors text-left group"
             >
               {copied ? (
-                <Check className="w-4 h-4 text-green-400" />
+                <Check className="w-4 h-4 group-hover:text-black text-green-400" />
               ) : (
-                <Copy className="w-4 h-4 text-gray-400" />
+                <Copy className="w-4 h-4 group-hover:text-black text-white" />
               )}
-              <span className="text-sm text-white">
-                {copied ? "Copied!" : "Copy Address"}
+              <span className="font-pixel text-[10px] uppercase text-white group-hover:text-black">
+                {copied ? "COPIED!" : "COPY ADDRESS"}
               </span>
             </button>
 
             {/* Disconnect */}
             <button
               onClick={handleDisconnect}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-500/10 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500 hover:text-black transition-colors text-left group"
             >
-              <LogOut className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-white">Disconnect</span>
+              <LogOut className="w-4 h-4 group-hover:text-black text-red-500" />
+              <span className="font-pixel text-[10px] uppercase text-white group-hover:text-black">DISCONNECT</span>
             </button>
           </div>
         </div>
