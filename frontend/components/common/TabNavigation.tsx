@@ -35,8 +35,8 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
             className={`
               flex items-center gap-4 px-6 py-4 transition-all w-full text-left font-pixel uppercase text-xs md:text-sm border-4
               ${isActive
-                ? "bg-game-primary text-black border-game-primary shadow-[4px_4px_0px_0px_#fff]"
-                : "bg-black text-white border-white hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_#4ade80]"
+                ? "bg-orange-500 text-black border-orange-500 shadow-[4px_4px_0px_0px_#fff]"
+                : "bg-black text-white border-white hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_#f97316]"
               }
             `}
           >
