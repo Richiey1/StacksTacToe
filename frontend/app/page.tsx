@@ -43,9 +43,9 @@ function HomeContent() {
 
         {/* Sidebar + Content Layout */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="md:w-64 flex-shrink-0 md:mt-24">
-            <div className="h-full relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff] p-6">
+          {/* Sidebar Navigation - Adjusted alignment */}
+          <aside className="md:w-64 flex-shrink-0 md:mt-10">
+            <div className="h-fit relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff] p-6">
               {/* Pixelated Pattern Overlay - Matching Hero 'Games' Slide */}
               <div 
                 className="absolute inset-0 bg-orange-600"
