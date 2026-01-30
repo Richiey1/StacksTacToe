@@ -41,6 +41,15 @@
     background-color: #ffffff;
     color: #000000;
   }
+
+  .nes-container {
+    @apply border-4 border-orange-500 bg-black p-6 relative;
+    box-shadow: 4px 4px 0px 0px #fff;
+  }
+
+  .retro-text-shadow {
+    text-shadow: 2px 2px 0px #000000;
+  }
 }
 
 /* Custom scrollbar */
