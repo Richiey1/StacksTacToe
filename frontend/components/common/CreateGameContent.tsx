@@ -75,10 +75,11 @@ export function CreateGameContent() {
   };
 
   return (
-    <div className="flex items-center justify-center py-8">
+    <div className="flex items-center justify-center py-4">
       <div className="max-w-xl w-full">
-        <div className="nes-container !p-8 sm:!p-12">
-          <div className="text-center mb-10 font-pixel">
+        {/* nes-container removed from here */}
+        <div className="p-4 sm:p-6">
+          <div className="text-center mb-10 font-pixel text-shadow">
             <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 uppercase">New Battle</h1>
             <p className="text-gray-500 text-[10px]">Set stakes and strike first</p>
           </div>
