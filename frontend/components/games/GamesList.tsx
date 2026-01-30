@@ -36,13 +36,13 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
   const getStatusColor = (status: string) => {
     switch (status) {
       case "waiting":
-        return "text-gray-300 bg-white/5 border-white/10";
+        return "text-gray-400 border-gray-400";
       case "active":
-        return "text-blue-500 bg-blue-500/10 border-blue-500/30";
+        return "text-orange-500 border-orange-500";
       case "finished":
-        return "text-gray-400 bg-white/5 border-white/10";
+        return "text-gray-600 border-gray-600";
       default:
-        return "text-gray-400 bg-white/5 border-white/10";
+        return "text-gray-400 border-gray-400";
     }
   };
 
@@ -60,11 +60,11 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
 
   if (games.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-300 text-lg mb-4">No games available</div>
+      <div className="text-center py-12 nes-container">
+        <div className="text-gray-300 text-lg mb-4 font-pixel">No games available</div>
         <button
           onClick={() => router.push("/create")}
-          className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-all border border-white/20"
+          className="btn-retro"
         >
           Create New Game
         </button>
@@ -73,12 +73,10 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
   }
 
   const handleCardClick = (game: Game, e: React.MouseEvent) => {
-    // Don't trigger card click if clicking on a button
     const target = e.target as HTMLElement;
     if (target.closest('button')) {
       return;
     }
-    // Only make active/finished games clickable (waiting games use Join button)
     if (game.status === "active" || game.status === "finished") {
       if (onGameClick) {
         onGameClick(game.gameId);
@@ -89,7 +87,7 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {games.map((game) => {
         const isClickable = game.status === "active" || game.status === "finished";
         const isDraw = game.status === "finished" && (!game.winner || game.winner === address);
@@ -98,45 +96,40 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
         <div
           key={game.id}
           onClick={(e) => handleCardClick(game, e)}
-          className={`bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:border-white/20 transition-all ${
-            isClickable ? "cursor-pointer hover:bg-white/10" : ""
+          className={`nes-container transition-all hover:translate-x-1 hover:-translate-y-1 ${
+            isClickable ? "cursor-pointer" : ""
           }`}
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
             <div className="flex-1">
-              {/* Top row: Status badges and buttons (side by side on mobile) */}
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(game.status)}`}>
-                    {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2 flex-wrap font-pixel text-[10px]">
+                  <span className={`px-2 py-1 border-2 uppercase font-bold ${getStatusColor(game.status)}`}>
+                    {game.status}
                   </span>
                   {game.status === "finished" && isDraw && (
-                    <span className="text-xs font-medium text-blue-400">
+                    <span className="px-2 py-1 border-2 border-blue-400 text-blue-400 uppercase font-bold">
                       Draw
                     </span>
                   )}
                   {game.player1.toLowerCase() === address?.toLowerCase() && (
-                    <span className="px-2 py-1 rounded text-xs font-medium bg-white/10 text-white border border-white/20">
+                    <span className="px-2 py-1 border-2 border-white text-white uppercase font-bold">
                       Your Game
                     </span>
                   )}
                 </div>
                 
-                {/* Buttons on same level as status badges on mobile - only show Join Game for waiting games */}
                 <div className="flex gap-2 md:hidden">
-                  {/* Share Button for My Waiting Game */}
                   {game.status === "waiting" && game.player1.toLowerCase() === address?.toLowerCase() && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Copy link to clipboard
                         const link = `${window.location.origin}/play/${game.gameId}`;
                         navigator.clipboard.writeText(link);
-                        toast.success("Game link copied to clipboard!");
+                        toast.success("Game link copied!");
                       }}
-                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-xs font-semibold transition-all border border-white/20"
+                      className="btn-retro !px-2 !py-1 !text-[8px]"
                     >
-                      <Share2 className="w-3 h-3" />
                       Share
                     </button>
                   )}
@@ -150,16 +143,15 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                           router.push(`/play/${game.gameId.toString()}`);
                         }
                       }}
-                      className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-1 rounded text-xs font-semibold transition-all border border-blue-500/30"
+                      className="btn-retro !px-2 !py-1 !text-[8px]"
                     >
-                      <Play className="w-3 h-3" />
-                      Join Game
+                      Join
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <PlayerDisplay 
                   playerAddress={game.player1} 
                   isPlayer1={true}
@@ -179,37 +171,30 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                     isDraw={isDraw}
                   />
                 ) : (
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-3 text-gray-500 font-pixel text-[10px]">
                     <Clock className="w-4 h-4" />
-                    <span className="text-sm">Waiting for player 2</span>
+                    <span>Waiting...</span>
                   </div>
                 )}
 
-                {/* Bet and Board side by side on mobile */}
-                <div className="grid grid-cols-2 gap-2 md:contents">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Coins className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm">
-                      <span className="text-gray-400">Bet: </span>
-                      <span className="font-semibold text-white">
-                        {(Number(game.betAmount) / 1_000_000).toFixed(6)} STX
-                      </span>
+                <div className="grid grid-cols-2 gap-4 md:contents font-pixel text-[10px]">
+                  <div className="flex items-center gap-3 text-white">
+                    <Coins className="w-4 h-4 text-orange-500" />
+                    <span>
+                      {(Number(game.betAmount) / 1_000_000).toFixed(2)} STX
                     </span>
                   </div>
 
                   {game.boardSize && (
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <Grid3x3 className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm">
-                        <span className="text-gray-400">Board: </span>
-                        <span className="font-semibold text-white">{game.boardSize}x{game.boardSize}</span>
-                      </span>
+                    <div className="flex items-center gap-3 text-white">
+                      <Grid3x3 className="w-4 h-4 text-orange-500" />
+                      <span>{game.boardSize}x{game.boardSize}</span>
                     </div>
                   )}
                 </div>
 
                 {game.status === "active" && game.timeRemaining !== undefined && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {game.timeRemaining !== null ? (
                       <>
                         <CountdownTimer 
@@ -217,50 +202,42 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                           warningThreshold={3600}
                         />
                         {game.canForfeit && game.currentPlayer?.toLowerCase() !== address?.toLowerCase() && (
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" />
+                          <span className="px-2 py-1 border-2 border-red-500 text-red-500 font-pixel text-[8px] uppercase font-bold animate-pulse">
                             Can Forfeit
                           </span>
                         )}
                       </>
                     ) : (
-                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                      <div className="flex items-center gap-2 text-gray-500 font-pixel text-[10px]">
                         <Clock className="w-4 h-4" />
-                        <span>Loading time...</span>
+                        <span>Loading...</span>
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Note for active games about 24-hour timeout */}
               {game.status === "active" && (
-                <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                  <p className="text-xs text-yellow-400 flex items-start gap-1.5">
-                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    <span>
-                      <strong>Note:</strong> If your opponent doesn't make a move within 24 hours, the last player to move can claim the reward. This applies unless the game is completed with a winner.
-                    </span>
+                <div className="mt-4 p-3 border-2 border-orange-500/30 bg-orange-500/5">
+                  <p className="text-[8px] text-orange-400 font-pixel leading-relaxed">
+                    <AlertTriangle className="w-3 h-3 inline mr-2" />
+                    Note: 24h move timeout applies. Claim reward if opponent stalls.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Buttons for desktop (hidden on mobile) */}
-            <div className="hidden md:flex gap-2">
-              {/* Share Button for My Waiting Game */}
+            <div className="hidden md:flex gap-3">
               {game.status === "waiting" && game.player1.toLowerCase() === address?.toLowerCase() && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Copy link to clipboard
                     const link = `${window.location.origin}/play/${game.gameId}`;
                     navigator.clipboard.writeText(link);
-                    toast.success("Game link copied to clipboard!");
+                    toast.success("Link copied!");
                   }}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-all border border-white/20"
+                  className="btn-retro-secondary"
                 >
-                  <Share2 className="w-4 h-4" />
                   Share
                 </button>
               )}
@@ -274,17 +251,16 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                       router.push(`/play/${game.gameId.toString()}`);
                     }
                   }}
-                  className="flex items-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg font-medium transition-all border border-blue-500/30"
+                  className="btn-retro"
                 >
-                  <Play className="w-4 h-4" />
                   Join Game
                 </button>
               )}
             </div>
           </div>
           {isClickable && (
-            <div className="mt-2 text-xs text-gray-500 text-right">
-              {game.status === "finished" ? "Click to view →" : "Click to play →"}
+            <div className="mt-4 text-[10px] text-gray-600 text-right font-pixel uppercase">
+              {game.status === "finished" ? "View →" : "Play →"}
             </div>
           )}
         </div>
