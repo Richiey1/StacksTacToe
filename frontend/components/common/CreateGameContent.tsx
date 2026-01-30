@@ -75,18 +75,17 @@ export function CreateGameContent() {
   };
 
   return (
-    <div className="flex items-center justify-center py-4">
+    <div className="flex items-center justify-center py-8">
       <div className="max-w-xl w-full">
-        {/* nes-container removed from here */}
         <div className="p-4 sm:p-6">
-          <div className="text-center mb-10 font-pixel text-shadow">
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 uppercase">New Battle</h1>
-            <p className="text-gray-500 text-[10px]">Set stakes and strike first</p>
+          <div className="text-center mb-12 font-pixel text-shadow">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-4 uppercase tracking-widest">Create Battle</h1>
+            <p className="text-gray-400 text-xs sm:text-sm uppercase tracking-tight">Set stakes and strike first</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-10">
+          <form onSubmit={handleSubmit} className="space-y-12">
             <div>
-              <label className="block text-[10px] font-pixel text-gray-300 mb-4 uppercase">
+              <label className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
                 Grid Size
               </label>
               <div className="grid grid-cols-2 gap-4">
@@ -99,7 +98,7 @@ export function CreateGameContent() {
                     type="button"
                     onClick={() => { setBoardSize(size); setSelectedMove(null); }}
                     className={`
-                      px-4 py-4 border-4 transition-all font-pixel uppercase text-[10px]
+                      px-4 py-5 border-4 transition-all font-pixel uppercase text-xs
                       ${boardSize === size
                         ? "border-orange-500 bg-orange-500/10 text-white shadow-[2px_2px_0px_0px_#fff]"
                         : "border-white/10 bg-white/5 text-gray-500 hover:border-white/20"
@@ -113,7 +112,7 @@ export function CreateGameContent() {
             </div>
 
             <div>
-              <label htmlFor="betAmount" className="block text-[10px] font-pixel text-gray-300 mb-4 uppercase">
+              <label htmlFor="betAmount" className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
                 Stakes (STX)
               </label>
               <div className="relative">
@@ -124,22 +123,22 @@ export function CreateGameContent() {
                   value={betAmount}
                   onChange={(e) => setBetAmount(e.target.value)}
                   placeholder="0.00"
-                  className="block w-full px-4 py-4 bg-black border-4 border-white/20 text-white font-pixel text-sm focus:outline-none focus:border-orange-500 transition-all placeholder:text-gray-700"
+                  className="block w-full px-5 py-5 bg-black border-4 border-white/20 text-white font-pixel text-base focus:outline-none focus:border-orange-500 transition-all placeholder:text-gray-800"
                   required
                 />
               </div>
               
-              <div className="mt-3 flex items-center gap-2 font-pixel text-[8px] text-gray-500 uppercase">
-                <Wallet className="w-3 h-3" />
+              <div className="mt-4 flex items-center gap-3 font-pixel text-[10px] text-gray-400 uppercase tracking-tight">
+                <Wallet className="w-4 h-4 text-orange-500" />
                 {loadingBalance ? "..." : balance !== null ? `Balance: ${balance.toFixed(2)} STX` : "?"}
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-pixel text-gray-300 mb-4 uppercase">
+              <label className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
                 Strike First
               </label>
-              <div className={`grid gap-2 p-4 border-4 border-white/5 bg-white/5 ${boardSize === 3 ? 'grid-cols-3' : 'grid-cols-5'}`}>
+              <div className={`grid gap-3 p-6 border-4 border-white/5 bg-white/5 ${boardSize === 3 ? 'grid-cols-3' : 'grid-cols-5'}`}>
                 {Array.from({ length: boardSize * boardSize }).map((_, index) => (
                   <button
                     key={index}
@@ -153,14 +152,14 @@ export function CreateGameContent() {
                       }
                     `}
                   >
-                    <span className={`text-lg font-black ${selectedMove === index ? "text-white" : "text-blue-500/20"}`}>X</span>
+                    <span className={`text-xl font-black ${selectedMove === index ? "text-white" : "text-blue-500/20"}`}>X</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {error && (
-              <div className="p-3 border-4 border-red-500 bg-red-500/10 text-red-500 font-pixel text-[8px] uppercase">
+              <div className="p-4 border-4 border-red-500 bg-red-500/10 text-red-500 font-pixel text-[10px] uppercase">
                 {error}
               </div>
             )}
@@ -168,7 +167,7 @@ export function CreateGameContent() {
             <button
               type="submit"
               disabled={isCreating}
-              className="btn-retro w-full py-5 !text-sm"
+              className="btn-retro w-full py-6 !text-base"
             >
               {isCreating ? "Deploying..." : "DEPLOY BATTLE"}
             </button>
