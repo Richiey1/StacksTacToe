@@ -33,7 +33,6 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
     };
     
     try {
-      console.log(`[loadGameData] Fetching game ${gameId}...`);
       const result = await fetchCallReadOnlyFunction({
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
@@ -184,13 +183,13 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
     <>
       <div className="px-2 sm:px-4 py-4 sm:py-6 md:px-8 md:py-12">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-10">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2 font-pixel">
-                All Games
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 font-pixel uppercase tracking-wider text-shadow">
+                All Battles
               </h1>
-              <p className="text-xs sm:text-sm md:text-base text-gray-400">
-                Join existing games or create a new one
+              <p className="text-[10px] sm:text-xs font-pixel text-gray-400 uppercase tracking-tight">
+                Enter the arena or deploy your own
               </p>
             </div>
             <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
@@ -207,8 +206,8 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
                 className="btn-retro flex items-center gap-2"
               >
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Create Game</span>
-                <span className="sm:hidden">Create</span>
+                <span className="hidden sm:inline">Create</span>
+                <span className="sm:hidden text-[8px]">New</span>
               </button>
             </div>
           </div>
@@ -220,26 +219,29 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
           ) : (
             <>
               {waitingGames.length > 0 && (
-                <GamesList 
-                  games={waitingGames} 
-                  loading={loading} 
-                  onGameClick={handleGameClick} 
-                />
+                <div className="mb-10">
+                  <h2 className="text-xs font-pixel text-gray-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-2">Arena Lobby</h2>
+                  <GamesList 
+                    games={waitingGames} 
+                    loading={loading} 
+                    onGameClick={handleGameClick} 
+                  />
+                </div>
               )}
 
               {myActiveGames.length > 0 && (
-                <div className={waitingGames.length > 0 ? "mt-6 sm:mt-8" : ""}>
+                <div className="mb-10">
                   <button
                     onClick={() => setShowActiveGames(!showActiveGames)}
-                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4 font-pixel"
+                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 font-pixel"
                   >
                     {showActiveGames ? (
                       <ChevronUp className="w-5 h-5" />
                     ) : (
                       <ChevronDown className="w-5 h-5" />
                     )}
-                    <span className="text-lg sm:text-xl font-semibold">
-                      My Active Games ({myActiveGames.length})
+                    <span className="text-sm uppercase tracking-wider">
+                      Active Battles ({myActiveGames.length})
                     </span>
                   </button>
 
@@ -254,18 +256,18 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
               )}
 
               {myPastGames.length > 0 && (
-                <div className="mt-6 sm:mt-8">
+                <div className="mb-10">
                   <button
                     onClick={() => setShowPastGames(!showPastGames)}
-                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4 font-pixel"
+                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 font-pixel"
                   >
                     {showPastGames ? (
                       <ChevronUp className="w-5 h-5" />
                     ) : (
                       <ChevronDown className="w-5 h-5" />
                     )}
-                    <span className="text-lg sm:text-xl font-semibold">
-                      My Past Games ({myPastGames.length})
+                    <span className="text-sm uppercase tracking-wider">
+                      History ({myPastGames.length})
                     </span>
                   </button>
 
@@ -280,13 +282,13 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
               )}
 
               {games.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  <div className="text-gray-300 text-lg mb-4 font-pixel">No games available</div>
+                <div className="text-center py-20 border-4 border-dashed border-white/10">
+                  <div className="text-gray-400 text-sm mb-6 font-pixel uppercase">The Arena is Empty</div>
                   <button
                     onClick={() => onTabChange?.("create")}
                     className="btn-retro"
                   >
-                    Create New Game
+                    Deploy First Battle
                   </button>
                 </div>
               )}
