@@ -36,17 +36,17 @@ function HomeContent() {
   return (
     <div className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-28 pb-12 relative overflow-hidden bg-game-pattern">
       <div className="relative z-10 max-w-7xl w-full space-y-8">
-        {/* Hero Carousel */}
-        <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12 nes-container">
+        {/* Hero Carousel - Outer nes-container removed */}
+        <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12">
           <HeroCarousel onTabChange={setActiveTab} />
         </div>
 
         {/* Sidebar + Content Layout */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Navigation - Adjusted alignment */}
-          <aside className="md:w-64 flex-shrink-0 md:mt-10">
+          {/* Sidebar Navigation */}
+          <aside className="md:w-64 flex-shrink-0 md:mt-4">
             <div className="h-fit relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff] p-6">
-              {/* Pixelated Pattern Overlay - Matching Hero 'Games' Slide */}
+              {/* Pixelated Pattern Overlay */}
               <div 
                 className="absolute inset-0 bg-orange-600"
                 style={{
@@ -66,9 +66,9 @@ function HomeContent() {
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <main className="flex-1 min-w-0">
-            <div className="nes-container min-h-[500px]">
+          {/* Main Content Area - Outer nes-container removed */}
+          <main className="flex-1 min-w-0 md:mt-4">
+            <div className="min-h-[500px]">
               {activeTab && (
                 <>
                   {activeTab === "games" && <GamesContent onTabChange={setActiveTab} initialGameId={initialGameId} />}
