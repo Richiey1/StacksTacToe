@@ -41,22 +41,18 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const game = gameData;
   const boardSize = game?.boardSize || 3;
   
-  // Helper function to extract primitive value from nested Clarity objects
   const extractValue = (val: any): string => {
     if (!val) return '';
     if (typeof val === 'string') return val;
-    // Recursively extract .value until we get a primitive
     if (val.value !== undefined) return extractValue(val.value);
     return String(val);
   };
   
-  // Extract and convert player addresses and winner to strings early
   const playerOne = game ? extractValue(game.playerOne) : '';
   const playerTwo = game?.playerTwo ? extractValue(game.playerTwo) : null;
   const winner = game?.winner ? extractValue(game.winner) : null;
   const betAmount = game?.betAmount || 0;
   
-  // New hooks for enhanced data
   const { data: boardData } = useBoardState(gameIdNum, boardSize);
   const { data: timeRemaining } = useTimeRemaining(gameIdNum);
   const { data: isRewardClaimed } = useRewardClaimed(gameIdNum);
@@ -74,18 +70,15 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  // Format board data for GameBoard component
   const board: BoardState = boardData 
     ? boardData.map(cell => cell === 0 ? null : (cell === 1 ? 'X' : 'O'))
     : Array(boardSize * boardSize).fill(null);
 
-  // Get player data for both players
   const { data: player1Data } = usePlayerData(playerOne);
   const { data: player2Data } = usePlayerData(playerTwo);
 
   useEffect(() => {
     if (!isOpen) {
-      // Reset state when modal closes
       setGameStatus("waiting");
       setCanJoin(false);
       setIsPlayerTurn(false);
@@ -112,30 +105,25 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     };
   }, [isOpen, onClose]);
 
-  // Update game state
   useEffect(() => {
     if (!game || !address) return;
 
-    // Determine game status
     let statusEnum: GameStatus = "waiting";
-    // Check if game is finished: either status is ended/forfeited OR there's a winner
     if (game.status === 1 || game.status === 2 || winner) {
       statusEnum = "finished";
     } else if (game.playerTwo && game.playerTwo !== address) {
       statusEnum = "active";
-    } else if (game.playerTwo) { // Active even if I am playerTwo
+    } else if (game.playerTwo) { 
       statusEnum = "active";
     }
     setGameStatus(statusEnum);
 
-    // Check if player can join
     if (statusEnum === "waiting" && address.toLowerCase() !== playerOne.toLowerCase()) {
       setCanJoin(true);
     } else {
       setCanJoin(false);
     }
 
-    // Check if it's player's turn
     if (statusEnum === "active" && playerTwo) {
       const currentPlayer = game.isPlayerOneTurn ? playerOne : playerTwo;
       setIsPlayerTurn(address.toLowerCase() === currentPlayer.toLowerCase());
@@ -143,7 +131,6 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
       setIsPlayerTurn(false);
     }
     
-    // Check forfeit eligibility
     if (statusEnum === "active" && !isPlayerTurn && moveTimeout && game.lastMoveBlock > 0) {
       setCanForfeit(timeRemaining === 0);
     } else {
@@ -154,29 +141,27 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
   const handleCellClick = async (index: number) => {
     if (!address) {
-      toast.error("Please connect your wallet");
+      toast.error("Connect wallet");
       return;
     }
 
     if (gameStatus === "waiting" && canJoin) {
-      // Join game - first select move, then show confirmation
       if (selectedJoinMove === null) {
         setSelectedJoinMove(index);
         return;
       }
       setShowJoinConfirmModal(true);
     } else if (gameStatus === "active" && isPlayerTurn) {
-      // Make a move
       if (board[index] !== null) {
-        toast.error("Cell is already occupied");
+        toast.error("Occupied");
         return;
       }
       try {
         setIsPending(true);
         await playMove(gameIdNum, index);
-        toast.success("Move submitted...");
+        toast.success("Move sent...");
       } catch (err: any) {
-        toast.error(err?.message || "Failed to make move");
+        toast.error(err?.message || "Error");
       } finally {
         setIsPending(false);
       }
@@ -188,9 +173,9 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
       setIsPending(true);
       await forfeitGame(gameIdNum);
       setShowForfeitModal(false);
-      toast.success("Forfeit transaction submitted...");
+      toast.success("Forfeit sent...");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to forfeit game");
+      toast.error(err?.message || "Error");
     } finally {
       setIsPending(false);
     }
@@ -199,37 +184,30 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   const handleClaimReward = async () => {
     try {
       if (isRewardClaimed) {
-        toast.error("Reward already claimed");
+        toast.error("Already claimed");
         return;
       }
       setIsPending(true);
       await claimReward(Number(gameId));
-      toast.success("Reward claimed successfully!");
+      toast.success("Claimed!");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to claim reward");
+      toast.error(err?.message || "Error");
     } finally {
       setIsPending(false);
     }
   };
 
   const handleConfirmJoin = async () => {
-    if (selectedJoinMove === null) {
-      toast.error("Please select a move");
-      return;
-    }
-    if (!game || typeof game !== "object" || !("betAmount" in game)) {
-      toast.error("Game data not loaded");
-      return;
-    }
+    if (selectedJoinMove === null) return;
     try {
       setShowJoinConfirmModal(false);
       setIsPending(true);
-      const betAmount = Number(game.betAmount) / 1_000_000;
+      const betAmount = Number(game!.betAmount) / 1_000_000;
       await joinGame(Number(gameId), selectedJoinMove, betAmount);
       setSelectedJoinMove(null);
-      toast.success("Joining game...");
+      toast.success("Joining...");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to join game");
+      toast.error(err?.message || "Error");
       setSelectedJoinMove(null);
     } finally {
       setIsPending(false);
@@ -237,48 +215,35 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
   };
 
   const getPlayerUsername = (playerAddress: string): string | null => {
-    if (!playerAddress || !game || typeof game !== "object" || !("playerOne" in game)) return null;
-
-    const isPlayer1 = (game as { playerOne: string }).playerOne.toLowerCase() === playerAddress.toLowerCase();
+    if (!playerAddress || !game) return null;
+    const isPlayer1 = playerOne.toLowerCase() === playerAddress.toLowerCase();
     const playerData = isPlayer1 ? player1Data : player2Data;
-
-    if (playerData && typeof playerData === "object" && "username" in playerData) {
-      return playerData.username as string;
-    }
-    return null;
+    return playerData?.username as string || null;
   };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Invalidate and refetch immediately
       await queryClient.invalidateQueries({ queryKey: ["game", gameId.toString()] });
       await queryClient.refetchQueries({ queryKey: ["game", gameId.toString()] });
-      toast.success("Game refreshed!");
+      toast.success("Refreshed!");
     } catch (error) {
-      console.error("Refresh error:", error);
-      toast.error("Failed to refresh");
+      toast.error("Error");
     } finally {
-      setTimeout(() => {
-        setIsRefreshing(false);
-      }, 500);
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
   if (!isOpen) return null;
 
-  // Show loading state
-  if (isLoadingGame || !game || typeof game !== "object" || !("playerOne" in game)) {
+  if (isLoadingGame || !game) {
     return (
       <>
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-md z-50"
-          onClick={onClose}
-        />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-16 sm:pt-4 overflow-y-auto">
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto my-auto">
-            <div className="flex items-center justify-center">
-              <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-spin" />
+        <div className="fixed inset-0 bg-black/80 z-50" onClick={onClose} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="nes-container max-w-2xl w-full">
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
           </div>
         </div>
@@ -288,201 +253,116 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
   const isPlayer1 = address?.toLowerCase() === playerOne.toLowerCase();
   const isPlayer2 = playerTwo && address?.toLowerCase() === playerTwo.toLowerCase();
-
-  // Convert microSTX to STX
   const betAmountSTX = Number(betAmount) / 1_000_000;
   const totalPot = playerTwo ? betAmountSTX * 2 : betAmountSTX;
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 transition-opacity"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/80 z-50 transition-opacity" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pt-16 sm:pt-4 overflow-y-auto">
-        <div ref={gameRef} className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 p-3 sm:p-4 md:p-6 lg:p-8 max-w-4xl w-full my-auto relative">
-          {/* Top Action Buttons */}
-          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 right-3 sm:right-4 flex justify-between items-start z-10">
-            {/* Refresh Button */}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20 disabled:opacity-50"
-              aria-label="Refresh"
-            >
-              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 text-white ${isRefreshing ? "animate-spin" : ""}`} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div ref={gameRef} className="nes-container max-w-4xl w-full my-auto relative !p-6 sm:!p-10">
+          <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+            <button onClick={handleRefresh} disabled={isRefreshing} className="btn-retro !p-2">
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             </button>
-
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <button onClick={onClose} className="btn-retro !p-2">
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Game Info */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 pt-10 sm:pt-12">
-            {/* Bet Amount / Total */}
-            <div className="bg-white/5 rounded-lg p-2 sm:p-3 md:p-4 border border-white/10">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 mb-0.5 sm:mb-1">
-                <Coins className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="text-xs sm:text-sm">
-                  {playerTwo ? "Total Pot" : "Bet Amount"}
-                </span>
-              </div>
-              <p className="text-white font-semibold text-sm sm:text-base md:text-lg">
-                {totalPot.toFixed(6)} STX
-              </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8 pt-12">
+            <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center">
+              <p className="text-[8px] text-gray-500 mb-2 uppercase">POT</p>
+              <p className="text-orange-500 text-xs sm:text-sm">{totalPot.toFixed(2)} STX</p>
             </div>
-            {/* Players */}
-            <div className="bg-white/5 rounded-lg p-2 sm:p-3 md:p-4 border border-white/10">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 mb-0.5 sm:mb-1">
-                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="text-xs sm:text-sm">Players</span>
-              </div>
-              <p className="text-white font-semibold text-sm sm:text-base">
-                {playerTwo ? "2/2" : "1/2"}
-              </p>
+            <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center">
+              <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYERS</p>
+              <p className="text-white text-xs sm:text-sm">{playerTwo ? "2/2" : "1/2"}</p>
             </div>
-            {/* Time Remaining */}
-            <div className="bg-white/5 rounded-lg p-2 sm:p-3 md:p-4 border border-white/10 col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 mb-0.5 sm:mb-1">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="text-xs sm:text-sm">Time Remaining</span>
-              </div>
-              <p className={`font-semibold text-sm sm:text-base ${
-                (timeRemaining || 0) < 3600 && (timeRemaining || 0) > 0 ? "text-red-400" : "text-white"
-              }`}>
+            <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center col-span-2 sm:col-span-1">
+              <p className="text-[8px] text-gray-500 mb-2 uppercase">TIME</p>
+              <p className={`text-xs sm:text-sm ${ (timeRemaining || 0) < 3600 && (timeRemaining || 0) > 0 ? "text-red-500" : "text-white"}`}>
                 {gameStatus === "active" ? formatTimeRemaining(timeRemaining || 0) : "--:--"}
               </p>
             </div>
           </div>
 
-          {/* Player Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-            <div className={`p-2 sm:p-3 md:p-4 rounded-lg border ${isPlayer1 ? "bg-white/10 border-white/30" : "bg-white/5 border-white/10"}`}>
-              <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Player 1 (X)</p>
-              <p className="text-blue-400 font-mono text-xs sm:text-sm truncate">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div className={`border-4 p-4 font-pixel ${isPlayer1 ? "border-orange-500 bg-orange-500/5" : "border-white/10 bg-white/5"}`}>
+              <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYER 1 (X)</p>
+              <p className="text-blue-400 text-[10px] truncate">
                 {playerOne.slice(0, 6)}...{playerOne.slice(-4)}
-                {getPlayerUsername(playerOne) && (
-                  <span className="text-blue-300 ml-1">({getPlayerUsername(playerOne)})</span>
-                )}
               </p>
-              {isPlayer1 && <span className="text-[10px] sm:text-xs text-green-400 mt-0.5 sm:mt-1 block">You</span>}
+              {isPlayer1 && <span className="text-[8px] text-green-400 mt-2 block">YOU</span>}
             </div>
             {playerTwo ? (
-              <div className={`p-2 sm:p-3 md:p-4 rounded-lg border ${isPlayer2 ? "bg-white/10 border-white/30" : "bg-white/5 border-white/10"}`}>
-                <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Player 2 (O)</p>
-                <p className="text-orange-400 font-mono text-xs sm:text-sm truncate">
+              <div className={`border-4 p-4 font-pixel ${isPlayer2 ? "border-orange-500 bg-orange-500/5" : "border-white/10 bg-white/5"}`}>
+                <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYER 2 (O)</p>
+                <p className="text-orange-400 text-[10px] truncate">
                   {playerTwo.slice(0, 6)}...{playerTwo.slice(-4)}
-                  {getPlayerUsername(playerTwo) && (
-                    <span className="text-orange-300 ml-1">({getPlayerUsername(playerTwo)})</span>
-                  )}
                 </p>
-                {isPlayer2 && <span className="text-[10px] sm:text-xs text-green-400 mt-0.5 sm:mt-1 block">You</span>}
+                {isPlayer2 && <span className="text-[8px] text-green-400 mt-2 block">YOU</span>}
               </div>
             ) : (
-              <div className="p-2 sm:p-3 md:p-4 rounded-lg border border-white/10 bg-white/5">
-                <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Player 2 (O)</p>
-                <p className="text-gray-500 text-xs sm:text-sm">Waiting for player...</p>
+              <div className="border-4 border-white/5 bg-white/5 p-4 font-pixel text-center flex items-center justify-center">
+                <p className="text-[8px] text-gray-600 uppercase">Waiting...</p>
               </div>
             )}
           </div>
 
-          {/* Game Status Messages */}
           {gameStatus === "finished" && (!winner || winner === address) && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-              <p className="text-blue-400 font-semibold text-sm sm:text-base">
-                🤝 Game Ended in a Draw
-              </p>
-              <p className="text-blue-300/80 text-xs sm:text-sm mt-1">
-                No winner - your bet has been automatically refunded.
-              </p>
+            <div className="mb-8 p-4 border-4 border-blue-500 bg-blue-500/10 text-center font-pixel">
+              <p className="text-blue-400 text-sm uppercase mb-2">DRAW!</p>
+              <p className="text-blue-300 text-[8px]">Bets refunded.</p>
             </div>
           )}
 
-          {gameStatus === "finished" && winner && winner !== address && (
-            <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg border ${
-              winner.toLowerCase() === address?.toLowerCase()
-                ? "bg-green-500/20 border-green-500/30"
-                : "bg-red-500/20 border-red-500/30"
+          {gameStatus === "finished" && winner && (
+            <div className={`mb-8 p-4 border-4 text-center font-pixel ${
+              winner.toLowerCase() === address?.toLowerCase() ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10"
             }`}>
-              <div className="flex items-center justify-between gap-3 sm:gap-4">
-                <p className={`font-semibold text-sm sm:text-base ${
-                  winner.toLowerCase() === address?.toLowerCase()
-                    ? "text-green-400"
-                    : "text-red-400"
-                }`}>
-                  {winner.toLowerCase() === address?.toLowerCase()
-                    ? "🎉 You Won!"
-                    : "Game Over - You Lost"}
-                </p>
-                {winner.toLowerCase() === address?.toLowerCase() && (
-                  <button
-                    onClick={handleClaimReward}
-                    disabled={isPending || isRewardClaimed}
-                    className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all text-xs sm:text-sm disabled:opacity-50"
-                  >
-                    <Trophy className="w-4 h-4" />
-                    {isRewardClaimed ? "Reward Claimed" : "Claim Reward"}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {gameStatus === "waiting" && canJoin && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-              <p className="text-blue-400 mb-1.5 sm:mb-2 text-xs sm:text-sm md:text-base">Select your first move to join this game</p>
-              {selectedJoinMove !== null && (
-                <p className="text-xs sm:text-sm text-blue-300">Selected cell: {selectedJoinMove}</p>
+              <p className={`text-sm uppercase mb-4 ${ winner.toLowerCase() === address?.toLowerCase() ? "text-green-400" : "text-red-400" }`}>
+                {winner.toLowerCase() === address?.toLowerCase() ? "VICTORY!" : "DEFEAT"}
+              </p>
+              {winner.toLowerCase() === address?.toLowerCase() && (
+                <button onClick={handleClaimReward} disabled={isPending || isRewardClaimed} className="btn-retro !py-2 !text-[10px]">
+                  {isRewardClaimed ? "CLAIMED" : "CLAIM REWARD"}
+                </button>
               )}
             </div>
           )}
 
+          {gameStatus === "waiting" && canJoin && (
+            <div className="mb-8 p-4 border-4 border-orange-500 bg-orange-500/10 text-center font-pixel">
+              <p className="text-orange-500 text-[10px] uppercase">Select a cell to join</p>
+            </div>
+          )}
+
           {gameStatus === "active" && isPlayerTurn && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-              <p className="text-yellow-400 font-semibold text-xs sm:text-sm md:text-base">Your turn! Make a move.</p>
+            <div className="mb-8 p-4 border-4 border-green-500 bg-green-500/10 text-center font-pixel animate-pulse">
+              <p className="text-green-500 text-[10px] uppercase">YOUR TURN!</p>
             </div>
           )}
 
-          {gameStatus === "active" && !isPlayerTurn && playerTwo && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-500/20 border border-gray-500/30 rounded-lg">
-              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Waiting for opponent's move...</p>
-            </div>
-          )}
-
-          {/* Game Board */}
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-8 flex justify-center">
             <GameBoard
               board={board}
               onCellClick={handleCellClick}
               disabled={gameStatus === "finished" || (gameStatus === "active" && !isPlayerTurn) || (gameStatus === "waiting" && !canJoin)}
               winner={winner ? (isPlayer1 ? "X" : "O") : null}
-              winningCells={[]} // TODO: Implement winning cells calculation
+              winningCells={[]} 
               boardSize={boardSize}
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div className="flex justify-center">
             {gameStatus === "active" && canForfeit && (
-              <button
-                onClick={() => setShowForfeitModal(true)}
-                className="px-4 sm:px-6 py-1.5 sm:py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg border border-red-500/30 transition-all text-xs sm:text-sm md:text-base"
-              >
-                Forfeit Game (Opponent Timed Out)
+              <button onClick={() => setShowForfeitModal(true)} className="btn-retro !border-red-500 !text-red-500 !shadow-red-500">
+                FORFEIT (TIMEOUT)
               </button>
             )}
           </div>
-
-
         </div>
       </div>
 
