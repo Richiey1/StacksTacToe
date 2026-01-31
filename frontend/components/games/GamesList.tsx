@@ -7,6 +7,7 @@ import { useStacks } from "@/contexts/StacksProvider";
 import { toast } from "react-hot-toast";
 import { CountdownTimer } from "./CountdownTimer";
 import { PlayerDisplay } from "./PlayerDisplay";
+import { formatStx } from "@/lib/gameUtils";
 
 export interface Game {
   id: string;
@@ -128,7 +129,7 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                         navigator.clipboard.writeText(link);
                         toast.success("Game link copied!");
                       }}
-                      className="btn-retro !px-2 !py-1 !text-[8px]"
+                      className="btn-retro !px-2 !py-1 !text-[10px]"
                     >
                       Share
                     </button>
@@ -143,7 +144,7 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                           router.push(`/play/${game.gameId.toString()}`);
                         }
                       }}
-                      className="btn-retro !px-2 !py-1 !text-[8px]"
+                      className="btn-retro !px-2 !py-1 !text-[10px]"
                     >
                       Join
                     </button>
@@ -171,17 +172,17 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                     isDraw={isDraw}
                   />
                 ) : (
-                  <div className="flex items-center gap-3 text-gray-500 font-pixel text-[10px]">
+                  <div className="flex items-center gap-3 text-gray-400 font-pixel text-xs">
                     <Clock className="w-4 h-4" />
                     <span>Waiting...</span>
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 md:contents font-pixel text-[10px]">
+                <div className="grid grid-cols-2 gap-4 md:contents font-pixel text-xs text-gray-400">
                   <div className="flex items-center gap-3 text-white">
                     <Coins className="w-4 h-4 text-orange-500" />
                     <span>
-                      {(Number(game.betAmount) / 1_000_000).toFixed(2)} STX
+                      {formatStx(game.betAmount)} STX
                     </span>
                   </div>
 
@@ -202,13 +203,13 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
                           warningThreshold={3600}
                         />
                         {game.canForfeit && game.currentPlayer?.toLowerCase() !== address?.toLowerCase() && (
-                          <span className="px-2 py-1 border-2 border-red-500 text-red-500 font-pixel text-[8px] uppercase font-bold animate-pulse">
+                          <span className="px-2 py-1 border-2 border-red-500 text-red-500 font-pixel text-[10px] uppercase font-bold animate-pulse">
                             Can Forfeit
                           </span>
                         )}
                       </>
                     ) : (
-                      <div className="flex items-center gap-2 text-gray-500 font-pixel text-[10px]">
+                      <div className="flex items-center gap-2 text-gray-400 font-pixel text-xs">
                         <Clock className="w-4 h-4" />
                         <span>Loading...</span>
                       </div>
@@ -219,7 +220,7 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
 
               {game.status === "active" && (
                 <div className="mt-4 p-3 border-2 border-orange-500/30 bg-orange-500/5">
-                  <p className="text-[8px] text-orange-400 font-pixel leading-relaxed">
+                  <p className="text-[10px] text-orange-400 font-pixel leading-relaxed">
                     <AlertTriangle className="w-3 h-3 inline mr-2" />
                     Note: 24h move timeout applies. Claim reward if opponent stalls.
                   </p>

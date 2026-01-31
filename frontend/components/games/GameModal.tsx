@@ -17,7 +17,8 @@ import {
 import { 
   canForfeitGame, 
   isGameActive, 
-  formatTimeRemaining 
+  formatTimeRemaining,
+  formatStx
 } from "@/lib/gameUtils";
 import { Loader2, Coins, Users, AlertCircle, Clock, X, Trophy, Share2, RefreshCw } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -261,7 +262,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
       <div className="fixed inset-0 bg-black/80 z-50 transition-opacity" onClick={onClose} />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-        <div ref={gameRef} className="nes-container max-w-4xl w-full my-auto relative !p-6 sm:!p-10">
+        <div ref={gameRef} className="nes-container max-w-2xl w-full my-auto relative !p-6 sm:!p-10">
           <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
             <button onClick={handleRefresh} disabled={isRefreshing} className="btn-retro !p-2">
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -273,15 +274,15 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8 pt-12">
             <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center">
-              <p className="text-[8px] text-gray-500 mb-2 uppercase">POT</p>
-              <p className="text-orange-500 text-xs sm:text-sm">{totalPot.toFixed(2)} STX</p>
+              <p className="text-[10px] text-gray-400 mb-2 uppercase">POT</p>
+              <p className="text-orange-500 text-xs sm:text-sm">{formatStx(totalPot * 1_000_000)} STX</p>
             </div>
             <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center">
-              <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYERS</p>
+              <p className="text-[10px] text-gray-400 mb-2 uppercase">PLAYERS</p>
               <p className="text-white text-xs sm:text-sm">{playerTwo ? "2/2" : "1/2"}</p>
             </div>
             <div className="border-4 border-white/10 bg-white/5 p-4 font-pixel text-center col-span-2 sm:col-span-1">
-              <p className="text-[8px] text-gray-500 mb-2 uppercase">TIME</p>
+              <p className="text-[10px] text-gray-400 mb-2 uppercase">TIME</p>
               <p className={`text-xs sm:text-sm ${ (timeRemaining || 0) < 3600 && (timeRemaining || 0) > 0 ? "text-red-500" : "text-white"}`}>
                 {gameStatus === "active" ? formatTimeRemaining(timeRemaining || 0) : "--:--"}
               </p>
@@ -290,23 +291,23 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div className={`border-4 p-4 font-pixel ${isPlayer1 ? "border-orange-500 bg-orange-500/5" : "border-white/10 bg-white/5"}`}>
-              <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYER 1 (X)</p>
+              <p className="text-[10px] text-gray-400 mb-2 uppercase">PLAYER 1 (X)</p>
               <p className="text-blue-400 text-[10px] truncate">
                 {playerOne.slice(0, 6)}...{playerOne.slice(-4)}
               </p>
-              {isPlayer1 && <span className="text-[8px] text-green-400 mt-2 block">YOU</span>}
+              {isPlayer1 && <span className="text-[10px] text-green-400 mt-2 block">YOU</span>}
             </div>
             {playerTwo ? (
               <div className={`border-4 p-4 font-pixel ${isPlayer2 ? "border-orange-500 bg-orange-500/5" : "border-white/10 bg-white/5"}`}>
-                <p className="text-[8px] text-gray-500 mb-2 uppercase">PLAYER 2 (O)</p>
+                <p className="text-[10px] text-gray-400 mb-2 uppercase">PLAYER 2 (O)</p>
                 <p className="text-orange-400 text-[10px] truncate">
                   {playerTwo.slice(0, 6)}...{playerTwo.slice(-4)}
                 </p>
-                {isPlayer2 && <span className="text-[8px] text-green-400 mt-2 block">YOU</span>}
+                {isPlayer2 && <span className="text-[10px] text-green-400 mt-2 block">YOU</span>}
               </div>
             ) : (
               <div className="border-4 border-white/5 bg-white/5 p-4 font-pixel text-center flex items-center justify-center">
-                <p className="text-[8px] text-gray-600 uppercase">Waiting...</p>
+                <p className="text-[10px] text-gray-500 uppercase">Waiting...</p>
               </div>
             )}
           </div>

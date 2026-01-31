@@ -7,7 +7,7 @@ import { TabNavigation } from "@/components/common/TabNavigation";
 import { GamesContent } from "@/components/common/GamesContent";
 import { CreateGameContent } from "@/components/common/CreateGameContent";
 import { LeaderboardContent } from "@/components/common/LeaderboardContent";
-import { ChallengesContent } from "@/components/common/ChallengesContent";
+import { PlayerProfileContent } from "@/components/common/PlayerProfileContent";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { TabType } from "@/components/common/TabNavigation";
 import { useStacks } from "@/contexts/StacksProvider";
@@ -74,7 +74,7 @@ function HomeContent() {
                   {activeTab === "games" && <GamesContent onTabChange={setActiveTab} initialGameId={initialGameId} />}
                   {activeTab === "create" && <CreateGameContent />}
                   {activeTab === "leaderboard" && <LeaderboardContent />}
-                  {activeTab === "challenges" && <ChallengesContent />}
+                  {activeTab === "challenges" && <PlayerProfileContent />}
                   {activeTab === "admin" && isAdmin && <AdminPanel />}
                 </>
               )}

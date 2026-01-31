@@ -117,6 +117,20 @@ export function isPlayerTurn(game: Game, playerAddress: string): boolean {
 }
 
 /**
+ * Format micro-STX to STX with appropriate precision
+ * @param microStx - Amount in micro-STX (as number or bigint)
+ * @param decimals - Max decimals to show (default 6)
+ * @returns Formatted STX string
+ */
+export function formatStx(microStx: number | bigint, decimals = 6): string {
+  const stx = Number(microStx) / 1_000_000;
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: decimals,
+  }).format(stx);
+}
+
+/**
  * Truncate Stacks address for display
  * @param address - Full Stacks address
  * @param startChars - Number of characters to show at start (default 6)

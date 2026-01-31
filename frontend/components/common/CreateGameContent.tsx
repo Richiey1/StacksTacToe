@@ -7,6 +7,7 @@ import { useStacksTacToe } from "@/hooks/useStacksTacToe";
 import { Loader2, Coins, AlertCircle, Wallet } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { STACKS_API_URL } from "@/lib/stacksConfig";
+import { formatStx } from "@/lib/gameUtils";
 
 export function CreateGameContent() {
   const [betAmount, setBetAmount] = useState("");
@@ -79,13 +80,13 @@ export function CreateGameContent() {
       <div className="max-w-xl w-full">
         <div className="p-4 sm:p-6">
           <div className="text-center mb-12 font-pixel text-shadow">
-            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-4 uppercase tracking-widest">Create Battle</h1>
-            <p className="text-gray-400 text-xs sm:text-sm uppercase tracking-tight">Set stakes and strike first</p>
+            <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 uppercase tracking-widest">Create Battle</h1>
+            <p className="text-gray-300 text-sm sm:text-base uppercase tracking-tight">Set stakes and strike first</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-12">
             <div>
-              <label className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
+              <label className="block text-sm sm:text-base font-pixel text-gray-300 mb-5 uppercase tracking-wider">
                 Grid Size
               </label>
               <div className="grid grid-cols-2 gap-4">
@@ -101,7 +102,7 @@ export function CreateGameContent() {
                       px-4 py-5 border-4 transition-all font-pixel uppercase text-xs
                       ${boardSize === size
                         ? "border-orange-500 bg-orange-500/10 text-white shadow-[2px_2px_0px_0px_#fff]"
-                        : "border-white/10 bg-white/5 text-gray-500 hover:border-white/20"
+                        : "border-white/10 bg-white/5 text-gray-400 hover:border-white/20"
                       }
                     `}
                   >
@@ -112,7 +113,7 @@ export function CreateGameContent() {
             </div>
 
             <div>
-              <label htmlFor="betAmount" className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
+              <label htmlFor="betAmount" className="block text-sm sm:text-base font-pixel text-gray-300 mb-5 uppercase tracking-wider">
                 Stakes (STX)
               </label>
               <div className="relative">
@@ -128,14 +129,14 @@ export function CreateGameContent() {
                 />
               </div>
               
-              <div className="mt-4 flex items-center gap-3 font-pixel text-[10px] text-gray-400 uppercase tracking-tight">
+              <div className="mt-4 flex items-center gap-3 font-pixel text-xs text-gray-300 uppercase tracking-tight">
                 <Wallet className="w-4 h-4 text-orange-500" />
-                {loadingBalance ? "..." : balance !== null ? `Balance: ${balance.toFixed(2)} STX` : "?"}
+                {loadingBalance ? "..." : balance !== null ? `Balance: ${formatStx(balance * 1_000_000)} STX` : "?"}
               </div>
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-pixel text-gray-400 mb-5 uppercase tracking-wider">
+              <label className="block text-sm sm:text-base font-pixel text-gray-300 mb-5 uppercase tracking-wider">
                 Strike First
               </label>
               <div className={`grid gap-3 p-6 border-4 border-white/5 bg-white/5 ${boardSize === 3 ? 'grid-cols-3' : 'grid-cols-5'}`}>
