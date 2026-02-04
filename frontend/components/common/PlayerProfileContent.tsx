@@ -17,16 +17,13 @@ export function PlayerProfileContent() {
   );
 
   const wins = Number(playerStats?.wins || 0);
-  const losses = Number(playerStats?.losses || 0);
-  const draws = Number(playerStats?.draws || 0);
-  const totalGames = wins + losses + draws;
+  // Calculate battles from game history to be more accurate
+  const totalGames = userGames.length;
+  const defeats = userGames.filter(game => 
+    game.status !== 0 && game.winner && game.winner.toLowerCase() !== address?.toLowerCase()
+  ).length;
+  
   const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : "0.0";
-
-  // Filter user's recent games
-  const userGames = (gamesData || []).filter(
-    game => game.playerOne.toLowerCase() === address?.toLowerCase() || 
-            game.playerTwo?.toLowerCase() === address?.toLowerCase()
-  );
 
   if (!address) {
     return (
@@ -63,7 +60,7 @@ export function PlayerProfileContent() {
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">DEFEATS</p>
-          <p className="text-2xl font-bold text-red-400">{losses}</p>
+          <p className="text-2xl font-bold text-red-400">{defeats}</p>
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">WIN RATIO</p>
