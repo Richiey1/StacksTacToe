@@ -9,6 +9,9 @@
 ;; Contract owner
 (define-constant CONTRACT_OWNER tx-sender)
 
+;; Contract principal
+(define-constant CONTRACT_PRINCIPAL (as-contract tx-sender))
+
 ;; Game parameters
 (define-constant DEFAULT_MOVE_TIMEOUT u144) ;; ~24 hours in blocks (assuming 10 min blocks)
 (define-constant MAX_TIMEOUT u1008) ;; ~7 days in blocks
@@ -40,6 +43,7 @@
 (define-constant ERR_TIMEOUT (err u108))
 (define-constant ERR_UNAUTHORIZED (err u109))
 (define-constant ERR_SELF_PLAY (err u110))
+(define-constant ERR_INVALID_ADDR (err u112))
 (define-constant ERR_NOT_ADMIN (err u116))
 (define-constant ERR_INVALID_TIMEOUT (err u117))
 (define-constant ERR_INVALID_FEE (err u118))
@@ -139,6 +143,7 @@
 (define-public (add-admin (admin principal))
     (begin
         (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (asserts! (not (is-eq admin CONTRACT_PRINCIPAL)) ERR_INVALID_ADDR)
         (ok (map-set admins admin true))
     )
 )
@@ -146,6 +151,7 @@
 (define-public (remove-admin (admin principal))
     (begin
         (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+        (asserts! (not (is-eq admin CONTRACT_PRINCIPAL)) ERR_INVALID_ADDR)
         (ok (map-set admins admin false))
     )
 )
@@ -169,6 +175,7 @@
 (define-public (set-platform-fee-recipient (recipient principal))
     (begin
         (asserts! (is-admin tx-sender) ERR_NOT_ADMIN)
+        (asserts! (not (is-eq recipient CONTRACT_PRINCIPAL)) ERR_INVALID_ADDR)
         (ok (var-set platform-fee-recipient recipient))
     )
 )
@@ -203,7 +210,7 @@
         (asserts! (< move-index max-cells) ERR_INVALID_MOVE)
         
         ;; Handle STX payment
-        (try! (stx-transfer? bet-amount tx-sender (as-contract tx-sender)))
+        (try! (stx-transfer? bet-amount tx-sender CONTRACT_PRINCIPAL))
         
         ;; Create game
         (map-set games game-id {
@@ -243,7 +250,7 @@
         (asserts! (is-eq cell-value MARK_EMPTY) ERR_CELL_OCCUPIED)
         
         ;; Handle STX payment
-        (try! (stx-transfer? (get bet-amount game) tx-sender (as-contract tx-sender)))
+        (try! (stx-transfer? (get bet-amount game) tx-sender CONTRACT_PRINCIPAL))
         
         ;; Update game
         (map-set games game-id (merge game {
