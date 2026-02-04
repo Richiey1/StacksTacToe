@@ -4,7 +4,6 @@ import { openContractCall } from '@stacks/connect';
 import {
   uintCV,
   principalCV,
-  stringAsciiCV,
   PostConditionMode,
 } from '@stacks/transactions';
 import { useCallback } from 'react';
@@ -13,27 +12,6 @@ import { useInvalidateGameQueries } from './useGameData';
 export function useStacksTacToe() {
   const { address } = useStacks();
   const { invalidatePlayer, invalidateGameList, invalidateGame, invalidateLeaderboard } = useInvalidateGameQueries();
-
-  const registerPlayer = useCallback(async (username: string) => {
-    if (!address) return;
-    
-    await openContractCall({
-      network: NETWORK,
-      contractAddress: CONTRACT_ADDRESS,
-      contractName: CONTRACT_NAME,
-      functionName: 'register-player',
-      functionArgs: [stringAsciiCV(username)],
-      postConditionMode: PostConditionMode.Deny,
-      onFinish: (data) => {
-        console.log('Transaction:', data.txId);
-        // Invalidate player data and leaderboard after registration
-        if (address) {
-          invalidatePlayer(address);
-          invalidateLeaderboard();
-        }
-      },
-    });
-  }, [address, invalidatePlayer, invalidateLeaderboard]);
 
   const createGame = useCallback(async (betAmount: number, moveIndex: number, boardSize: number) => {
     if (!address) return;
@@ -209,7 +187,6 @@ export function useStacksTacToe() {
   }, [address]);
 
   return {
-    registerPlayer,
     createGame,
     joinGame,
     playMove,
