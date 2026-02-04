@@ -91,8 +91,8 @@ export function CreateGameContent() {
               </label>
               <div className="grid grid-cols-2 gap-4">
                 {([
-                  { size: 3, label: "3x3" },
-                  { size: 5, label: "5x5" }
+                  { size: 3, label: "3x3 (Classic)" },
+                  { size: 5, label: "5x5 (Advance)" }
                 ] as const).map(({ size, label }) => (
                   <button
                     key={size}
