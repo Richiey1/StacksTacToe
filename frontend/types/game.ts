@@ -17,7 +17,7 @@ export interface Player {
   losses: number;
   draws: number;
   totalGames: number;
-  rating: number;
+  totalEarned: number;
   registered: boolean;
 }
 
@@ -27,5 +27,5 @@ export interface LeaderboardEntry {
   wins: number;
   losses: number;
   draws: number;
-  rating: number;
+  totalEarned: number;
 }
