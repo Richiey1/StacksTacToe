@@ -17,11 +17,6 @@ export function usePlayerData(address?: string | null) {
   return useQuery({
     queryKey: ['player', address],
     queryFn: async (): Promise<Player | null> => {
-      // Contract doesn't have get-player function yet
-      // Return null until the contract is updated
-      return null;
-      
-      /* Commented out until contract has get-player function
       if (!address) return null;
 
       try {
@@ -29,33 +24,43 @@ export function usePlayerData(address?: string | null) {
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
           contractName: CONTRACT_NAME,
-          functionName: 'get-player',
+          functionName: 'get-player-stats',
           functionArgs: [standardPrincipalCV(address)],
-          senderAddress: address,
+          senderAddress: CONTRACT_ADDRESS,
         });
 
         const data = cvToValue(response);
-        if (!data || !data.value) return null;
+        if (!data || !data.value) {
+           return {
+            address,
+            username: "",
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            totalGames: 0,
+            totalEarned: 0,
+            registered: false,
+          };
+        }
 
+        const stats = data.value.value;
         return {
           address,
-          username: data.value.username?.value || "",
-          wins: Number(data.value.wins?.value || 0),
-          losses: Number(data.value.losses?.value || 0),
-          draws: Number(data.value.draws?.value || 0),
-          totalGames: Number(data.value["total-games"]?.value || 0),
-          rating: Number(data.value.rating?.value || 0),
-          registered: Boolean(data.value.registered?.value),
+          username: "",
+          wins: Number(stats.wins?.value || 0),
+          losses: 0, 
+          draws: 0,
+          totalGames: 0,
+          totalEarned: Number(stats["total-earned"]?.value || 0),
+          registered: true,
         };
       } catch (error) {
         console.error('Error fetching player data:', error);
         return null;
       }
-      */
     },
-    enabled: false, // Disabled until contract has get-player function
-    staleTime: 30000, // 30 seconds
-    retry: 1, // Only retry once for missing contract function
+    enabled: !!address,
+    staleTime: 30000,
   });
 }
 
