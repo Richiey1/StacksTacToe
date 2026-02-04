@@ -626,6 +626,21 @@
     (ok (var-get contract-paused))
 )
 
+(define-read-only (get-time-remaining (game-id uint))
+    (let
+        (
+            (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
+            (timeout (var-get move-timeout))
+            (last-move (get last-move-block game))
+            (expiration (+ last-move timeout))
+        )
+        (if (>= stacks-block-height expiration)
+            (ok u0)
+            (ok (- expiration stacks-block-height))
+        )
+    )
+)
+
 (define-read-only (get-player-stats (player principal))
     (ok (default-to { wins: u0, total-earned: u0 } (map-get? player-stats player)))
 )
