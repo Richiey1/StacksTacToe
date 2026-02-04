@@ -12,7 +12,6 @@
 ;; Game parameters
 (define-constant DEFAULT_MOVE_TIMEOUT u144) ;; ~24 hours in blocks (assuming 10 min blocks)
 (define-constant MAX_TIMEOUT u1008) ;; ~7 days in blocks
-(define-constant DEFAULT_BOARD_SIZE u3)
 
 ;; Game status
 (define-constant STATUS_ACTIVE u0)
@@ -36,14 +35,11 @@
 (define-constant ERR_INVALID_MOVE (err u102))
 (define-constant ERR_NOT_TURN (err u103))
 (define-constant ERR_INVALID_BET (err u104))
-(define-constant ERR_BET_MISMATCH (err u105))
 (define-constant ERR_GAME_STARTED (err u106))
 (define-constant ERR_CELL_OCCUPIED (err u107))
 (define-constant ERR_TIMEOUT (err u108))
 (define-constant ERR_UNAUTHORIZED (err u109))
 (define-constant ERR_SELF_PLAY (err u110))
-(define-constant ERR_TRANSFER_FAILED (err u111))
-(define-constant ERR_INVALID_ADDR (err u112))
 (define-constant ERR_NOT_ADMIN (err u116))
 (define-constant ERR_INVALID_TIMEOUT (err u117))
 (define-constant ERR_INVALID_FEE (err u118))
@@ -478,8 +474,6 @@
     (let
         (
             (game (unwrap! (map-get? games game-id) ERR_INVALID_ID))
-            (player-two (unwrap! (get player-two game) ERR_NOT_ACTIVE))
-            (loser (if (is-eq winner (get player-one game)) player-two (get player-one game)))
             (total-pot (* (get bet-amount game) u2))
             (fee-amount (/ (* total-pot (var-get platform-fee-percent)) BASIS_POINTS))
             (winner-payout (- total-pot fee-amount))

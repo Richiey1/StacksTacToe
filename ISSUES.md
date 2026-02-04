@@ -47,9 +47,19 @@ This file tracks the UI/UX and contract development for StacksTacToe.
   - [x] Optimize retro components for touch targets
   - [x] Ensure consistent scaling on mobile
 
+### Issue #6: Win/Draw Logic & Leaderboard Statistics
+- **Status**: ✅ COMPLETED
+- **Description**: Implemented robust on-chain win detection for 5x5 boards and global player statistics.
+- **Tasks**:
+  - [x] Implement 5-in-a-row win condition for 5x5 Advanced board
+  - [x] Fix draw detection logic using on-chain move-count
+  - [x] Implement `player-stats` map for tracking wins and STX earnings
+  - [x] Unlock Leaderboard UI and populate with real on-chain data
+  - [x] Add `get-time-remaining` read-only function for UI countdowns
+
 ## ❌ Pending Issues
 
-### Issue #6: Subgraph Indexing
+### Issue #7: Subgraph Indexing
 - **Status**: ❌ PENDING
 - **Description**: Implement a subgraph to index game events for efficient querying.
 - **Tasks**:
@@ -57,7 +67,7 @@ This file tracks the UI/UX and contract development for StacksTacToe.
   - [ ] Implement mappings.ts
   - [ ] Configure subgraph.yaml
 
-### Issue #7: Mainnet Deployment
+### Issue #8: Mainnet Deployment
 - **Status**: ❌ PENDING
 - **Description**: Deploy finalized contracts and frontend to Mainnet.
 - **Tasks**:
