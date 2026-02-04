@@ -73,24 +73,77 @@ export function useLeaderboard() {
     queryKey: ['leaderboard'],
     queryFn: async (): Promise<LeaderboardEntry[]> => {
       try {
-        const response = await fetchCallReadOnlyFunction({
+        // Step 1: Get latest game ID
+        const latestResponse = await fetchCallReadOnlyFunction({
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
           contractName: CONTRACT_NAME,
-          functionName: 'get-leaderboard',
+          functionName: 'get-latest-game-id',
           functionArgs: [],
           senderAddress: CONTRACT_ADDRESS,
         });
+        const latestData = cvToValue(latestResponse);
+        const latestId = Number(latestData.value || 0);
+
+        // Step 2: Scan last 50 games for unique player addresses
+        const uniquePlayers = new Set<string>();
+        const scanLimit = Math.max(0, latestId - 50);
         
-        const data = cvToValue(response);
-        return data || []; 
+        for (let i = latestId - 1; i >= scanLimit; i--) {
+          const gameResponse = await fetchCallReadOnlyFunction({
+            network: NETWORK,
+            contractAddress: CONTRACT_ADDRESS,
+            contractName: CONTRACT_NAME,
+            functionName: 'get-game',
+            functionArgs: [uintCV(i)],
+            senderAddress: CONTRACT_ADDRESS,
+          });
+          const gameData = cvToValue(gameResponse);
+          if (gameData && gameData.value && gameData.value.value) {
+            const game = gameData.value.value;
+            uniquePlayers.add(game['player-one'].value);
+            if (game['player-two']?.value) {
+              uniquePlayers.add(game['player-two'].value);
+            }
+          }
+        }
+
+        // Step 3: Fetch stats for each unique player
+        const leaderboard: LeaderboardEntry[] = [];
+        for (const playerAddress of Array.from(uniquePlayers)) {
+          const statsResponse = await fetchCallReadOnlyFunction({
+            network: NETWORK,
+            contractAddress: CONTRACT_ADDRESS,
+            contractName: CONTRACT_NAME,
+            functionName: 'get-player-stats',
+            functionArgs: [standardPrincipalCV(playerAddress)],
+            senderAddress: CONTRACT_ADDRESS,
+          });
+          const statsData = cvToValue(statsResponse);
+          if (statsData && statsData.value && statsData.value.value) {
+            const stats = statsData.value.value;
+            leaderboard.push({
+              player: playerAddress,
+              username: "",
+              wins: Number(stats.wins?.value || 0),
+              losses: 0,
+              draws: 0,
+              totalEarned: Number(stats["total-earned"]?.value || 0),
+            });
+          }
+        }
+
+        // Step 4: Sort by wins, then earnings
+        return leaderboard.sort((a, b) => {
+          if (b.wins !== a.wins) return b.wins - a.wins;
+          return b.totalEarned - a.totalEarned;
+        });
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         return [];
       }
     },
-    staleTime: 30000, // 30 seconds
-    // Removed refetchInterval - only refresh manually or after mutations
+    staleTime: 60000,
   });
 }
 
