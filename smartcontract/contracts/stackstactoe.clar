@@ -85,7 +85,8 @@
         is-player-one-turn: bool,
         winner: (optional principal),
         last-move-block: uint,
-        status: uint
+        status: uint,
+        move-count: uint
     }
 )
 
@@ -95,6 +96,15 @@
 ;; Claimable rewards
 (define-map claimable-rewards uint uint)
 (define-map reward-claimed uint bool)
+
+;; Player statistics for leaderboard
+(define-map player-stats
+    principal
+    {
+        wins: uint,
+        total-earned: uint
+    }
+)
 
 ;; ============================================
 ;; Initialization
@@ -111,6 +121,18 @@
     (or 
         (is-eq caller CONTRACT_OWNER)
         (default-to false (map-get? admins caller))
+    )
+)
+
+(define-private (update-player-stats (player principal) (earnings uint))
+    (let
+        (
+            (stats (default-to { wins: u0, total-earned: u0 } (map-get? player-stats player)))
+        )
+        (map-set player-stats player {
+            wins: (+ (get wins stats) u1),
+            total-earned: (+ (get total-earned stats) earnings)
+        })
     )
 )
 
@@ -196,7 +218,8 @@
             is-player-one-turn: false,
             winner: none,
             last-move-block: stacks-block-height,
-            status: STATUS_ACTIVE
+            status: STATUS_ACTIVE,
+            move-count: u1
         })
         
         ;; Set first move
@@ -230,7 +253,8 @@
         (map-set games game-id (merge game {
             player-two: (some tx-sender),
             is-player-one-turn: true,
-            last-move-block: stacks-block-height
+            last-move-block: stacks-block-height,
+            move-count: (+ (get move-count game) u1)
         }))
         
         ;; Set second move
@@ -291,7 +315,8 @@
                     (begin
                         (map-set games game-id (merge game {
                             is-player-one-turn: (not (get is-player-one-turn game)),
-                            last-move-block: stacks-block-height
+                            last-move-block: stacks-block-height,
+                            move-count: (+ (get move-count game) u1)
                         }))
                         (ok true)
                     )
@@ -324,6 +349,25 @@
     )
 )
 
+(define-private (check-five-in-row (game-id uint) (idx1 uint) (idx2 uint) (idx3 uint) (idx4 uint) (idx5 uint))
+    (let
+        (
+            (cell1 (get-cell game-id idx1))
+            (cell2 (get-cell game-id idx2))
+            (cell3 (get-cell game-id idx3))
+            (cell4 (get-cell game-id idx4))
+            (cell5 (get-cell game-id idx5))
+        )
+        (and 
+            (not (is-eq cell1 MARK_EMPTY))
+            (is-eq cell1 cell2)
+            (is-eq cell1 cell3)
+            (is-eq cell1 cell4)
+            (is-eq cell1 cell5)
+        )
+    )
+)
+
 (define-private (check-winner-rows (game-id uint) (board-size uint))
     (if (is-eq board-size u3)
         ;; 3x3 board
@@ -335,21 +379,16 @@
             )
         )
         (if (is-eq board-size u5)
-            ;; 5x5 board - check all possible 3-in-a-row combinations
+            ;; 5x5 board - check 5-in-a-row rows
             (or
-                ;; Row 0
-                (or (check-three-in-row game-id u0 u1 u2) (or (check-three-in-row game-id u1 u2 u3) (check-three-in-row game-id u2 u3 u4)))
+                (check-five-in-row game-id u0 u1 u2 u3 u4)
                 (or
-                    ;; Row 1
-                    (or (check-three-in-row game-id u5 u6 u7) (or (check-three-in-row game-id u6 u7 u8) (check-three-in-row game-id u7 u8 u9)))
+                    (check-five-in-row game-id u5 u6 u7 u8 u9)
                     (or
-                        ;; Row 2
-                        (or (check-three-in-row game-id u10 u11 u12) (or (check-three-in-row game-id u11 u12 u13) (check-three-in-row game-id u12 u13 u14)))
+                        (check-five-in-row game-id u10 u11 u12 u13 u14)
                         (or
-                            ;; Row 3
-                            (or (check-three-in-row game-id u15 u16 u17) (or (check-three-in-row game-id u16 u17 u18) (check-three-in-row game-id u17 u18 u19)))
-                            ;; Row 4
-                            (or (check-three-in-row game-id u20 u21 u22) (or (check-three-in-row game-id u21 u22 u23) (check-three-in-row game-id u22 u23 u24)))
+                            (check-five-in-row game-id u15 u16 u17 u18 u19)
+                            (check-five-in-row game-id u20 u21 u22 u23 u24)
                         )
                     )
                 )
@@ -370,21 +409,16 @@
             )
         )
         (if (is-eq board-size u5)
-            ;; 5x5 board - check all possible 3-in-a-column combinations
+            ;; 5x5 board - check 5-in-a-row columns
             (or
-                ;; Col 0
-                (or (check-three-in-row game-id u0 u5 u10) (or (check-three-in-row game-id u5 u10 u15) (check-three-in-row game-id u10 u15 u20)))
+                (check-five-in-row game-id u0 u5 u10 u15 u20)
                 (or
-                    ;; Col 1
-                    (or (check-three-in-row game-id u1 u6 u11) (or (check-three-in-row game-id u6 u11 u16) (check-three-in-row game-id u11 u16 u21)))
+                    (check-five-in-row game-id u1 u6 u11 u16 u21)
                     (or
-                        ;; Col 2
-                        (or (check-three-in-row game-id u2 u7 u12) (or (check-three-in-row game-id u7 u12 u17) (check-three-in-row game-id u12 u17 u22)))
+                        (check-five-in-row game-id u2 u7 u12 u17 u22)
                         (or
-                            ;; Col 3
-                            (or (check-three-in-row game-id u3 u8 u13) (or (check-three-in-row game-id u8 u13 u18) (check-three-in-row game-id u13 u18 u23)))
-                            ;; Col 4
-                            (or (check-three-in-row game-id u4 u9 u14) (or (check-three-in-row game-id u9 u14 u19) (check-three-in-row game-id u14 u19 u24)))
+                            (check-five-in-row game-id u3 u8 u13 u18 u23)
+                            (check-five-in-row game-id u4 u9 u14 u19 u24)
                         )
                     )
                 )
@@ -402,12 +436,10 @@
             (check-three-in-row game-id u2 u4 u6)  ;; Top-right to bottom-left
         )
         (if (is-eq board-size u5)
-            ;; 5x5 board - check all possible 3-in-a-diagonal combinations
+            ;; 5x5 board - check 5-in-a-row diagonals
             (or
-                ;; Main diagonals (top-left to bottom-right)
-                (or (check-three-in-row game-id u0 u6 u12) (or (check-three-in-row game-id u1 u7 u13) (or (check-three-in-row game-id u5 u11 u17) (or (check-three-in-row game-id u6 u12 u18) (or (check-three-in-row game-id u7 u13 u19) (or (check-three-in-row game-id u10 u16 u22) (or (check-three-in-row game-id u11 u17 u23) (check-three-in-row game-id u12 u18 u24))))))))
-                ;; Anti-diagonals (top-right to bottom-left)
-                (or (check-three-in-row game-id u2 u6 u10) (or (check-three-in-row game-id u3 u7 u11) (or (check-three-in-row game-id u4 u8 u12) (or (check-three-in-row game-id u8 u12 u16) (or (check-three-in-row game-id u9 u13 u17) (or (check-three-in-row game-id u13 u17 u21) (or (check-three-in-row game-id u14 u18 u22) (check-three-in-row game-id u18 u22 u23))))))))
+                (check-five-in-row game-id u0 u6 u12 u18 u24) ;; Top-left to bottom-right
+                (check-five-in-row game-id u4 u8 u12 u16 u20) ;; Top-right to bottom-left
             )
             false
         )
@@ -417,37 +449,10 @@
 (define-private (check-board-full (game-id uint) (board-size uint))
     (let
         (
+            (game (unwrap! (map-get? games game-id) false))
             (max-cells (* board-size board-size))
         )
-        (if (is-eq board-size u3)
-            ;; Check all 9 cells for 3x3
-            (and
-                (not (is-eq (get-cell game-id u0) MARK_EMPTY))
-                (and
-                    (not (is-eq (get-cell game-id u1) MARK_EMPTY))
-                    (and
-                        (not (is-eq (get-cell game-id u2) MARK_EMPTY))
-                        (and
-                            (not (is-eq (get-cell game-id u3) MARK_EMPTY))
-                            (and
-                                (not (is-eq (get-cell game-id u4) MARK_EMPTY))
-                                (and
-                                    (not (is-eq (get-cell game-id u5) MARK_EMPTY))
-                                    (and
-                                        (not (is-eq (get-cell game-id u6) MARK_EMPTY))
-                                        (and
-                                            (not (is-eq (get-cell game-id u7) MARK_EMPTY))
-                                            (not (is-eq (get-cell game-id u8) MARK_EMPTY))
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-            false
-        )
+        (>= (get move-count game) max-cells)
     )
 )
 
@@ -487,6 +492,9 @@
         
         ;; Store claimable reward
         (map-set claimable-rewards game-id winner-payout)
+        
+        ;; Update player stats
+        (update-player-stats winner winner-payout)
         
         ;; Transfer platform fee if any
         (if (> fee-amount u0)
@@ -568,6 +576,9 @@
             ;; Store claimable reward
             (map-set claimable-rewards game-id winner-payout)
             
+            ;; Update player stats
+            (update-player-stats winner winner-payout)
+            
             ;; Transfer platform fee if any
             (if (> fee-amount u0)
                 (try! (transfer-payout (var-get platform-fee-recipient) fee-amount))
@@ -613,4 +624,8 @@
 
 (define-read-only (is-contract-paused)
     (ok (var-get contract-paused))
+)
+
+(define-read-only (get-player-stats (player principal))
+    (ok (default-to { wins: u0, total-earned: u0 } (map-get? player-stats player)))
 )
