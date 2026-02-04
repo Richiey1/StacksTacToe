@@ -23,10 +23,10 @@ StacksTacToe is a **competitive PvP betting game** that brings the classic Tic-T
 ## Deployed Contract
 
 **Mainnet Contract:**
-- **Address**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha`
+- **Address**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-gammar`
 - **Network**: Stacks Mainnet
 - **Clarity Version**: 3
-- **Explorer**: [View on Explorer](https://explorer.hiro.so/txid/SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha?chain=mainnet)
+- **Explorer**: [View on Explorer](https://explorer.hiro.so/txid/SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-gammar?chain=mainnet)
 
 ## Features (Coming Soon)
 
