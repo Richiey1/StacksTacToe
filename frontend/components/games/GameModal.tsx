@@ -312,10 +312,10 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
             )}
           </div>
 
-          {gameStatus === "finished" && (!winner || winner === address) && (
+          {gameStatus === "finished" && !winner && (
             <div className="mb-8 p-4 border-4 border-blue-500 bg-blue-500/10 text-center font-pixel">
-              <p className="text-blue-400 text-sm uppercase mb-2">DRAW!</p>
-              <p className="text-blue-300 text-[8px]">Bets refunded.</p>
+              <p className="text-blue-400 text-sm uppercase mb-2">GAME OVER!</p>
+              <p className="text-blue-300 text-[8px]">IT'S A DRAW.</p>
             </div>
           )}
 
@@ -326,9 +326,12 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
               <p className={`text-sm uppercase mb-4 ${ winner.toLowerCase() === address?.toLowerCase() ? "text-green-400" : "text-red-400" }`}>
                 {winner.toLowerCase() === address?.toLowerCase() ? "VICTORY!" : "DEFEAT"}
               </p>
+              <p className="text-[8px] text-gray-400 mb-4">
+                WINNER: {winner === address ? "YOU" : (winner.slice(0, 8) + "..." + winner.slice(-6))}
+              </p>
               {winner.toLowerCase() === address?.toLowerCase() && (
                 <button onClick={handleClaimReward} disabled={isPending || isRewardClaimed} className="btn-retro !py-2 !text-[10px]">
-                  {isRewardClaimed ? "CLAIMED" : "CLAIM REWARD"}
+                  {isRewardClaimed ? "REWARD CLAIMED" : "CLAIM REWARD"}
                 </button>
               )}
             </div>
