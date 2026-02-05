@@ -9,9 +9,9 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: stackstactoe-alpha
+            contract-name: stackstactoe-gammar
             expected-sender: SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF
-            cost: 727808
+            cost: 327808
             path: contracts/stackstactoe.clar
             anchor-block-only: true
             clarity-version: 3
