@@ -17,6 +17,13 @@ export function PlayerProfileContent() {
   );
 
   const wins = Number(playerStats?.wins || 0);
+
+  // Filter user's recent games
+  const userGames = (gamesData || []).filter(
+    game => game.playerOne.toLowerCase() === address?.toLowerCase() || 
+            game.playerTwo?.toLowerCase() === address?.toLowerCase()
+  );
+
   // Calculate battles from game history to be more accurate
   const totalGames = userGames.length;
   const defeats = userGames.filter(game => 
