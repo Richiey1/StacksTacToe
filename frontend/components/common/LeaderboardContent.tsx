@@ -28,12 +28,12 @@ export function LeaderboardContent() {
     const wins = Number(player.wins || 0);
     const losses = Number(player.losses || 0);
     const draws = Number(player.draws || 0);
-    const totalEarnings = Number(player.totalEarned || 0) / 1000000; // Convert microSTX to STX
+    const totalEarnings = Number(player.totalEarned || 0) / 1000000;
     const totalGames = wins + losses + draws;
     const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
 
     return {
-      address: player.player,
+      address: player.player || "",
       totalGames,
       wins,
       losses,
@@ -46,7 +46,7 @@ export function LeaderboardContent() {
   });
 
   const filteredPlayers = players.filter((player) =>
-    player.address.toLowerCase().includes(searchTerm.toLowerCase())
+    player.address && player.address.toLowerCase().includes((searchTerm || "").toLowerCase())
   );
 
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {

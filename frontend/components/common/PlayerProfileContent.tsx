@@ -20,8 +20,8 @@ export function PlayerProfileContent() {
 
   // Filter user's recent games
   const userGames = (gamesData || []).filter(
-    game => game.playerOne.toLowerCase() === address?.toLowerCase() || 
-            game.playerTwo?.toLowerCase() === address?.toLowerCase()
+    game => (game.playerOne && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
+            (game.playerTwo && game.playerTwo.toLowerCase() === address?.toLowerCase())
   );
 
   // Calculate battles from game history to be more accurate

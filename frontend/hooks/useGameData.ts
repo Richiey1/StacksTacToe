@@ -43,15 +43,15 @@ export function usePlayerData(address?: string | null) {
           };
         }
 
-        const stats = data.value.value;
+        const stats = data.value;
         return {
           address,
           username: "",
-          wins: Number(stats.wins?.value || 0),
+          wins: Number(stats.wins || 0),
           losses: 0, 
           draws: 0,
           totalGames: 0,
-          totalEarned: Number(stats["total-earned"]?.value || 0),
+          totalEarned: Number(stats["total-earned"] || 0),
           registered: true,
         };
       } catch (error) {
@@ -85,53 +85,65 @@ export function useLeaderboard() {
         const latestData = cvToValue(latestResponse);
         const latestId = Number(latestData.value || 0);
 
-        // Step 2: Scan last 50 games for unique player addresses
+        if (latestId === 0) return [];
+
+        // Step 2: Scan last 50 games for unique player addresses in parallel
         const uniquePlayers = new Set<string>();
         const scanLimit = Math.max(0, latestId - 50);
         
+        const gamePromises = [];
         for (let i = latestId - 1; i >= scanLimit; i--) {
-          const gameResponse = await fetchCallReadOnlyFunction({
-            network: NETWORK,
-            contractAddress: CONTRACT_ADDRESS,
-            contractName: CONTRACT_NAME,
-            functionName: 'get-game',
-            functionArgs: [uintCV(i)],
-            senderAddress: CONTRACT_ADDRESS,
-          });
-          const gameData = cvToValue(gameResponse);
-          if (gameData && gameData.value && gameData.value.value) {
-            const game = gameData.value.value;
-            uniquePlayers.add(game['player-one'].value);
-            if (game['player-two']?.value) {
-              uniquePlayers.add(game['player-two'].value);
-            }
-          }
+          gamePromises.push(
+            fetchCallReadOnlyFunction({
+              network: NETWORK,
+              contractAddress: CONTRACT_ADDRESS,
+              contractName: CONTRACT_NAME,
+              functionName: 'get-game',
+              functionArgs: [uintCV(i)],
+              senderAddress: CONTRACT_ADDRESS,
+            })
+          );
         }
 
-        // Step 3: Fetch stats for each unique player
-        const leaderboard: LeaderboardEntry[] = [];
-        for (const playerAddress of Array.from(uniquePlayers)) {
-          const statsResponse = await fetchCallReadOnlyFunction({
+        const gameResponses = await Promise.all(gamePromises);
+        gameResponses.forEach(response => {
+          const gameData = cvToValue(response);
+          // ResponseOk(OptionalSome(Tuple)) -> { value: { value: { ... } } }
+          if (gameData && gameData.value && gameData.value.value) {
+            const game = gameData.value.value;
+            if (game['player-one']) uniquePlayers.add(game['player-one']);
+            if (game['player-two']) uniquePlayers.add(game['player-two']);
+          }
+        });
+
+        // Step 3: Fetch stats for each unique player in parallel
+        const playerAddresses = Array.from(uniquePlayers);
+        const statsPromises = playerAddresses.map(playerAddress => 
+          fetchCallReadOnlyFunction({
             network: NETWORK,
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
             functionName: 'get-player-stats',
             functionArgs: [standardPrincipalCV(playerAddress)],
             senderAddress: CONTRACT_ADDRESS,
-          });
-          const statsData = cvToValue(statsResponse);
-          if (statsData && statsData.value && statsData.value.value) {
-            const stats = statsData.value.value;
-            leaderboard.push({
-              player: playerAddress,
-              username: "",
-              wins: Number(stats.wins?.value || 0),
-              losses: 0,
-              draws: 0,
-              totalEarned: Number(stats["total-earned"]?.value || 0),
-            });
-          }
-        }
+          })
+        );
+
+        const statsResponses = await Promise.all(statsPromises);
+        const leaderboard: LeaderboardEntry[] = statsResponses.map((response, index) => {
+          const statsData = cvToValue(response);
+          // get-player-stats returns (ok {wins: uint, total-earned: uint})
+          // statsData is { value: { wins: 0n, "total-earned": 0n } }
+          const stats = statsData?.value || {};
+          return {
+            player: playerAddresses[index],
+            username: "",
+            wins: Number(stats.wins || 0),
+            losses: 0,
+            draws: 0,
+            totalEarned: Number(stats["total-earned"] || 0),
+          };
+        });
 
         // Step 4: Sort by wins, then earnings
         return leaderboard.sort((a, b) => {
@@ -202,14 +214,14 @@ export function useGame(gameId: number, enablePolling = true) {
         const game = data.value.value;
         return {
           id: gameId,
-          playerOne: game['player-one'].value,
-          playerTwo: game['player-two']?.value || null,
-          betAmount: Number(game['bet-amount'].value),
-          boardSize: Number(game['board-size'].value),
-          isPlayerOneTurn: game['is-player-one-turn'].value,
-          winner: game.winner?.value || null,
-          lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-time']?.value || 0),
-          status: Number(game.status.value),
+          playerOne: game['player-one'],
+          playerTwo: game['player-two'] || null,
+          betAmount: Number(game['bet-amount']),
+          boardSize: Number(game['board-size']),
+          isPlayerOneTurn: game['is-player-one-turn'],
+          winner: game.winner || null,
+          lastMoveBlock: Number(game['last-move-block'] || game['last-move-time'] || 0),
+          status: Number(game.status),
         };
       } catch (error) {
         console.error(`Error fetching game ${gameId}:`, error);
@@ -233,37 +245,44 @@ export function useGameList(limit = 20) {
     queryFn: async (): Promise<Game[]> => {
       try {
         const maxId = latestGameId || 0;
+        if (maxId === 0) return [];
+
         const games: Game[] = [];
-        
-        // Fetch games in reverse order (newest first)
         const startId = Math.max(0, maxId - limit);
         
+        const gamePromises = [];
         for (let i = maxId - 1; i >= startId && i >= 0; i--) {
-          const response = await fetchCallReadOnlyFunction({
-            network: NETWORK,
-            contractAddress: CONTRACT_ADDRESS,
-            contractName: CONTRACT_NAME,
-            functionName: 'get-game',
-            functionArgs: [uintCV(i)],
-            senderAddress: CONTRACT_ADDRESS,
-          });
-          
+          gamePromises.push(
+            fetchCallReadOnlyFunction({
+              network: NETWORK,
+              contractAddress: CONTRACT_ADDRESS,
+              contractName: CONTRACT_NAME,
+              functionName: 'get-game',
+              functionArgs: [uintCV(i)],
+              senderAddress: CONTRACT_ADDRESS,
+            })
+          );
+        }
+        
+        const responses = await Promise.all(gamePromises);
+        responses.forEach((response, index) => {
+          const gameId = maxId - 1 - index;
           const data = cvToValue(response);
           if (data && data.value && data.value.value) {
             const game = data.value.value;
             games.push({
-              id: i,
-              playerOne: game['player-one'].value,
-              playerTwo: game['player-two']?.value || null,
-              betAmount: Number(game['bet-amount'].value),
-              boardSize: Number(game['board-size'].value),
-              isPlayerOneTurn: game['is-player-one-turn'].value,
-              winner: game.winner?.value || null,
-              lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-time']?.value || 0),
-              status: Number(game.status.value),
+              id: gameId,
+              playerOne: game['player-one'],
+              playerTwo: game['player-two'] || null,
+              betAmount: Number(game['bet-amount']),
+              boardSize: Number(game['board-size']),
+              isPlayerOneTurn: game['is-player-one-turn'],
+              winner: game.winner || null,
+              lastMoveBlock: Number(game['last-move-block'] || game['last-move-time'] || 0),
+              status: Number(game.status),
             });
           }
-        }
+        });
         
         return games;
       } catch (error) {
@@ -272,8 +291,7 @@ export function useGameList(limit = 20) {
       }
     },
     enabled: latestGameId !== undefined && latestGameId > 0,
-    staleTime: 5000, // 5 seconds
-    // Removed refetchInterval - only refresh manually or after mutations
+    staleTime: 5000,
   });
 }
 
