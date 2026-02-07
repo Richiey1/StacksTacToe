@@ -20,14 +20,14 @@ export function PlayerProfileContent() {
 
   // Filter user's recent games
   const userGames = (gamesData || []).filter(
-    game => (game.playerOne && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
-            (game.playerTwo && game.playerTwo.toLowerCase() === address?.toLowerCase())
+    game => (game.playerOne && typeof game.playerOne === 'string' && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
+            (game.playerTwo && typeof game.playerTwo === 'string' && game.playerTwo.toLowerCase() === address?.toLowerCase())
   );
 
   // Calculate battles from game history to be more accurate
   const totalGames = userGames.length;
   const defeats = userGames.filter(game => 
-    game.status !== 0 && game.winner && game.winner.toLowerCase() !== address?.toLowerCase()
+    game.status !== 0 && game.winner && typeof game.winner === 'string' && game.winner.toLowerCase() !== address?.toLowerCase()
   ).length;
   
   const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : "0.0";
@@ -86,7 +86,7 @@ export function PlayerProfileContent() {
           <div className="space-y-4">
             {userGames.slice(0, 5).map((game) => {
               const outcome = game.status === 2 ? "FORFEIT" : 
-                             (game.winner ? (game.winner.toLowerCase() === address.toLowerCase() ? "WIN" : "LOSS") : "DRAW");
+                             (game.winner && typeof game.winner === 'string' ? (game.winner.toLowerCase() === address.toLowerCase() ? "WIN" : "LOSS") : "DRAW");
               
               return (
                 <div key={game.id} className="flex items-center justify-between p-4 border-2 border-white/5 bg-white/5 text-[10px]">

@@ -31,9 +31,10 @@ export function LeaderboardContent() {
     const totalEarnings = Number(player.totalEarned || 0) / 1000000;
     const totalGames = wins + losses + draws;
     const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+    const playerAddr = typeof player.player === 'string' ? player.player : player.player?.value;
 
     return {
-      address: player.player || "",
+      address: playerAddr || "",
       totalGames,
       wins,
       losses,
@@ -46,7 +47,7 @@ export function LeaderboardContent() {
   });
 
   const filteredPlayers = players.filter((player) =>
-    player.address && player.address.toLowerCase().includes((searchTerm || "").toLowerCase())
+    player.address && typeof player.address === 'string' && player.address.toLowerCase().includes((searchTerm || "").toLowerCase())
   );
 
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {
@@ -166,11 +167,13 @@ export function LeaderboardContent() {
         </div>
       </div>
 
-      <PlayerProfileModal
-        isOpen={!!selectedPlayer}
-        onClose={() => setSelectedPlayer(null)}
-        stats={selectedPlayer}
-      />
+      {selectedPlayer && (
+        <PlayerProfileModal
+          isOpen={!!selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+          stats={selectedPlayer}
+        />
+      )}
     </>
   );
 }

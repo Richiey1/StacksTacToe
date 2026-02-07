@@ -119,7 +119,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     }
     setGameStatus(statusEnum);
 
-    if (statusEnum === "waiting" && address.toLowerCase() !== playerOne.toLowerCase()) {
+    if (statusEnum === "waiting" && address.toLowerCase() !== playerOne.toLowerCase() && !game.playerTwo) {
       setCanJoin(true);
     } else {
       setCanJoin(false);
@@ -127,7 +127,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
 
     if (statusEnum === "active" && playerTwo) {
       const currentPlayer = game.isPlayerOneTurn ? playerOne : playerTwo;
-      setIsPlayerTurn(address.toLowerCase() === currentPlayer.toLowerCase());
+      setIsPlayerTurn(address.toLowerCase() === currentPlayer?.toLowerCase());
     } else {
       setIsPlayerTurn(false);
     }
@@ -147,10 +147,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
     }
 
     if (gameStatus === "waiting" && canJoin) {
-      if (selectedJoinMove === null) {
-        setSelectedJoinMove(index);
-        return;
-      }
+      setSelectedJoinMove(index);
       setShowJoinConfirmModal(true);
     } else if (gameStatus === "active" && isPlayerTurn) {
       if (board[index] !== null) {
@@ -354,7 +351,7 @@ export function GameModal({ gameId, isOpen, onClose }: GameModalProps) {
               board={board}
               onCellClick={handleCellClick}
               disabled={gameStatus === "finished" || (gameStatus === "active" && !isPlayerTurn) || (gameStatus === "waiting" && !canJoin)}
-              winner={winner ? (isPlayer1 ? "X" : "O") : null}
+              winner={winner ? (winner.toLowerCase() === playerOne.toLowerCase() ? "X" : "O") : null}
               winningCells={[]} 
               boardSize={boardSize}
             />
