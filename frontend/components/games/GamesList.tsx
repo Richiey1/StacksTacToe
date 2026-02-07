@@ -91,7 +91,7 @@ export function GamesList({ games, loading = false, onGameClick }: GamesListProp
     <div className="space-y-6">
       {games.map((game) => {
         const isClickable = game.status === "active" || game.status === "finished";
-        const isDraw = game.status === "finished" && (!game.winner || game.winner === address);
+        const isDraw = game.status === "finished" && !game.winner;
         
         return (
         <div

@@ -51,18 +51,18 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       const game = gameData.value;
       const gameFields = game.value;
       
-      const playerOneRaw = gameFields["player-one"].value;
-      const playerTwoRaw = gameFields["player-two"].value;
-      const winnerRaw = gameFields.winner.value;
+      const p1Raw = gameFields["player-one"];
+      const p2Raw = gameFields["player-two"];
+      const winRaw = gameFields.winner;
       
-      const playerOne = extractValue(playerOneRaw);
-      const playerTwo = extractValue(playerTwoRaw);
-      const winner = extractValue(winnerRaw);
+      const playerOne = typeof p1Raw === 'string' ? p1Raw : p1Raw?.value;
+      const playerTwo = typeof p2Raw === 'string' ? p2Raw : p2Raw?.value;
+      const winner = typeof winRaw === 'string' ? winRaw : winRaw?.value;
       
-      const betAmount = BigInt(gameFields["bet-amount"].value);
-      const status = Number(gameFields.status.value);
-      const boardSize = Number(gameFields["board-size"].value || 3);
-      const isPlayerOneTurn = gameFields["is-player-one-turn"].value;
+      const betAmount = BigInt(gameFields["bet-amount"]?.value || gameFields["bet-amount"] || 0);
+      const status = Number(gameFields.status?.value || gameFields.status || 0);
+      const boardSize = Number(gameFields["board-size"]?.value || gameFields["board-size"] || 3);
+      const isPlayerOneTurn = !!(gameFields["is-player-one-turn"]?.value ?? gameFields["is-player-one-turn"]);
 
       let gameStatus: "waiting" | "active" | "finished" = "waiting";
       if (status === 1 || status === 2) {
@@ -92,12 +92,12 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       const gameObject = {
         id: gameId.toString(),
         gameId,
-        player1: playerOne,
-        player2: playerTwo && playerTwo !== "none" ? playerTwo : null,
+        player1: playerOne || '',
+        player2: playerTwo || null,
         betAmount,
         status: gameStatus,
         currentPlayer: isPlayerOneTurn ? playerOne : playerTwo,
-        winner: winner && winner !== "none" ? winner : null,
+        winner: winner || null,
         createdAt: new Date(),
         timeRemaining,
         canForfeit: timeRemaining === BigInt(0),
