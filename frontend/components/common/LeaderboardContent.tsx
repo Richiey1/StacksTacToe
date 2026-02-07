@@ -28,14 +28,16 @@ export function LeaderboardContent() {
     const wins = Number(player.wins || 0);
     const losses = Number(player.losses || 0);
     const draws = Number(player.draws || 0);
-    const totalEarnings = Number(player.totalEarned || 0) / 1000000;
+    const totalEarnedMicro = Number(player.totalEarned || 0);
+    const totalEarnings = totalEarnedMicro / 1000000;
     const totalGames = wins + losses + draws;
-    const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+    const winRate = totalGames > 0 ? (wins / totalGames) * 100 : (wins > 0 ? 100 : 0);
+
     const playerAddr = typeof player.player === 'string' ? player.player : player.player?.value;
 
     return {
       address: playerAddr || "",
-      totalGames,
+      totalGames: totalGames || wins, // Fallback if games count is missing but wins exist
       wins,
       losses,
       draws,

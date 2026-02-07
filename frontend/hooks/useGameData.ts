@@ -65,6 +65,11 @@ export function usePlayerData(address?: string | null) {
     staleTime: 30000,
   });
 }
+    },
+    enabled: !!address,
+    staleTime: 30000,
+  });
+}
 
 // ============================================
 // Leaderboard Hook
@@ -89,9 +94,9 @@ export function useLeaderboard() {
 
         if (latestId === 0) return [];
 
-        // Step 2: Scan last 50 games for unique player addresses in parallel
+        // Step 2: Scan last 100 games for unique player addresses in parallel
         const uniquePlayers = new Set<string>();
-        const scanLimit = Math.max(0, latestId - 50);
+        const scanLimit = Math.max(0, latestId - 100);
         
         const gamePromises = [];
         for (let i = latestId - 1; i >= scanLimit; i--) {
@@ -113,12 +118,12 @@ export function useLeaderboard() {
           // ResponseOk(OptionalSome(Tuple)) -> { isOk: true, value: { value: { ... } } }
           if (gameData && gameData.value && gameData.value.value) {
             const game = gameData.value.value;
-            // Ensure we extract a string address
+            // Address might be a string or a Principal object
             const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
             const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
             
-            if (p1 && typeof p1 === 'string') uniquePlayers.add(p1);
-            if (p2 && typeof p2 === 'string') uniquePlayers.add(p2);
+            if (p1 && typeof p1 === 'string' && p1.startsWith('S')) uniquePlayers.add(p1);
+            if (p2 && typeof p2 === 'string' && p2.startsWith('S')) uniquePlayers.add(p2);
           }
         });
 

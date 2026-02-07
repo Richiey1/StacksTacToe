@@ -13,7 +13,7 @@ export function PlayerProfileContent() {
 
   // Find user in leaderboard
   const playerStats = (leaderboardData || []).find(
-    (p: any) => p.player.toLowerCase() === address?.toLowerCase()
+    (p: any) => p.player && typeof p.player === 'string' && p.player.toLowerCase() === address?.toLowerCase()
   );
 
   const wins = Number(playerStats?.wins || 0);
@@ -26,9 +26,11 @@ export function PlayerProfileContent() {
 
   // Calculate battles from game history to be more accurate
   const totalGames = userGames.length;
-  const defeats = userGames.filter(game => 
-    game.status !== 0 && game.winner && typeof game.winner === 'string' && game.winner.toLowerCase() !== address?.toLowerCase()
-  ).length;
+  const defeats = userGames.filter(game => {
+    if (game.status === 0) return false; // Still active or waiting
+    if (!game.winner) return false; // Draw
+    return typeof game.winner === 'string' && game.winner.toLowerCase() !== address?.toLowerCase();
+  }).length;
   
   const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : "0.0";
 
@@ -85,8 +87,14 @@ export function PlayerProfileContent() {
         {userGames.length > 0 ? (
           <div className="space-y-4">
             {userGames.slice(0, 5).map((game) => {
-              const outcome = game.status === 2 ? "FORFEIT" : 
-                             (game.winner && typeof game.winner === 'string' ? (game.winner.toLowerCase() === address.toLowerCase() ? "WIN" : "LOSS") : "DRAW");
+              let outcome = "DRAW";
+              if (game.status === 2) {
+                outcome = "FORFEIT";
+              } else if (game.winner) {
+                if (typeof game.winner === 'string') {
+                  outcome = game.winner.toLowerCase() === address.toLowerCase() ? "WIN" : "LOSS";
+                }
+              }
               
               return (
                 <div key={game.id} className="flex items-center justify-between p-4 border-2 border-white/5 bg-white/5 text-[10px]">
