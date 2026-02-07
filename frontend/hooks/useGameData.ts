@@ -56,21 +56,6 @@ export function usePlayerData(address?: string | null) {
           totalEarned: Number(stats["total-earned"] || 0),
           registered: true,
         };
-        }
-
-        // statsData is (ok {wins: uint, total-earned: uint})
-        // cvToValue for ResponseOk returns { isOk: true, value: { wins: 0n, "total-earned": 0n } }
-        const stats = data.value;
-        return {
-          address,
-          username: "",
-          wins: Number(stats.wins || 0),
-          losses: 0, 
-          draws: 0,
-          totalGames: 0,
-          totalEarned: Number(stats["total-earned"] || 0),
-          registered: true,
-        };
       } catch (error) {
         console.error('Error fetching player data:', error);
         return null;
