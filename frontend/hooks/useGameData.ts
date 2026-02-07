@@ -30,6 +30,8 @@ export function usePlayerData(address?: string | null) {
         });
 
         const data = cvToValue(response);
+        // get-player-stats returns (ok { wins: uint, total-earned: uint })
+        // cvToValue returns { isOk: true, value: { wins: 0n, "total-earned": 0n } }
         if (!data || !data.value) {
            return {
             address,
@@ -41,6 +43,19 @@ export function usePlayerData(address?: string | null) {
             totalEarned: 0,
             registered: false,
           };
+        }
+
+        const stats = data.value;
+        return {
+          address,
+          username: "",
+          wins: Number(stats.wins || 0),
+          losses: 0, 
+          draws: 0,
+          totalGames: 0,
+          totalEarned: Number(stats["total-earned"] || 0),
+          registered: true,
+        };
         }
 
         // statsData is (ok {wins: uint, total-earned: uint})
