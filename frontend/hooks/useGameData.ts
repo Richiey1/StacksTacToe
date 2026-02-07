@@ -43,6 +43,8 @@ export function usePlayerData(address?: string | null) {
           };
         }
 
+        // statsData is (ok {wins: uint, total-earned: uint})
+        // cvToValue for ResponseOk returns { isOk: true, value: { wins: 0n, "total-earned": 0n } }
         const stats = data.value;
         return {
           address,
@@ -108,11 +110,15 @@ export function useLeaderboard() {
         const gameResponses = await Promise.all(gamePromises);
         gameResponses.forEach(response => {
           const gameData = cvToValue(response);
-          // ResponseOk(OptionalSome(Tuple)) -> { value: { value: { ... } } }
+          // ResponseOk(OptionalSome(Tuple)) -> { isOk: true, value: { value: { ... } } }
           if (gameData && gameData.value && gameData.value.value) {
             const game = gameData.value.value;
-            if (game['player-one']) uniquePlayers.add(game['player-one']);
-            if (game['player-two']) uniquePlayers.add(game['player-two']);
+            // Ensure we extract a string address
+            const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
+            const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
+            
+            if (p1 && typeof p1 === 'string') uniquePlayers.add(p1);
+            if (p2 && typeof p2 === 'string') uniquePlayers.add(p2);
           }
         });
 
@@ -212,16 +218,20 @@ export function useGame(gameId: number, enablePolling = true) {
         if (!data || !data.value) return null;
 
         const game = data.value.value;
+        const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
+        const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
+        const win = typeof game.winner === 'string' ? game.winner : game.winner?.value;
+
         return {
           id: gameId,
-          playerOne: game['player-one'],
-          playerTwo: game['player-two'] || null,
-          betAmount: Number(game['bet-amount']),
-          boardSize: Number(game['board-size']),
-          isPlayerOneTurn: game['is-player-one-turn'],
-          winner: game.winner || null,
-          lastMoveBlock: Number(game['last-move-block'] || game['last-move-time'] || 0),
-          status: Number(game.status),
+          playerOne: p1 || '',
+          playerTwo: p2 || null,
+          betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
+          boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
+          isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
+          winner: win || null,
+          lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
+          status: Number(game.status?.value || game.status || 0),
         };
       } catch (error) {
         console.error(`Error fetching game ${gameId}:`, error);
@@ -270,16 +280,20 @@ export function useGameList(limit = 20) {
           const data = cvToValue(response);
           if (data && data.value && data.value.value) {
             const game = data.value.value;
+            const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
+            const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
+            const win = typeof game.winner === 'string' ? game.winner : game.winner?.value;
+
             games.push({
               id: gameId,
-              playerOne: game['player-one'],
-              playerTwo: game['player-two'] || null,
-              betAmount: Number(game['bet-amount']),
-              boardSize: Number(game['board-size']),
-              isPlayerOneTurn: game['is-player-one-turn'],
-              winner: game.winner || null,
-              lastMoveBlock: Number(game['last-move-block'] || game['last-move-time'] || 0),
-              status: Number(game.status),
+              playerOne: p1 || '',
+              playerTwo: p2 || null,
+              betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
+              boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
+              isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
+              winner: win || null,
+              lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
+              status: Number(game.status?.value || game.status || 0),
             });
           }
         });
