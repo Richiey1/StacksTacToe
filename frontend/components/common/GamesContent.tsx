@@ -55,9 +55,16 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       const p2Raw = gameFields["player-two"];
       const winRaw = gameFields.winner;
       
-      const playerOne = typeof p1Raw === 'string' ? p1Raw : p1Raw?.value;
-      const playerTwo = typeof p2Raw === 'string' ? p2Raw : p2Raw?.value;
-      const winner = typeof winRaw === 'string' ? winRaw : winRaw?.value;
+      const safeString = (val: any): string => {
+        if (!val) return '';
+        if (typeof val === 'string') return val;
+        if (val.value && typeof val.value === 'string') return val.value;
+        return '';
+      };
+
+      const playerOne = safeString(p1Raw);
+      const playerTwo = safeString(p2Raw) || null;
+      const winner = safeString(winRaw) || null;
       
       const betAmount = BigInt(gameFields["bet-amount"]?.value || gameFields["bet-amount"] || 0);
       const status = Number(gameFields.status?.value || gameFields.status || 0);
@@ -167,15 +174,19 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
   const myActiveGames = address
     ? games.filter(g => {
         if (g.status !== "active") return false;
-        return g.player1.toLowerCase() === address.toLowerCase() ||
-               g.player2?.toLowerCase() === address.toLowerCase();
+        const p1 = (typeof g.player1 === 'string' ? g.player1 : '').toLowerCase();
+        const p2 = (typeof g.player2 === 'string' ? g.player2 : '').toLowerCase();
+        const addr = address.toLowerCase();
+        return p1 === addr || p2 === addr;
       })
     : [];
   const myPastGames = address
     ? games.filter(g => {
         if (g.status !== "finished") return false;
-        return g.player1.toLowerCase() === address.toLowerCase() ||
-               g.player2?.toLowerCase() === address.toLowerCase();
+        const p1 = (typeof g.player1 === 'string' ? g.player1 : '').toLowerCase();
+        const p2 = (typeof g.player2 === 'string' ? g.player2 : '').toLowerCase();
+        const addr = address.toLowerCase();
+        return p1 === addr || p2 === addr;
       })
     : [];
 
