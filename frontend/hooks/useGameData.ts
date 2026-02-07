@@ -65,11 +65,6 @@ export function usePlayerData(address?: string | null) {
     staleTime: 30000,
   });
 }
-    },
-    enabled: !!address,
-    staleTime: 30000,
-  });
-}
 
 // ============================================
 // Leaderboard Hook
@@ -118,12 +113,18 @@ export function useLeaderboard() {
           // ResponseOk(OptionalSome(Tuple)) -> { isOk: true, value: { value: { ... } } }
           if (gameData && gameData.value && gameData.value.value) {
             const game = gameData.value.value;
-            // Address might be a string or a Principal object
-            const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
-            const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
             
-            if (p1 && typeof p1 === 'string' && p1.startsWith('S')) uniquePlayers.add(p1);
-            if (p2 && typeof p2 === 'string' && p2.startsWith('S')) uniquePlayers.add(p2);
+            const safeAddr = (val: any) => {
+              if (typeof val === 'string') return val;
+              if (val?.value && typeof val.value === 'string') return val.value;
+              return null;
+            };
+
+            const p1 = safeAddr(game['player-one']);
+            const p2 = safeAddr(game['player-two']);
+            
+            if (p1 && p1.startsWith('S')) uniquePlayers.add(p1);
+            if (p2 && p2.startsWith('S')) uniquePlayers.add(p2);
           }
         });
 
@@ -223,18 +224,16 @@ export function useGame(gameId: number, enablePolling = true) {
         if (!data || !data.value) return null;
 
         const game = data.value.value;
-        const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
-        const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
-        const win = typeof game.winner === 'string' ? game.winner : game.winner?.value;
+        const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
 
         return {
           id: gameId,
-          playerOne: p1 || '',
-          playerTwo: p2 || null,
+          playerOne: safeVal(game['player-one']) || '',
+          playerTwo: safeVal(game['player-two']) || null,
           betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
           boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
           isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
-          winner: win || null,
+          winner: safeVal(game.winner) || null,
           lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
           status: Number(game.status?.value || game.status || 0),
         };
@@ -285,18 +284,16 @@ export function useGameList(limit = 20) {
           const data = cvToValue(response);
           if (data && data.value && data.value.value) {
             const game = data.value.value;
-            const p1 = typeof game['player-one'] === 'string' ? game['player-one'] : game['player-one']?.value;
-            const p2 = typeof game['player-two'] === 'string' ? game['player-two'] : game['player-two']?.value;
-            const win = typeof game.winner === 'string' ? game.winner : game.winner?.value;
+            const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
 
             games.push({
               id: gameId,
-              playerOne: p1 || '',
-              playerTwo: p2 || null,
+              playerOne: safeVal(game['player-one']) || '',
+              playerTwo: safeVal(game['player-two']) || null,
               betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
               boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
               isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
-              winner: win || null,
+              winner: safeVal(game.winner) || null,
               lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
               status: Number(game.status?.value || game.status || 0),
             });
