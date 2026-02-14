@@ -11,28 +11,22 @@ export function PlayerProfileContent() {
   const { data: leaderboardData } = useLeaderboard();
   const { data: gamesData, isLoading: isLoadingGames } = useGameList();
 
-  // Find user in leaderboard
   const playerStats = (leaderboardData || []).find(
     (p: any) => p.player && typeof p.player === 'string' && p.player.toLowerCase() === address?.toLowerCase()
   );
 
   const wins = Number(playerStats?.wins || 0);
+  const losses = Number(playerStats?.losses || 0);
+  const draws = Number(playerStats?.draws || 0);
 
-  // Filter user's recent games
   const userGames = (gamesData || []).filter(
     game => (game.playerOne && typeof game.playerOne === 'string' && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
             (game.playerTwo && typeof game.playerTwo === 'string' && game.playerTwo.toLowerCase() === address?.toLowerCase())
   );
 
-  // Calculate battles from game history to be more accurate
-  const totalGames = userGames.length;
-  const defeats = userGames.filter(game => {
-    if (game.status === 0) return false; // Still active or waiting
-    if (!game.winner) return false; // Draw
-    return typeof game.winner === 'string' && game.winner.toLowerCase() !== address?.toLowerCase();
-  }).length;
-  
-  const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : "0.0";
+  const totalGames = userGames.filter(game => game.status !== 0).length;
+  const totalGamesPlayed = wins + losses + draws;
+  const winRate = totalGamesPlayed > 0 ? ((wins / totalGamesPlayed) * 100).toFixed(1) : "0.0";
 
   if (!address) {
     return (
@@ -61,7 +55,7 @@ export function PlayerProfileContent() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">BATTLES</p>
-          <p className="text-2xl font-bold text-white">{totalGames}</p>
+          <p className="text-2xl font-bold text-white">{totalGamesPlayed}</p>
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">VICTORIES</p>
@@ -69,7 +63,7 @@ export function PlayerProfileContent() {
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">DEFEATS</p>
-          <p className="text-2xl font-bold text-red-400">{defeats}</p>
+          <p className="text-2xl font-bold text-red-400">{losses}</p>
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
           <p className="text-[8px] text-gray-400 mb-3 tracking-widest">WIN RATIO</p>
@@ -87,11 +81,13 @@ export function PlayerProfileContent() {
         {userGames.length > 0 ? (
           <div className="space-y-4">
             {userGames.slice(0, 5).map((game) => {
-              let outcome = "DRAW";
+              let outcome = "ACTIVE";
               if (game.status === 2) {
                 outcome = "FORFEIT";
-              } else if (game.winner) {
-                if (typeof game.winner === 'string') {
+              } else if (game.status === 1) {
+                if (!game.winner) {
+                  outcome = "DRAW";
+                } else if (typeof game.winner === 'string') {
                   outcome = game.winner.toLowerCase() === address.toLowerCase() ? "WIN" : "LOSS";
                 }
               }
@@ -100,7 +96,7 @@ export function PlayerProfileContent() {
                 <div key={game.id} className="flex items-center justify-between p-4 border-2 border-white/5 bg-white/5 text-[10px]">
                   <div className="flex items-center gap-4">
                     <span className={
-                      outcome === "WIN" ? "text-green-400" : outcome === "LOSS" ? "text-red-400" : "text-blue-400"
+                      outcome === "WIN" ? "text-green-400" : outcome === "LOSS" ? "text-red-400" : outcome === "DRAW" ? "text-yellow-400" : "text-blue-400"
                     }>
                       {outcome}
                     </span>

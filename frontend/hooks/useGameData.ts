@@ -75,7 +75,6 @@ export function useLeaderboard() {
     queryKey: ['leaderboard'],
     queryFn: async (): Promise<LeaderboardEntry[]> => {
       try {
-        // Step 1: Get latest game ID
         const latestResponse = await fetchCallReadOnlyFunction({
           network: NETWORK,
           contractAddress: CONTRACT_ADDRESS,
@@ -89,9 +88,12 @@ export function useLeaderboard() {
 
         if (latestId === 0) return [];
 
-        // Step 2: Scan last 100 games for unique player addresses in parallel
-        const uniquePlayers = new Set<string>();
         const scanLimit = Math.max(0, latestId - 100);
+        const safeAddr = (val: any): string | null => {
+          if (typeof val === 'string') return val;
+          if (val?.value && typeof val.value === 'string') return val.value;
+          return null;
+        };
         
         const gamePromises = [];
         for (let i = latestId - 1; i >= scanLimit; i--) {
@@ -108,28 +110,56 @@ export function useLeaderboard() {
         }
 
         const gameResponses = await Promise.all(gamePromises);
+        
+        const playerStatsMap = new Map<string, { wins: number; losses: number; draws: number; totalEarned: number }>();
+        
         gameResponses.forEach(response => {
           const gameData = cvToValue(response);
-          // ResponseOk(OptionalSome(Tuple)) -> { isOk: true, value: { value: { ... } } }
           if (gameData && gameData.value && gameData.value.value) {
             const game = gameData.value.value;
+            const status = Number(game.status?.value ?? game.status ?? 0);
             
-            const safeAddr = (val: any) => {
-              if (typeof val === 'string') return val;
-              if (val?.value && typeof val.value === 'string') return val.value;
-              return null;
-            };
-
+            if (status === 0) return;
+            
             const p1 = safeAddr(game['player-one']);
             const p2 = safeAddr(game['player-two']);
+            const winner = safeAddr(game.winner);
             
-            if (p1 && p1.startsWith('S')) uniquePlayers.add(p1);
-            if (p2 && p2.startsWith('S')) uniquePlayers.add(p2);
+            if (!p1) return;
+            
+            if (!playerStatsMap.has(p1)) {
+              playerStatsMap.set(p1, { wins: 0, losses: 0, draws: 0, totalEarned: 0 });
+            }
+            if (p2 && !playerStatsMap.has(p2)) {
+              playerStatsMap.set(p2, { wins: 0, losses: 0, draws: 0, totalEarned: 0 });
+            }
+            
+            if (status === 1 || status === 2) {
+              if (!winner) {
+                const p1Stats = playerStatsMap.get(p1)!;
+                p1Stats.draws++;
+                if (p2) {
+                  const p2Stats = playerStatsMap.get(p2)!;
+                  p2Stats.draws++;
+                }
+              } else if (winner === p1) {
+                const p1Stats = playerStatsMap.get(p1)!;
+                p1Stats.wins++;
+                if (p2) {
+                  const p2Stats = playerStatsMap.get(p2)!;
+                  p2Stats.losses++;
+                }
+              } else if (winner === p2) {
+                const p2Stats = playerStatsMap.get(p2)!;
+                p2Stats.wins++;
+                const p1Stats = playerStatsMap.get(p1)!;
+                p1Stats.losses++;
+              }
+            }
           }
         });
 
-        // Step 3: Fetch stats for each unique player in parallel
-        const playerAddresses = Array.from(uniquePlayers);
+        const playerAddresses = Array.from(playerStatsMap.keys());
         const statsPromises = playerAddresses.map(playerAddress => 
           fetchCallReadOnlyFunction({
             network: NETWORK,
@@ -144,20 +174,19 @@ export function useLeaderboard() {
         const statsResponses = await Promise.all(statsPromises);
         const leaderboard: LeaderboardEntry[] = statsResponses.map((response, index) => {
           const statsData = cvToValue(response);
-          // get-player-stats returns (ok {wins: uint, total-earned: uint})
-          // statsData is { value: { wins: 0n, "total-earned": 0n } }
-          const stats = statsData?.value || {};
+          const onChainStats = statsData?.value || {};
+          const localStats = playerStatsMap.get(playerAddresses[index])!;
+          
           return {
             player: playerAddresses[index],
             username: "",
-            wins: Number(stats.wins || 0),
-            losses: 0,
-            draws: 0,
-            totalEarned: Number(stats["total-earned"] || 0),
+            wins: Number(onChainStats.wins || localStats.wins),
+            losses: localStats.losses,
+            draws: localStats.draws,
+            totalEarned: Number(onChainStats["total-earned"] || 0),
           };
         });
 
-        // Step 4: Sort by wins, then earnings
         return leaderboard.sort((a, b) => {
           if (b.wins !== a.wins) return b.wins - a.wins;
           return b.totalEarned - a.totalEarned;
