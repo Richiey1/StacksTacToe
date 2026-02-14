@@ -56,6 +56,7 @@ This file tracks the UI/UX and contract development for StacksTacToe.
   - [x] Implement `player-stats` map for tracking wins and STX earnings
   - [x] Unlock Leaderboard UI and populate with real on-chain data
   - [x] Add `get-time-remaining` read-only function for UI countdowns
+  - [x] Fix frontend to calculate wins/losses/draws from game history for accurate display
 
 ## ❌ Pending Issues
 
