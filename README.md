@@ -54,6 +54,10 @@ StacksTacToe/
 │   ├── tests/        # Contract tests
 │   └── settings/     # Network configurations
 │
+├── subgraph/         # The Graph indexer
+│   ├── src/          # Mappings
+│   └── abis/         # Contract ABIs
+│
 └── README.md         # This file
 ```
 
