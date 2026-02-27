@@ -1,0 +1,28 @@
+type Player @entity(immutable: false) {
+  id: ID!
+  username: String!
+  address: Bytes!
+  wins: BigInt!
+  draws: BigInt!
+  rating: BigInt!
+}
+
+type Game @entity(immutable: false) {
+  id: ID!
+  player1: Player!
+  player2: Player
+  boardSize: Int!
+  betAmount: BigInt!
+  status: String!
+  winner: Player
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type Move @entity(immutable: true) {
+  id: ID!
+  game: Game!
+  player: Player!
+  position: Int!
+  timestamp: BigInt!
+}
