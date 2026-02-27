@@ -1,0 +1,17 @@
+{
+  "name": "stackstactoe-subgraph",
+  "version": "0.1.0",
+  "description": "Subgraph for StacksTacToe",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ stackstactoe",
+    "create-local": "graph create --node http://localhost:8020/ stackstactoe",
+    "remove-local": "graph remove --node http://localhost:8020/ stackstactoe",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 stackstactoe"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.68.0",
+    "@graphprotocol/graph-ts": "^0.32.0"
+  }
+}
