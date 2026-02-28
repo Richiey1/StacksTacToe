@@ -18,15 +18,16 @@ export function PlayerProfileContent() {
   const wins = Number(playerStats?.wins || 0);
   const losses = Number(playerStats?.losses || 0);
   const draws = Number(playerStats?.draws || 0);
+  const earnings = Number(playerStats?.totalEarned || 0);
 
   const userGames = (gamesData || []).filter(
-    game => (game.playerOne && typeof game.playerOne === 'string' && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
+    (game: any) => (game.playerOne && typeof game.playerOne === 'string' && game.playerOne.toLowerCase() === address?.toLowerCase()) || 
             (game.playerTwo && typeof game.playerTwo === 'string' && game.playerTwo.toLowerCase() === address?.toLowerCase())
   );
 
-  const totalGames = userGames.filter(game => game.status !== 0).length;
-  const totalGamesPlayed = wins + losses + draws;
-  const winRate = totalGamesPlayed > 0 ? ((wins / totalGamesPlayed) * 100).toFixed(1) : "0.0";
+  const totalGames = userGames.filter((game: any) => game.status !== 0).length;
+  // If no on-chain stats exist yet and we didn't play enough games to register on the leaderboard query, fallback to local games count
+  const totalGamesPlayed = wins + losses + draws > 0 ? (wins + losses + draws) : totalGames;
 
   if (!address) {
     return (
@@ -66,8 +67,8 @@ export function PlayerProfileContent() {
           <p className="text-2xl font-bold text-red-400">{losses}</p>
         </div>
         <div className="border-4 border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-[8px] text-gray-400 mb-3 tracking-widest">WIN RATIO</p>
-          <p className="text-2xl font-bold text-blue-400">{winRate}%</p>
+          <p className="text-[8px] text-gray-400 mb-3 tracking-widest">TOTAL EARNINGS</p>
+          <p className="text-2xl font-bold text-orange-500">{formatStx(earnings * 1_000_000)} STX</p>
         </div>
       </div>
 
@@ -80,7 +81,7 @@ export function PlayerProfileContent() {
 
         {userGames.length > 0 ? (
           <div className="space-y-4">
-            {userGames.slice(0, 5).map((game) => {
+            {userGames.slice(0, 5).map((game: any) => {
               let outcome = "ACTIVE";
               if (game.status === 2) {
                 outcome = "FORFEIT";

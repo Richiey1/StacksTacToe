@@ -21,7 +21,7 @@ interface PlayerStats {
 export function LeaderboardContent() {
   const { data: leaderboardData, isLoading } = useLeaderboard();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"wins" | "earnings" | "winRate">("wins");
+  const [sortBy, setSortBy] = useState<"wins" | "earnings">("wins");
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStats | null>(null);
 
   const players = (leaderboardData || []).map((player: any) => {
@@ -55,7 +55,6 @@ export function LeaderboardContent() {
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {
     if (sortBy === "wins") return b.wins - a.wins;
     if (sortBy === "earnings") return b.totalEarnings - a.totalEarnings;
-    if (sortBy === "winRate") return b.winRate - a.winRate;
     return 0;
   });
 
@@ -86,7 +85,7 @@ export function LeaderboardContent() {
             <p className="text-gray-400 font-pixel text-xs uppercase tracking-tight">Top warriors ranked by performance</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="border-4 border-white/10 bg-white/5 p-6 font-pixel text-center">
               <p className="text-[10px] text-gray-400 mb-2 uppercase">TOTAL WARRIORS</p>
               <p className="text-2xl font-bold text-white">{players.length}</p>
@@ -95,14 +94,6 @@ export function LeaderboardContent() {
               <p className="text-[10px] text-gray-400 mb-2 uppercase">TOTAL EARNINGS</p>
               <p className="text-2xl font-bold text-white">
                 {players.reduce((sum, p) => sum + p.totalEarnings, 0).toFixed(2)} STX
-              </p>
-            </div>
-            <div className="border-4 border-white/10 bg-white/5 p-6 font-pixel text-center">
-              <p className="text-[10px] text-gray-400 mb-2 uppercase">AVG WIN RATE</p>
-              <p className="text-2xl font-bold text-white">
-                {players.length > 0
-                  ? (players.reduce((sum, p) => sum + p.winRate, 0) / players.length).toFixed(1)
-                  : "0"}%
               </p>
             </div>
           </div>
@@ -153,11 +144,8 @@ export function LeaderboardContent() {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-white text-sm uppercase">{player.wins} WINS</p>
-                  <p className="text-gray-400 text-[10px] uppercase">
-                    {player.winRate.toFixed(1)}% RATIO
-                  </p>
+                <div className="text-right flex items-center h-full">
+                  <p className="text-white text-sm uppercase">{player.wins} {player.wins === 1 ? 'WIN' : 'WINS'}</p>
                 </div>
               </div>
             )) : (

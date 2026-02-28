@@ -48,7 +48,7 @@ export function PlayerProfileModal({ isOpen, onClose, stats }: PlayerProfileModa
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10 font-pixel">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 font-pixel">
           <div className="border-4 border-white/10 bg-white/5 p-5">
             <div className="flex items-center gap-3 mb-3">
               <Target className="w-4 h-4 text-blue-400" />
@@ -63,14 +63,6 @@ export function PlayerProfileModal({ isOpen, onClose, stats }: PlayerProfileModa
               <p className="text-[10px] text-gray-400 uppercase">Victories</p>
             </div>
             <p className="text-xl font-bold text-green-400">{stats.wins}</p>
-          </div>
-
-          <div className="border-4 border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <TrendingUp className="w-4 h-4 text-blue-400" />
-              <p className="text-[10px] text-gray-400 uppercase">Ratio</p>
-            </div>
-            <p className="text-xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</p>
           </div>
 
           <div className="border-4 border-white/10 bg-white/5 p-5">
