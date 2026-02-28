@@ -45,15 +45,18 @@ export function usePlayerData(address?: string | null) {
           };
         }
 
-        const stats = data.value;
+        const stats = data?.value || {};
+        const chainWins = Number(stats.wins?.value ?? stats.wins ?? 0);
+        const chainEarned = Number(stats["total-earned"]?.value ?? stats["total-earned"] ?? 0);
+        
         return {
           address,
           username: "",
-          wins: Number(stats.wins || 0),
+          wins: chainWins,
           losses: 0, 
           draws: 0,
           totalGames: 0,
-          totalEarned: Number(stats["total-earned"] || 0),
+          totalEarned: chainEarned,
           registered: true,
         };
       } catch (error) {
@@ -172,18 +175,20 @@ export function useLeaderboard() {
         );
 
         const statsResponses = await Promise.all(statsPromises);
-        const leaderboard: LeaderboardEntry[] = statsResponses.map((response, index) => {
           const statsData = cvToValue(response);
           const onChainStats = statsData?.value || {};
           const localStats = playerStatsMap.get(playerAddresses[index])!;
           
+          const chainWins = Number(onChainStats.wins?.value ?? onChainStats.wins ?? 0);
+          const chainEarned = Number(onChainStats["total-earned"]?.value ?? onChainStats["total-earned"] ?? 0);
+
           return {
             player: playerAddresses[index],
             username: "",
-            wins: Number(onChainStats.wins || localStats.wins),
+            wins: chainWins > 0 ? chainWins : localStats.wins,
             losses: localStats.losses,
             draws: localStats.draws,
-            totalEarned: Number(onChainStats["total-earned"] || 0),
+            totalEarned: chainEarned,
           };
         });
 
