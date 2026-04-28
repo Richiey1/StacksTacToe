@@ -38,7 +38,7 @@ StacksTacToe brings the classic game of Tic-Tac-Toe to the blockchain, allowing 
 ## Deployed Contract
 
 **Mainnet:**
-- **Contract**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-alpha`
+- **Contract**: `SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.stackstactoe-gammar`
 - **Network**: Stacks Mainnet
 - **Clarity Version**: 3
 
