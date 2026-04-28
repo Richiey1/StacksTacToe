@@ -20,6 +20,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://stackstactoe.vercel.app'),
   title: {
     default: "StacksTacToe — Bitcoin Tic-Tac-Toe Arena",
     template: "%s | StacksTacToe",

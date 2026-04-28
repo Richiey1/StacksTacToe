@@ -44,32 +44,22 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
 
       const gameData = cvToValue(result);
       
-      if (!gameData || !gameData.value) {
+      // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
+      if (!gameData || typeof gameData !== 'object' || !('value' in gameData) || !gameData.value) {
         return null;
       }
 
-      const game = gameData.value;
-      const gameFields = game.value;
-      
-      const p1Raw = gameFields["player-one"];
-      const p2Raw = gameFields["player-two"];
-      const winRaw = gameFields.winner;
-      
-      const safeString = (val: any): string => {
-        if (!val) return '';
-        if (typeof val === 'string') return val;
-        if (val.value && typeof val.value === 'string') return val.value;
-        return '';
-      };
+      const gameFields = gameData.value;
+      const safeVal = (v: any) => (typeof v === 'object' && v !== null && 'value' in v ? v.value : v);
 
-      const playerOne = safeString(p1Raw);
-      const playerTwo = safeString(p2Raw) || null;
-      const winner = safeString(winRaw) || null;
+      const playerOne = safeVal(gameFields["player-one"]) || '';
+      const playerTwo = safeVal(gameFields["player-two"]) || null;
+      const winner = safeVal(gameFields.winner) || null;
       
-      const betAmount = BigInt(gameFields["bet-amount"]?.value || gameFields["bet-amount"] || 0);
-      const status = Number(gameFields.status?.value || gameFields.status || 0);
-      const boardSize = Number(gameFields["board-size"]?.value || gameFields["board-size"] || 3);
-      const isPlayerOneTurn = !!(gameFields["is-player-one-turn"]?.value ?? gameFields["is-player-one-turn"]);
+      const betAmount = BigInt(safeVal(gameFields["bet-amount"]) || 0);
+      const status = Number(safeVal(gameFields.status) || 0);
+      const boardSize = Number(safeVal(gameFields["board-size"]) || 3);
+      const isPlayerOneTurn = !!(safeVal(gameFields["is-player-one-turn"]) ?? true);
 
       let gameStatus: "waiting" | "active" | "finished" = "waiting";
       if (status === 1 || status === 2) {
@@ -132,17 +122,17 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
       });
 
       const latestIdData = cvToValue(latestIdResult);
-      const gameCount = Number(latestIdData.value || 0);
+      // get-latest-game-id returns plain uint, cvToValue returns bigint directly
+      const totalGameCount = typeof latestIdData === 'bigint' ? Number(latestIdData) : Number(latestIdData?.value || 0);
 
       const allGames: Game[] = [];
+      const SCAN_LIMIT = 20;
+      const startId = Math.max(0, totalGameCount - SCAN_LIMIT);
       
-      for (let i = 0; i < gameCount; i++) {
+      for (let i = totalGameCount - 1; i >= startId; i--) {
         const game = await loadGameData(BigInt(i));
         if (game) {
           allGames.push(game);
-        }
-        if (i % 5 === 0 && i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search, Loader2, Gamepad2, Trophy } from "lucide-react";
 import { fetchCallReadOnlyFunction, uintCV, cvToJSON } from "@stacks/transactions";
-import { CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
+import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "@/lib/stacksConfig";
 import Link from "next/link";
 
 const STATUS_LABELS: Record<number, string> = {
@@ -31,32 +31,33 @@ export function VerifyGameContent() {
 
     try {
       const result = await fetchCallReadOnlyFunction({
+        network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
         functionName: "get-game",
         functionArgs: [uintCV(id)],
-        network: { url: "https://api.hiro.so", chainId: 1 } as any,
         senderAddress: CONTRACT_ADDRESS,
       });
-
-      if (!result) {
+      
+      const gameData = cvToValue(result);
+      if (!gameData || !gameData.value) {
         setError(`Game #${id} not found`);
         return;
       }
 
-      const j = cvToJSON(result);
-      const data = j?.value?.value?.value ?? j?.value?.value ?? {};
+      const data = gameData.value;
+      const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
 
       setGame({
         id,
-        playerOne: data?.["player-one"]?.value ?? "Unknown",
-        playerTwo: data?.["player-two"]?.value ?? null,
-        betAmount: Number(data?.["bet-amount"]?.value ?? 0),
-        boardSize: Number(data?.["board-size"]?.value ?? 3),
-        status: Number(data?.status?.value ?? 0),
-        isPlayerOneTurn: data?.["is-player-one-turn"]?.value ?? true,
-        moveCount: Number(data?.["move-count"]?.value ?? 0),
-        winner: data?.winner?.value ?? null,
+        playerOne: safeVal(data["player-one"]) || "Unknown",
+        playerTwo: safeVal(data["player-two"]) || null,
+        betAmount: Number(safeVal(data["bet-amount"]) || 0),
+        boardSize: Number(safeVal(data["board-size"]) || 3),
+        status: Number(safeVal(data.status) || 0),
+        isPlayerOneTurn: !!(safeVal(data["is-player-one-turn"]) ?? true),
+        moveCount: Number(safeVal(data["move-count"]) || 0),
+        winner: safeVal(data.winner) || null,
       });
     } catch (e: any) {
       setError(`Failed to fetch game: ${e.message}`);

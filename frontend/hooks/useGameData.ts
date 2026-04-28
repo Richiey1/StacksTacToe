@@ -87,7 +87,8 @@ export function useLeaderboard() {
           senderAddress: CONTRACT_ADDRESS,
         });
         const latestData = cvToValue(latestResponse);
-        const latestId = Number(latestData.value || 0);
+        // get-latest-game-id returns plain uint, cvToValue returns bigint directly
+        const latestId = typeof latestData === 'bigint' ? Number(latestData) : Number(latestData?.value || 0);
 
         if (latestId === 0) return [];
 
@@ -118,8 +119,11 @@ export function useLeaderboard() {
         
         gameResponses.forEach(response => {
           const gameData = cvToValue(response);
-          if (gameData && gameData.value && gameData.value.value) {
-            const game = gameData.value.value;
+          // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
+          if (gameData && typeof gameData === 'object' && 'value' in gameData) {
+            const game = gameData.value;
+            if (!game) return; // (some none) -> null
+            
             const status = Number(game.status?.value ?? game.status ?? 0);
             
             if (status === 0) return;
@@ -229,7 +233,9 @@ export function useLatestGameId() {
         });
 
         const data = cvToValue(response);
-        return Number(data.value || 0);
+        // get-latest-game-id returns plain uint, cvToValue returns bigint directly
+        const latestId = typeof data === 'bigint' ? Number(data) : Number(data?.value || 0);
+        return latestId;
       } catch (error) {
         console.error('Error fetching latest game ID:', error);
         return 0;
@@ -257,21 +263,22 @@ export function useGame(gameId: number, enablePolling = true) {
         });
 
         const data = cvToValue(response);
-        if (!data || !data.value) return null;
+        // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
+        if (!data || typeof data !== 'object' || !('value' in data) || !data.value) return null;
 
-        const game = data.value.value;
-        const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
+        const game = data.value;
+        const safeVal = (v: any) => (typeof v === 'object' && v !== null && 'value' in v ? v.value : v);
 
         return {
           id: gameId,
           playerOne: safeVal(game['player-one']) || '',
           playerTwo: safeVal(game['player-two']) || null,
-          betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
-          boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
-          isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
+          betAmount: Number(safeVal(game['bet-amount']) || 0),
+          boardSize: Number(safeVal(game['board-size']) || 3),
+          isPlayerOneTurn: !!(safeVal(game['is-player-one-turn']) ?? true),
           winner: safeVal(game.winner) || null,
-          lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
-          status: Number(game.status?.value || game.status || 0),
+          lastMoveBlock: Number(safeVal(game['last-move-block']) || 0),
+          status: Number(safeVal(game.status) || 0),
         };
       } catch (error) {
         console.error(`Error fetching game ${gameId}:`, error);
@@ -318,20 +325,21 @@ export function useGameList(limit = 20) {
         responses.forEach((response, index) => {
           const gameId = maxId - 1 - index;
           const data = cvToValue(response);
-          if (data && data.value && data.value.value) {
-            const game = data.value.value;
-            const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
+          // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
+          if (data && typeof data === 'object' && 'value' in data && data.value) {
+            const game = data.value;
+            const safeVal = (v: any) => (typeof v === 'object' && v !== null && 'value' in v ? v.value : v);
 
             games.push({
               id: gameId,
               playerOne: safeVal(game['player-one']) || '',
               playerTwo: safeVal(game['player-two']) || null,
-              betAmount: Number(game['bet-amount']?.value || game['bet-amount'] || 0),
-              boardSize: Number(game['board-size']?.value || game['board-size'] || 3),
-              isPlayerOneTurn: !!(game['is-player-one-turn']?.value ?? game['is-player-one-turn']),
+              betAmount: Number(safeVal(game['bet-amount']) || 0),
+              boardSize: Number(safeVal(game['board-size']) || 3),
+              isPlayerOneTurn: !!(safeVal(game['is-player-one-turn']) ?? true),
               winner: safeVal(game.winner) || null,
-              lastMoveBlock: Number(game['last-move-block']?.value || game['last-move-block'] || 0),
-              status: Number(game.status?.value || game.status || 0),
+              lastMoveBlock: Number(safeVal(game['last-move-block']) || 0),
+              status: Number(safeVal(game.status) || 0),
             });
           }
         });
@@ -485,9 +493,10 @@ export function useClaimableReward(gameId: number) {
         });
 
         const data = cvToValue(response);
-        if (!data || !data.value) return null;
+        if (!data || typeof data !== 'object' || !('value' in data)) return null;
         
-        return Number(data.value.value || 0);
+        // (ok (some uint)) -> { isOk: true, value: 100n }
+        return data.value ? Number(data.value) : null;
       } catch (error) {
         console.error(`Error fetching claimable reward for game ${gameId}:`, error);
         return null;
