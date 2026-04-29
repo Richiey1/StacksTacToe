@@ -46,7 +46,11 @@ export function LeaderboardContent() {
       currentStreak: 0,
       bestStreak: 0,
     };
-  });
+  }).filter((player) => player.wins > 0);
+
+  const formatEarnings = (val: number) => {
+    return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 7 });
+  };
 
   const filteredPlayers = players.filter((player) =>
     player.address && typeof player.address === 'string' && player.address.toLowerCase().includes((searchTerm || "").toLowerCase())
@@ -93,7 +97,7 @@ export function LeaderboardContent() {
             <div className="border-4 border-white/10 bg-white/5 p-6 font-pixel text-center">
               <p className="text-[10px] text-gray-400 mb-2 uppercase">TOTAL EARNINGS</p>
               <p className="text-2xl font-bold text-white">
-                {players.reduce((sum, p) => sum + p.totalEarnings, 0).toFixed(2)} STX
+                {formatEarnings(players.reduce((sum, p) => sum + p.totalEarnings, 0))} STX
               </p>
             </div>
           </div>
@@ -125,7 +129,7 @@ export function LeaderboardContent() {
           </div>
 
           <div className="divide-y divide-white/10 border-4 border-white/10 bg-white/5">
-            {sortedPlayers.length > 0 ? sortedPlayers.map((player, index) => (
+            {sortedPlayers.length > 0 ? sortedPlayers.slice(0, 10).map((player, index) => (
               <div
                 key={player.address}
                 className="flex items-center justify-between p-6 font-pixel hover:bg-white/5 transition-colors cursor-pointer"
@@ -140,7 +144,7 @@ export function LeaderboardContent() {
                       {player.address.slice(0, 8)}...{player.address.slice(-6)}
                     </p>
                     <p className="text-orange-500 text-[10px] uppercase">
-                      {player.totalEarnings.toFixed(2)} STX EARNED
+                      {formatEarnings(player.totalEarnings)} STX EARNED
                     </p>
                   </div>
                 </div>
