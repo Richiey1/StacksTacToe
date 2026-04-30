@@ -1,5 +1,5 @@
 // src/lib/stacksConfig.ts
-import { StacksMainnet, StacksTestnet } from '@stacks/network';
+import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 import { 
   STACKS_NETWORK as CONF_NETWORK, 
   CONTRACT_ADDRESS as CONF_CONTRACT_ADDRESS,
@@ -10,8 +10,8 @@ import {
 
 // Network configuration
 export const NETWORK = CONF_NETWORK === 'mainnet' 
-  ? new StacksMainnet() 
-  : new StacksTestnet();
+  ? STACKS_MAINNET 
+  : STACKS_TESTNET;
 
 // Contract configuration
 export const CONTRACT_ADDRESS = CONF_CONTRACT_ADDRESS;
