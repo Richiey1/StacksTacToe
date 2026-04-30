@@ -191,6 +191,7 @@ export function useLeaderboard() {
           const statsData = cvToValue(response);
           // (ok { ... }) -> { isOk: true, value: { ... } }
           const onChainStats = statsData?.value || statsData || {};
+          console.log(`[Leaderboard Debug] Player ${playerAddresses[index]} stats:`, onChainStats);
           const localStats = playerStatsMap.get(playerAddresses[index])!;
           
           const chainWins = Number(onChainStats.wins || 0);
