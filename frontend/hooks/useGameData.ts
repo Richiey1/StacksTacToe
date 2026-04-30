@@ -99,21 +99,28 @@ export function useLeaderboard() {
           return null;
         };
         
-        const gamePromises = [];
-        for (let i = latestId - 1; i >= scanLimit; i--) {
-          gamePromises.push(
-            fetchCallReadOnlyFunction({
-              network: NETWORK,
-              contractAddress: CONTRACT_ADDRESS,
-              contractName: CONTRACT_NAME,
-              functionName: 'get-game',
-              functionArgs: [uintCV(i)],
-              senderAddress: CONTRACT_ADDRESS,
-            })
-          );
-        }
+        const gameResponses = [];
+        const BATCH_SIZE = 5;
+        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-        const gameResponses = await Promise.all(gamePromises);
+        for (let i = latestId - 1; i >= scanLimit; i -= BATCH_SIZE) {
+          const batch = [];
+          for (let j = 0; j < BATCH_SIZE && i - j >= scanLimit; j++) {
+            batch.push(
+              fetchCallReadOnlyFunction({
+                network: NETWORK,
+                contractAddress: CONTRACT_ADDRESS,
+                contractName: CONTRACT_NAME,
+                functionName: 'get-game',
+                functionArgs: [uintCV(i - j)],
+                senderAddress: CONTRACT_ADDRESS,
+              })
+            );
+          }
+          const results = await Promise.all(batch);
+          gameResponses.push(...results);
+          if (i - BATCH_SIZE >= scanLimit) await sleep(100); // Small delay between batches
+        }
         
         const playerStatsMap = new Map<string, { wins: number; losses: number; draws: number; totalEarned: number }>();
         
@@ -182,11 +189,12 @@ export function useLeaderboard() {
 
         const leaderboard = statsResponses.map((response, index) => {
           const statsData = cvToValue(response);
-          const onChainStats = statsData?.value || {};
+          // (ok { ... }) -> { isOk: true, value: { ... } }
+          const onChainStats = statsData?.value || statsData || {};
           const localStats = playerStatsMap.get(playerAddresses[index])!;
           
-          const chainWins = Number(onChainStats.wins?.value ?? onChainStats.wins ?? 0);
-          const chainEarned = Number(onChainStats["total-earned"]?.value ?? onChainStats["total-earned"] ?? 0);
+          const chainWins = Number(onChainStats.wins || 0);
+          const chainEarned = Number(onChainStats["total-earned"] || 0);
 
           return {
             player: playerAddresses[index],
@@ -198,10 +206,13 @@ export function useLeaderboard() {
           };
         });
 
-        return leaderboard.sort((a, b) => {
-          if (b.wins !== a.wins) return b.wins - a.wins;
-          return b.totalEarned - a.totalEarned;
-        });
+        // Filter out players with no wins and sort
+        return leaderboard
+          .filter(p => p.wins > 0)
+          .sort((a, b) => {
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            return b.totalEarned - a.totalEarned;
+          });
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         return [];
