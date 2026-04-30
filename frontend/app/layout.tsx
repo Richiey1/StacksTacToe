@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Space_Mono } from "next/font/google";
 import { StacksProvider } from "@/contexts/StacksProvider";
 import { Navbar } from "@/components/common/Navbar";
@@ -48,13 +48,16 @@ export const metadata: Metadata = {
     apple: "/logo.svg",
     shortcut: "/favicon.svg",
   },
+  other: {
+    "talentapp:project_verification": "4973ef29e148f19c63b948f1ea3900f289b641ecbde3140a9f0b32c5df8daca90c1ddbe1937b26c5b86e0b886e723785e3603705f6f1f81a176ecaa92e12287e",
+  },
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#000000" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
-  other: {
-    "talentapp:project_verification": "4973ef29e148f19c63b948f1ea3900f289b641ecbde3140a9f0b32c5df8daca90c1ddbe1937b26c5b86e0b886e723785e3603705f6f1f81a176ecaa92e12287e",
-  },
 };
 
 export default function RootLayout({
