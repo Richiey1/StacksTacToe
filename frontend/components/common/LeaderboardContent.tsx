@@ -46,7 +46,7 @@ export function LeaderboardContent() {
       currentStreak: 0,
       bestStreak: 0,
     };
-  }); // Removed the .filter(p => p.wins > 0) to ensure the leaderboard is never completely empty
+  }).filter((player) => player.wins > 0);
 
   const formatEarnings = (val: number) => {
     return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 7 });
