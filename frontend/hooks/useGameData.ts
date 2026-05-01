@@ -320,12 +320,28 @@ export function useGame(gameId: number, enablePolling = true) {
           senderAddress: CONTRACT_ADDRESS,
         });
 
-        const data = cvToValue(response);
-        // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
-        if (!data || typeof data !== 'object' || !('value' in data) || !data.value) return null;
+        const data = cvToJSON(response);
+        // (ok (some tuple)) -> { success: true, value: { ... } }
+        if (!data || !data.success || !data.value) return null;
 
-        const game = data.value;
-        const safeVal = (v: any) => (typeof v === 'object' && v !== null && 'value' in v ? v.value : v);
+        let game = data.value;
+        while (game && typeof game === 'object' && 'value' in game && !game['player-one']) {
+          game = game.value;
+        }
+        if (!game || !game['player-one']) return null;
+
+        const safeVal = (v: any): any => {
+          if (v === null || v === undefined) return null;
+          if (typeof v === 'string') {
+            if (v === 'none') return null;
+            return v;
+          }
+          if (typeof v === 'object') {
+            if ('value' in v) return safeVal(v.value);
+            if (v.type === 'none') return null;
+          }
+          return v;
+        };
 
         return {
           id: gameId,
