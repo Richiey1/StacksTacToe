@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCallReadOnlyFunction, cvToValue, standardPrincipalCV, uintCV } from '@stacks/transactions';
+import { fetchCallReadOnlyFunction, cvToValue, cvToJSON, standardPrincipalCV, uintCV } from '@stacks/transactions';
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK, STACKS_API_URL } from '@/lib/stacksConfig';
 import { Player, LeaderboardEntry, Game } from '@/types/game';
 import { isGameActive } from '../lib/gameUtils';
@@ -132,16 +132,14 @@ export function useLeaderboard() {
         const playerStatsMap = new Map<string, { wins: number; losses: number; draws: number; totalEarned: number }>();
         
         gameResponses.forEach(response => {
-          const gameData = cvToValue(response);
-          // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
-          if (gameData && typeof gameData === 'object' && 'value' in gameData) {
-            const rawGame = gameData.value;
-            if (!rawGame) return; // (some none) -> null
-            
-            // Extract the actual fields object handling double-wrapped values
-            const game = typeof rawGame.value === 'object' && rawGame.value !== null 
-                               ? rawGame.value 
-                               : rawGame;
+          const gameData = cvToJSON(response);
+          // (ok (some tuple)) -> { success: true, value: { ...tuple... } }
+          if (gameData && gameData.success && gameData.value) {
+            let game = gameData.value;
+            while (game && typeof game === 'object' && 'value' in game && !game['player-one']) {
+              game = game.value;
+            }
+            if (!game || !game['player-one']) return;
                                
             const safeVal = (v: any): any => {
               if (v === null || v === undefined) return null;
@@ -213,14 +211,37 @@ export function useLeaderboard() {
         const statsResponses = await Promise.all(statsPromises);
 
         const leaderboard = statsResponses.map((response, index) => {
-          const statsData = cvToValue(response);
-          // (ok { ... }) -> { isOk: true, value: { ... } }
-          const onChainStats = statsData?.value || statsData || {};
+          const statsData = cvToJSON(response);
+          
+          let onChainStats: any = {};
+          if (statsData && statsData.success && statsData.value) {
+            let data = statsData.value;
+            while (data && typeof data === 'object' && 'value' in data && typeof data.wins === 'undefined') {
+              data = data.value;
+            }
+            if (data && typeof data.wins !== 'undefined') {
+              onChainStats = data;
+            }
+          }
+          
+          const safeVal = (v: any): any => {
+            if (v === null || v === undefined) return null;
+            if (typeof v === 'string') {
+              if (v === 'none') return null;
+              return v;
+            }
+            if (typeof v === 'object') {
+              if ('value' in v) return safeVal(v.value);
+              if (v.type === 'none') return null;
+            }
+            return v;
+          };
+
           console.log(`[Leaderboard Debug] Player ${playerAddresses[index]} stats:`, onChainStats);
           const localStats = playerStatsMap.get(playerAddresses[index])!;
           
-          const chainWins = Number(onChainStats.wins || 0);
-          const chainEarned = Number(onChainStats["total-earned"] || 0);
+          const chainWins = Number(safeVal(onChainStats.wins) || 0);
+          const chainEarned = Number(safeVal(onChainStats["total-earned"]) || 0);
 
           return {
             player: playerAddresses[index],

@@ -8,7 +8,7 @@ import { TabType } from "@/components/common/TabNavigation";
 import { Plus, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { NETWORK, CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacksConfig";
-import { cvToValue, uintCV } from "@stacks/transactions";
+import { cvToValue, cvToJSON, uintCV } from "@stacks/transactions";
 
 interface GamesContentProps {
   onTabChange?: (tab: TabType) => void;
@@ -42,17 +42,19 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         senderAddress: CONTRACT_ADDRESS,
       });
 
-      const gameData = cvToValue(result);
+      const gameData = cvToJSON(result);
       
-      // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
-      if (!gameData || typeof gameData !== 'object' || !('value' in gameData) || !gameData.value) {
+      // (ok (some tuple)) -> { success: true, value: { value: { value: { ...tuple... } } } }
+      if (!gameData || !gameData.success || !gameData.value) {
         return null;
       }
 
-      // Extract the actual fields object handling double-wrapped values
-      const gameFields = typeof gameData.value.value === 'object' && gameData.value.value !== null 
-                         ? gameData.value.value 
-                         : gameData.value;
+      // cvToJSON structure: { value: { value: { value: { 'player-one': ... } } } }
+      // Navigate down to the tuple fields
+      let gameFields = gameData.value;
+      while (gameFields && typeof gameFields === 'object' && 'value' in gameFields && !gameFields['player-one']) {
+        gameFields = gameFields.value;
+      }
                          
       // Robust recursive unwrap
       const safeVal = (v: any): any => {

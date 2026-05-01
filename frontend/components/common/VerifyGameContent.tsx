@@ -39,17 +39,21 @@ export function VerifyGameContent() {
         senderAddress: CONTRACT_ADDRESS,
       });
       
-      const gameData = cvToValue(result);
-      if (!gameData || !gameData.value) {
+      const gameData = cvToJSON(result);
+      console.log("[VerifyGame Debug] cvToJSON(result):", gameData);
+      console.log("[VerifyGame Debug] raw result:", result);
+      
+      if (!gameData || !gameData.success || !gameData.value) {
         setError(`Game #${id} not found`);
         return;
       }
 
-      // Extract the actual fields object handling double-wrapped values
-      const rawData = gameData.value;
-      const data = typeof rawData.value === 'object' && rawData.value !== null 
-                   ? rawData.value 
-                   : rawData;
+      // cvToJSON structure: { value: { value: { value: { 'player-one': ... } } } }
+      // Navigate down to the tuple fields
+      let data = gameData.value;
+      while (data && typeof data === 'object' && 'value' in data && !data['player-one']) {
+        data = data.value;
+      }
 
       const safeVal = (v: any): any => {
         if (v === null || v === undefined) return null;
