@@ -49,8 +49,24 @@ export function GamesContent({ onTabChange, initialGameId }: GamesContentProps) 
         return null;
       }
 
-      const gameFields = gameData.value;
-      const safeVal = (v: any) => (typeof v === 'object' && v !== null && 'value' in v ? v.value : v);
+      // Extract the actual fields object handling double-wrapped values
+      const gameFields = typeof gameData.value.value === 'object' && gameData.value.value !== null 
+                         ? gameData.value.value 
+                         : gameData.value;
+                         
+      // Robust recursive unwrap
+      const safeVal = (v: any): any => {
+        if (v === null || v === undefined) return null;
+        if (typeof v === 'string') {
+          if (v === 'none') return null;
+          return v;
+        }
+        if (typeof v === 'object') {
+          if ('value' in v) return safeVal(v.value);
+          if (v.type === 'none') return null;
+        }
+        return v;
+      };
 
       const playerOne = safeVal(gameFields["player-one"]) || '';
       const playerTwo = safeVal(gameFields["player-two"]) || null;

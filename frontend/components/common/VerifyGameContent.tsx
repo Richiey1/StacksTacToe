@@ -45,8 +45,24 @@ export function VerifyGameContent() {
         return;
       }
 
-      const data = gameData.value;
-      const safeVal = (v: any) => (typeof v === 'string' ? v : v?.value);
+      // Extract the actual fields object handling double-wrapped values
+      const rawData = gameData.value;
+      const data = typeof rawData.value === 'object' && rawData.value !== null 
+                   ? rawData.value 
+                   : rawData;
+
+      const safeVal = (v: any): any => {
+        if (v === null || v === undefined) return null;
+        if (typeof v === 'string') {
+          if (v === 'none') return null;
+          return v;
+        }
+        if (typeof v === 'object') {
+          if ('value' in v) return safeVal(v.value);
+          if (v.type === 'none') return null;
+        }
+        return v;
+      };
 
       setGame({
         id,

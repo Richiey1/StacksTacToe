@@ -93,9 +93,16 @@ export function useLeaderboard() {
         if (latestId === 0) return [];
 
         const scanLimit = Math.max(0, latestId - 100);
-        const safeAddr = (val: any): string | null => {
-          if (typeof val === 'string') return val;
-          if (val?.value && typeof val.value === 'string') return val.value;
+        const safeAddr = (v: any): string | null => {
+          if (v === null || v === undefined) return null;
+          if (typeof v === 'string') {
+            if (v === 'none') return null;
+            return v;
+          }
+          if (typeof v === 'object') {
+            if ('value' in v) return safeAddr(v.value);
+            if (v.type === 'none') return null;
+          }
           return null;
         };
         
@@ -128,10 +135,28 @@ export function useLeaderboard() {
           const gameData = cvToValue(response);
           // (ok (some tuple)) -> { isOk: true, value: { ...tuple... } }
           if (gameData && typeof gameData === 'object' && 'value' in gameData) {
-            const game = gameData.value;
-            if (!game) return; // (some none) -> null
+            const rawGame = gameData.value;
+            if (!rawGame) return; // (some none) -> null
             
-            const status = Number(game.status?.value ?? game.status ?? 0);
+            // Extract the actual fields object handling double-wrapped values
+            const game = typeof rawGame.value === 'object' && rawGame.value !== null 
+                               ? rawGame.value 
+                               : rawGame;
+                               
+            const safeVal = (v: any): any => {
+              if (v === null || v === undefined) return null;
+              if (typeof v === 'string') {
+                if (v === 'none') return null;
+                return v;
+              }
+              if (typeof v === 'object') {
+                if ('value' in v) return safeVal(v.value);
+                if (v.type === 'none') return null;
+              }
+              return v;
+            };
+            
+            const status = Number(safeVal(game.status) || 0);
             
             if (status === 0) return;
             
