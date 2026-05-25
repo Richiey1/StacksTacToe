@@ -4,6 +4,11 @@
   --font-pixel: var(--font-press-start-2p), monospace;
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 @layer utilities {
   .stackstactoe-bg {
     @apply bg-gradient-to-br from-gray-900 via-black to-gray-900;
