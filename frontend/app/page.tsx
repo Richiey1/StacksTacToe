@@ -35,7 +35,7 @@ function HomeContent() {
   }, [gameIdParam]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-28 pb-12 relative overflow-hidden bg-game-pattern">
+    <div className="min-h-screen flex flex-col items-center px-2 sm:px-4 pt-28 pb-12 relative overflow-hidden bg-game-pattern selection:bg-blue-500 selection:text-white">
       <div className="relative z-10 max-w-7xl w-full space-y-8">
         {/* Hero Carousel - Outer nes-container removed */}
         <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12">
