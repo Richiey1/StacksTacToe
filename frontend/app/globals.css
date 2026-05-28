@@ -4,6 +4,16 @@
   --font-pixel: var(--font-press-start-2p), monospace;
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 @layer utilities {
   .stackstactoe-bg {
     @apply bg-gradient-to-br from-gray-900 via-black to-gray-900;
@@ -18,7 +28,8 @@
   .btn-retro {
     @apply font-pixel uppercase text-xs px-4 py-3 cursor-pointer transition-all active:translate-y-1;
     background-color: #000000;
-    color: #F97316; /* Orange-500 */
+    color: #F97316;
+    /* Orange-500 */
     border: 2px solid #F97316;
     box-shadow: 4px 4px 0px 0px #F97316;
   }
@@ -68,7 +79,8 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ea580c; /* Orange-600 */
+  background: #ea580c;
+  /* Orange-600 */
 }
 
 /* Animations */

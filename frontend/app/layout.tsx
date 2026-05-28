@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Space_Mono } from "next/font/google";
 import { StacksProvider } from "@/contexts/StacksProvider";
 import { Navbar } from "@/components/common/Navbar";
-import { Toaster } from "react-hot-toast";
+import { GameToaster } from "@/components/ui/Toast";
+import OnboardingTour from "@/components/onboarding/OnboardingTour";
 import { Providers } from "@/components/Providers";
 import { ReownProvider } from "@/contexts/ReownProvider";
 import "./globals.css";
@@ -20,27 +21,41 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://stackstactoe.vercel.app'),
+  metadataBase: new URL("https://stackstactoe.vercel.app"),
   title: {
     default: "StacksTacToe — Bitcoin Tic-Tac-Toe Arena",
     template: "%s | StacksTacToe",
   },
   description:
     "Play decentralized Tic-Tac-Toe on Stacks L2. Bet STX, challenge opponents, win on-chain. Provably fair, Bitcoin-secured PvP gaming.",
-  keywords: ["Stacks", "Bitcoin", "tic-tac-toe", "game", "PvP", "betting", "blockchain", "L2", "DeFi"],
+  keywords: [
+    "Stacks",
+    "Bitcoin",
+    "tic-tac-toe",
+    "game",
+    "PvP",
+    "betting",
+    "blockchain",
+    "L2",
+    "DeFi",
+  ],
   authors: [{ name: "StacksTacToe Protocol" }],
   creator: "StacksTacToe",
   openGraph: {
     title: "StacksTacToe — Bitcoin Tic-Tac-Toe Arena",
-    description: "Bet STX. Challenge opponents. Win on-chain. Bitcoin-secured PvP gaming on Stacks L2.",
+    description:
+      "Bet STX. Challenge opponents. Win on-chain. Bitcoin-secured PvP gaming on Stacks L2.",
     type: "website",
     siteName: "StacksTacToe",
-    images: [{ url: "/logo.svg", width: 64, height: 64, alt: "StacksTacToe Logo" }],
+    images: [
+      { url: "/logo.svg", width: 64, height: 64, alt: "StacksTacToe Logo" },
+    ],
   },
   twitter: {
     card: "summary",
     title: "StacksTacToe — Bitcoin Tic-Tac-Toe Arena",
-    description: "Decentralized Tic-Tac-Toe on Stacks L2. Bet STX, play opponents, win Bitcoin-secured prizes.",
+    description:
+      "Decentralized Tic-Tac-Toe on Stacks L2. Bet STX, play opponents, win Bitcoin-secured prizes.",
     images: ["/logo.svg"],
   },
   icons: {
@@ -49,7 +64,8 @@ export const metadata: Metadata = {
     shortcut: "/favicon.svg",
   },
   other: {
-    "talentapp:project_verification": "4973ef29e148f19c63b948f1ea3900f289b641ecbde3140a9f0b32c5df8daca90c1ddbe1937b26c5b86e0b886e723785e3603705f6f1f81a176ecaa92e12287e",
+    "talentapp:project_verification":
+      "4973ef29e148f19c63b948f1ea3900f289b641ecbde3140a9f0b32c5df8daca90c1ddbe1937b26c5b86e0b886e723785e3603705f6f1f81a176ecaa92e12287e",
   },
 };
 
@@ -78,17 +94,8 @@ export default function RootLayout({
               <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 font-pixel text-gray-300">
                 {children}
               </div>
-              <Toaster position="top-right" 
-                toastOptions={{
-                  style: {
-                    fontFamily: 'var(--font-press-start-2p)',
-                    borderRadius: '0px',
-                    border: '2px solid #F97316',
-                    background: '#000',
-                    color: '#fff',
-                  }
-                }}
-              />
+              <OnboardingTour />
+              <GameToaster />
             </StacksProvider>
           </ReownProvider>
         </Providers>
