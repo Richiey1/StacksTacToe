@@ -8,22 +8,22 @@ const slides = [
     title: "On-Chain PvP",
     description:
       "Welcome to StacksTacToe. A winner-takes-all Tic-Tac-Toe game powered by Bitcoin L2.",
-    icon: <Grid3x3 className="w-12 h-12 text-blue-500" />,
-    color: "bg-blue-500/10",
+    icon: <Grid3x3 className="w-10 h-10 text-orange-500" />,
+    color: "from-orange-500/10 to-transparent",
   },
   {
     title: "Challenge Others",
     description:
       "Create a game, set your wager in STX or sBTC, and wait for an opponent to join the fray.",
-    icon: <Swords className="w-12 h-12 text-red-500" />,
-    color: "bg-red-500/10",
+    icon: <Swords className="w-10 h-10 text-orange-500" />,
+    color: "from-orange-500/10 to-transparent",
   },
   {
     title: "Claim the Pot",
     description:
       "Every move is verified on-chain. Win the match and the smart contract automatically sends you the rewards.",
-    icon: <Trophy className="w-12 h-12 text-amber-500" />,
-    color: "bg-amber-500/10",
+    icon: <Trophy className="w-10 h-10 text-orange-500" />,
+    color: "from-orange-500/10 to-transparent",
   },
 ];
 
@@ -58,52 +58,63 @@ export default function OnboardingTour() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-sm transition-opacity duration-300">
-      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        <div
-          className={`p-10 flex flex-col items-center text-center transition-colors duration-500 ${slides[currentSlide].color}`}
-        >
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+      <div className="relative w-full max-w-md bg-black border-4 border-orange-500 shadow-[8px_8px_0px_0px_#fff] overflow-hidden">
+        {/* Pixelated Pattern Overlay */}
+        <div 
+          className="absolute inset-0 bg-orange-600 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+              linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)
+            `,
+            backgroundSize: '4px 4px',
+            backgroundPosition: '0 0, 2px 2px',
+          }}
+        />
+
+        <div className="relative p-6 md:p-8 flex flex-col items-center text-center z-10">
           <button
             onClick={handleClose}
-            className="absolute top-6 right-6 p-2 text-zinc-500 hover:text-white transition-colors"
+            className="absolute top-4 right-4 p-1 bg-black border-2 border-white text-white hover:bg-orange-500 hover:text-black transition-all cursor-pointer font-pixel text-[8px] uppercase font-bold"
+            title="Skip"
           >
-            <X size={20} />
+            [X]
           </button>
 
-          <div className="mb-8 p-6 bg-zinc-800 rounded-2xl border border-zinc-700 shadow-lg">
+          <div className="mb-6 p-4 bg-black border-4 border-white shadow-[4px_4px_0px_0px_#f97316] inline-block">
             {slides[currentSlide].icon}
           </div>
 
-          <h2 className="text-2xl font-black text-white mb-4 tracking-tight uppercase">
+          <h2 className="text-sm md:text-base font-pixel text-orange-500 mb-4 uppercase tracking-wider">
             {slides[currentSlide].title}
           </h2>
-          <p className="text-zinc-400 text-sm font-medium leading-relaxed mb-10">
+          <p className="font-pixel text-[9px] md:text-[10px] leading-loose text-zinc-300 mb-8 uppercase tracking-wide max-w-[320px]">
             {slides[currentSlide].description}
           </p>
 
-          <div className="w-full flex items-center justify-between mt-auto pt-6 border-t border-zinc-800/50">
-            <div className="flex gap-1.5">
+          <div className="w-full flex items-center justify-between mt-auto pt-4 border-t-4 border-white/10">
+            {/* Square Retro Indicators */}
+            <div className="flex gap-2">
               {slides.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={`w-3.5 h-3.5 border-2 transition-all duration-300 ${
                     index === currentSlide
-                      ? "w-8 bg-blue-500"
-                      : "w-2 bg-zinc-800"
+                      ? "bg-orange-500 border-white shadow-[2px_2px_0px_0px_#000]"
+                      : "bg-black border-zinc-700"
                   }`}
                 />
               ))}
             </div>
 
+            {/* Retro Action Button */}
             <button
               onClick={nextSlide}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all active:scale-95 group"
+              className="flex items-center gap-1 px-4 py-2.5 bg-black border-4 border-white text-white hover:bg-orange-500 hover:text-black shadow-[4px_4px_0px_0px_#f97316] font-pixel text-[10px] uppercase transition-all active:translate-y-0.5 cursor-pointer"
             >
-              {currentSlide === slides.length - 1 ? "Play Now" : "Next"}
-              <ChevronRight
-                size={18}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
+              <span>{currentSlide === slides.length - 1 ? "Play Now" : "Next"}</span>
+              <ChevronRight size={14} strokeWidth={3} />
             </button>
           </div>
         </div>
