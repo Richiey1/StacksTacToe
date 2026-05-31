@@ -1,11 +1,9 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { X, Swords, Coins, Grid3x3, Wallet } from "lucide-react";
+import { useState } from "react";
+import { X, Swords, Coins, Grid3x3, Wallet, AlertTriangle } from "lucide-react";
 import { useStacks } from "@/contexts/StacksProvider";
 import { useStacksTacToe } from "@/hooks/useStacksTacToe";
+import { useGameBalance } from "@/hooks/useGameBalance";
 import { toast } from "react-hot-toast";
-import { STACKS_API_URL } from "@/lib/stacksConfig";
 
 interface ChallengeModalProps {
   isOpen: boolean;
@@ -15,46 +13,27 @@ interface ChallengeModalProps {
 export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
   const { address } = useStacks();
   const { createGame } = useStacksTacToe();
+  const { balanceSTX, maxBetSTX, isLoading: loadingBalance, exceedsBet } = useGameBalance();
   const [betAmount, setBetAmount] = useState("0.3");
   const [boardSize, setBoardSize] = useState<3 | 5>(3);
-  const [firstMove, setFirstMove] = useState(4); // Center cell for 3x3
+  const [firstMove, setFirstMove] = useState(4);
   const [isCreating, setIsCreating] = useState(false);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [loadingBalance, setLoadingBalance] = useState(false);
-
-  // Fetch STX balance
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!address) return;
-      
-      setLoadingBalance(true);
-      try {
-        const response = await fetch(`${STACKS_API_URL}/extended/v1/address/${address}/balances`);
-        const data = await response.json();
-        const stxBalance = parseInt(data.stx.balance) / 1_000_000;
-        setBalance(stxBalance);
-      } catch (error) {
-        console.error("Failed to fetch balance:", error);
-      } finally {
-        setLoadingBalance(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchBalance();
-    }
-  }, [address, isOpen]);
 
   if (!isOpen) return null;
 
+  const betExceedsBalance = exceedsBet(betAmount);
+
   const handleCreate = async () => {
-    const betMicroSTX = parseFloat(betAmount) * 1_000_000;
-    
-    if (betMicroSTX <= 0) {
+    const betFloat = parseFloat(betAmount);
+    if (betFloat <= 0) {
       toast.error("Bet amount must be greater than 0 STX");
       return;
     }
-
+    if (betExceedsBalance) {
+      toast.error("Bet exceeds your wallet balance");
+      return;
+    }
+    const betMicroSTX = betFloat * 1_000_000;
     setIsCreating(true);
     try {
       await createGame(betMicroSTX, firstMove, boardSize);
@@ -92,40 +71,45 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
           </button>
         </div>
 
-        {/* Bet Amount */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            <div className="flex items-center gap-2">
-              <Coins className="w-4 h-4 text-orange-400" />
-              Bet Amount (STX)
-            </div>
-          </label>
-          <input
-            type="number"
-            value={betAmount}
-            onChange={(e) => setBetAmount(e.target.value)}
-            min="0.001"
-            step="0.001"
-            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500"
-            placeholder="Enter bet amount"
-          />
-          
-          {/* Wallet Balance */}
-          <div className="mt-2 flex items-center gap-2 text-sm">
-            <Wallet className="w-4 h-4 text-gray-400" />
-            {loadingBalance ? (
-              <span className="text-gray-400">Loading balance...</span>
-            ) : balance !== null ? (
-              <span className="text-gray-400">
-                Wallet Balance: <span className="text-white font-medium">{balance.toFixed(6)} STX</span>
+          {/* Bet Amount */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium text-gray-300">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-orange-400" />
+                  Bet Amount (STX)
+                </div>
+              </label>
+              <span className="text-xs text-gray-400 flex items-center gap-1">
+                <Wallet className="w-3 h-3" />
+                {loadingBalance ? "..." : `${balanceSTX.toFixed(4)} STX`}
               </span>
-            ) : (
-              <span className="text-gray-400">Unable to load balance</span>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                min="0.001"
+                step="0.001"
+                className={`w-full bg-black/20 border ${betExceedsBalance ? "border-red-500" : "border-white/10"} rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 pr-16`}
+                placeholder="Enter bet amount"
+              />
+              <button
+                type="button"
+                onClick={() => setBetAmount(maxBetSTX)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-orange-500 hover:text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded"
+              >
+                MAX
+              </button>
+            </div>
+            {betExceedsBalance && (
+              <p className="text-[10px] text-red-500 mt-1 flex items-center gap-1 animate-pulse font-medium">
+                <AlertTriangle className="w-3 h-3" /> Exceeds wallet balance
+              </p>
             )}
+            <p className="text-xs text-gray-500 mt-2">Minimum: 0.001 STX</p>
           </div>
-          
-          <p className="text-xs text-gray-500 mt-2">Minimum: 0.001 STX</p>
-        </div>
 
         {/* Board Size */}
         <div className="mb-6">
@@ -182,22 +166,22 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-white/5 hover:bg-white/10 text-white px-4 py-3 rounded-lg font-medium transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={isCreating || !betAmount}
-            className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
-          >
-            {isCreating ? "Creating..." : "Create Challenge"}
-          </button>
-        </div>
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white px-4 py-3 rounded-lg font-medium transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={isCreating || !betAmount || betExceedsBalance}
+              className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
+            >
+              {isCreating ? "Creating..." : "Create Challenge"}
+            </button>
+          </div>
       </div>
     </div>
   );
