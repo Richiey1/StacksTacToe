@@ -1,90 +1,89 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { showConnect } from "@stacks/connect";
-import { appDetails, userSession } from "@/lib/stacks-session";
+import {
+  connect,
+  disconnect,
+  isConnected,
+  getLocalStorage,
+} from "@stacks/connect";
 import { STACKS_NETWORK } from "@/config/constants";
-
-type StacksUserData = {
-  profile?: {
-    stxAddress?: {
-      mainnet?: string;
-      testnet?: string;
-    };
-  };
-};
 
 export type Network = "mainnet" | "testnet" | "disconnected";
 
-const getAppIcon = () => {
-  if (typeof window === "undefined") return appDetails.icon;
+/** Pull the STX address from localStorage set by @stacks/connect v8 */
+function readStxAddress(): string | null {
   try {
-    return new URL(appDetails.icon, window.location.origin).toString();
+    const data = getLocalStorage();
+    if (!data?.addresses?.stx?.length) return null;
+    return data.addresses.stx[0].address ?? null;
   } catch {
-    return appDetails.icon;
+    return null;
   }
-};
+}
 
 export function useStacksWallet() {
-  const [userData, setUserData] = useState<StacksUserData | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
+  // Hydrate on mount — check if wallet is already connected via localStorage
   useEffect(() => {
-    let cancelled = false;
-    async function hydrateSession() {
-      if (userSession.isSignInPending()) {
-        const data = await userSession.handlePendingSignIn();
-        if (!cancelled) setUserData(data);
-      } else if (userSession.isUserSignedIn()) {
-        setUserData(userSession.loadUserData());
+    try {
+      if (isConnected()) {
+        const addr = readStxAddress();
+        if (addr) {
+          setAddress(addr);
+          setIsSignedIn(true);
+        }
       }
-      if (!cancelled) setIsReady(true);
+    } catch {
+      // wallet not present or not connected
+    } finally {
+      setIsReady(true);
     }
-
-    hydrateSession();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  const connect = useCallback(() => {
+  const handleConnect = useCallback(async () => {
     if (typeof window === "undefined") return;
-
-    showConnect({
-      userSession,
-      appDetails: { ...appDetails, icon: getAppIcon() },
-      onFinish: () => {
-        setUserData(userSession.loadUserData());
-      },
-    });
+    try {
+      const result = await connect();
+      if (result?.addresses?.length) {
+        // v8 returns all addresses; pick the STX one (symbol 'STX' or first)
+        const stxEntry =
+          result.addresses.find((a) => a.address.startsWith("S")) ??
+          result.addresses[0];
+        if (stxEntry?.address) {
+          setAddress(stxEntry.address);
+          setIsSignedIn(true);
+        }
+      }
+    } catch (e) {
+      console.error("Wallet connect error:", e);
+    }
   }, []);
 
-  const disconnect = useCallback(() => {
-    userSession.signUserOut();
-    setUserData(null);
+  const handleDisconnect = useCallback(() => {
+    try {
+      disconnect();
+    } catch {
+      // ignore
+    }
+    setAddress(null);
+    setIsSignedIn(false);
   }, []);
 
   const network: Network = useMemo(() => {
-    if (!userData?.profile?.stxAddress) return "disconnected";
-    if (userData.profile.stxAddress.testnet) return "testnet";
-    if (userData.profile.stxAddress.mainnet) return "mainnet";
-    return "disconnected";
-  }, [userData]);
-
-  const address = useMemo(() => {
-    if (!userData?.profile?.stxAddress) return null;
-    if (STACKS_NETWORK === 'mainnet') {
-      return userData.profile.stxAddress.mainnet || userData.profile.stxAddress.testnet;
-    }
-    return userData.profile.stxAddress.testnet || userData.profile.stxAddress.mainnet;
-  }, [userData]);
+    if (!isSignedIn) return "disconnected";
+    return STACKS_NETWORK === "mainnet" ? "mainnet" : "testnet";
+  }, [isSignedIn]);
 
   return {
     address,
-    connect,
-    disconnect,
+    connect: handleConnect,
+    disconnect: handleDisconnect,
     isReady,
-    isSignedIn: !!userData,
+    isSignedIn,
     network,
   };
 }

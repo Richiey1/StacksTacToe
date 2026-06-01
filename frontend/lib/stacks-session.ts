@@ -1,10 +1,7 @@
-import { AppConfig, UserSession } from "@stacks/connect";
-
-const appConfig = new AppConfig(["store_write", "publish_data"]);
-
-export const userSession = new UserSession({ appConfig });
-
+// App details used across wallet connection flows
 export const appDetails = {
   name: "StacksTacToe",
-  icon: "/favicon.ico",
+  icon: typeof window !== "undefined"
+    ? new URL("/favicon.ico", window.location.origin).toString()
+    : "/favicon.ico",
 };

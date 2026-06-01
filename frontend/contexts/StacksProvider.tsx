@@ -1,12 +1,14 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppConfig, UserSession, showConnect } from '@stacks/connect';
-import { APP_NAME, APP_ICON } from '@/lib/stacksConfig';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import {
+  connect,
+  disconnect,
+  isConnected,
+  getLocalStorage,
+} from '@stacks/connect';
 
 interface StacksContextType {
-  userSession: UserSession;
-  userData: any;
   isConnected: boolean;
   address: string | null;
   connect: () => void;
@@ -15,46 +17,75 @@ interface StacksContextType {
 
 const StacksContext = createContext<StacksContextType | undefined>(undefined);
 
-const appConfig = new AppConfig(['store_write', 'publish_data']);
+/** Pull the STX address from localStorage set by @stacks/connect v8 */
+function readStxAddress(): string | null {
+  try {
+    const data = getLocalStorage();
+    if (!data?.addresses?.stx?.length) return null;
+    return data.addresses.stx[0].address ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function StacksProvider({ children }: { children: ReactNode }) {
-  const [userSession] = useState(() => new UserSession({ appConfig }));
-  const [userData, setUserData] = useState<any>(null);
+  const [address, setAddress] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
 
+  // Hydrate on mount
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      setUserData(userSession.loadUserData());
+    try {
+      if (isConnected()) {
+        const addr = readStxAddress();
+        if (addr) {
+          setAddress(addr);
+          setConnected(true);
+        }
+      }
+    } catch {
+      // wallet not available
     }
-  }, [userSession]);
+  }, []);
 
-  const connect = () => {
-    showConnect({
-      appDetails: {
-        name: APP_NAME,
-        icon: APP_ICON,
-      },
-      onFinish: () => {
-        setUserData(userSession.loadUserData());
-      },
-      userSession,
-    });
-  };
+  const handleConnect = useCallback(async () => {
+    try {
+      const result = await connect();
+      if (result?.addresses?.length) {
+        const stxEntry =
+          result.addresses.find((a) => a.address.startsWith('S')) ??
+          result.addresses[0];
+        if (stxEntry?.address) {
+          setAddress(stxEntry.address);
+          setConnected(true);
+        }
+      }
+    } catch (e) {
+      console.error('Connect error:', e);
+    }
+  }, []);
 
-  const disconnect = () => {
-    userSession.signUserOut();
-    setUserData(null);
-  };
+  const handleDisconnect = useCallback(() => {
+    try {
+      disconnect();
+    } catch {
+      // ignore
+    }
+    setAddress(null);
+    setConnected(false);
+  }, []);
 
-  const value = {
-    userSession,
-    userData,
-    isConnected: userSession.isUserSignedIn(),
-    address: userData?.profile?.stxAddress?.mainnet || null,
-    connect,
-    disconnect,
-  };
-
-  return <StacksContext.Provider value={value}>{children}</StacksContext.Provider>;
+  return (
+    <StacksContext.Provider
+      value={{
+        isConnected: connected,
+        address,
+        connect: handleConnect,
+        disconnect: handleDisconnect,
+      }}
+    >
+      {children}
+    </StacksContext.Provider>
+  );
 }
 
 export const useStacks = () => {
