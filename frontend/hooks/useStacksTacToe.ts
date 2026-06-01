@@ -1,7 +1,7 @@
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "@/lib/stacksConfig";
 import { openContractCall } from "@stacks/connect";
-import { uintCV, principalCV, PostConditionMode } from "@stacks/transactions";
+import { uintCV, principalCV, PostConditionMode, Pc } from "@stacks/transactions";
 import { useCallback } from "react";
 import { useInvalidateGameQueries } from "./useGameData";
 
@@ -31,7 +31,10 @@ export function useStacksTacToe() {
           uintCV(moveIndex),
           uintCV(boardSize),
         ],
-        postConditionMode: PostConditionMode.Allow, // Check this: STX transfer usually needs Allow or specific post conditions
+        postConditions: [
+          Pc.principal(address).willSendEq(amountMicroStx).ustx()
+        ],
+        postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
           // Invalidate game list after creating a game
           invalidateGameList();
@@ -54,7 +57,10 @@ export function useStacksTacToe() {
         contractName: CONTRACT_NAME,
         functionName: "join-game",
         functionArgs: [uintCV(gameId), uintCV(moveIndex)],
-        postConditionMode: PostConditionMode.Allow, // Needs to transfer STX
+        postConditions: [
+          Pc.principal(address).willSendEq(amountMicroStx).ustx()
+        ],
+        postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
           // Invalidate specific game and game list after joining
           invalidateGame(gameId);
@@ -95,7 +101,7 @@ export function useStacksTacToe() {
         contractName: CONTRACT_NAME,
         functionName: "forfeit-game",
         functionArgs: [uintCV(gameId)],
-        postConditionMode: PostConditionMode.Allow, // May transfer STX to winner
+        postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
           // Invalidate game data and leaderboard after forfeit
           invalidateGame(gameId);
@@ -117,7 +123,7 @@ export function useStacksTacToe() {
         contractName: CONTRACT_NAME,
         functionName: "claim-reward",
         functionArgs: [uintCV(gameId)],
-        postConditionMode: PostConditionMode.Allow, // Transfers STX to winner
+        postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
           // Invalidate game data after claiming reward
           invalidateGame(gameId);
