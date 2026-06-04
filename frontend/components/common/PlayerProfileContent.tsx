@@ -48,7 +48,7 @@ export function PlayerProfileContent() {
         </div>
         <div className="text-center md:text-left">
           <h1 className="text-2xl font-bold text-white mb-2 tracking-widest">Warrior Profile</h1>
-          <p className="text-gray-400 text-[10px] font-mono lowercase tracking-normal break-all">{address}</p>
+          <p className="text-gray-400 text-[10px] font-mono uppercase tracking-normal break-all">{address}</p>
         </div>
       </div>
 
