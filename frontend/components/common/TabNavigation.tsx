@@ -24,7 +24,7 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full p-4">
+    <div className="flex flex-row md:flex-col justify-around gap-1 sm:gap-2 md:gap-6 w-full p-1 sm:p-2 md:p-4">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -34,16 +34,16 @@ export function TabNavigation({ activeTab, onTabChange, showAdmin = false }: Tab
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex items-center gap-4 px-6 py-4 transition-all w-full text-left font-pixel uppercase text-xs md:text-sm border-4
+              flex flex-1 md:flex-none flex-col md:flex-row items-center justify-center md:justify-start gap-1 sm:gap-2 md:gap-4 px-1 py-1.5 sm:px-3 sm:py-2 md:px-6 md:py-4 transition-all text-center md:text-left font-pixel uppercase text-[7px] sm:text-[9px] md:text-sm border-2 md:border-4 md:w-full
               ${isActive
-                ? "bg-orange-500 text-black border-orange-500 shadow-[4px_4px_0px_0px_#fff]"
-                : "bg-black text-white border-white hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_#f97316]"
+                ? "bg-orange-500 text-black border-orange-500 shadow-none md:shadow-[4px_4px_0px_0px_#fff]"
+                : "bg-black text-white border-zinc-800 hover:bg-white hover:text-black hover:border-white md:border-white md:hover:shadow-[4px_4px_0px_0px_#f97316]"
               }
             `}
           >
-            <Icon className="w-8 h-8" />
-            <span className="flex-1">{tab.label}</span>
-            {isActive && <span className="animate-pulse">◄</span>}
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 flex-shrink-0" />
+            <span className="truncate max-w-[48px] sm:max-w-none md:max-w-none">{tab.label}</span>
+            {isActive && <span className="hidden md:inline animate-pulse">◄</span>}
           </button>
         );
       })}

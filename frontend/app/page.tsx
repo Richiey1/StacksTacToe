@@ -43,13 +43,13 @@ function HomeContent() {
         </div>
 
         {/* Sidebar + Content Layout */}
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-8 pb-24 md:pb-0">
           {/* Sidebar Navigation */}
-          <aside className="md:w-64 flex-shrink-0 md:mt-4">
-            <div className="h-fit relative overflow-hidden border-4 border-orange-500 bg-black shadow-[4px_4px_0px_0px_#fff] p-6">
+          <aside className="fixed bottom-0 left-0 right-0 z-50 bg-black border-t-4 border-orange-500 md:static md:w-64 md:flex-shrink-0 md:mt-4 md:border-t-0 md:bg-transparent md:z-10">
+            <div className="relative overflow-hidden md:border-4 md:border-orange-500 md:bg-black md:shadow-[4px_4px_0px_0px_#fff] p-1.5 md:p-6">
               {/* Pixelated Pattern Overlay */}
               <div 
-                className="absolute inset-0 bg-orange-600"
+                className="absolute inset-0 bg-orange-600 hidden md:block"
                 style={{
                   backgroundImage: `
                     linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
@@ -61,7 +61,7 @@ function HomeContent() {
                 }}
               ></div>
               
-              <div className="relative z-10">
+              <div className="relative z-10 w-full">
                 <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} showAdmin={!!isAdmin} />
               </div>
             </div>
