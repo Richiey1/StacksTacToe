@@ -20,11 +20,9 @@ export function Logo() {
         <line x1="44" y1="28" x2="52" y2="36" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"/>
         <line x1="52" y1="28" x2="44" y2="36" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"/>
       </svg>
-      <span className="leading-tight hidden sm:block">
-        <span className="block text-base">StacksTacToe</span>
-        <span className="block text-xs font-normal text-slate-400">
-          Arena
-        </span>
+      <span className="leading-tight hidden sm:block font-pixel text-xs sm:text-sm tracking-tight">
+        <span className="text-orange-500 font-bold">STACKS</span>
+        <span className="text-white font-bold">TacToe</span>
       </span>
     </Link>
   );

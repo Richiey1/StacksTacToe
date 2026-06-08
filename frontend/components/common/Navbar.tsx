@@ -14,7 +14,9 @@ export function Navbar() {
 
           {/* Wallet Button */}
           <div className="flex items-center gap-3">
-             <WalletConnectButton />
+             <div className="hidden sm:block">
+               <WalletConnectButton />
+             </div>
              <WalletButton />
           </div>
         </div>
