@@ -13,11 +13,12 @@ import { AdminPanel } from "@/components/admin/AdminPanel";
 import { TabType } from "@/components/common/TabNavigation";
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS } from "@/lib/stacksConfig";
+import { ADMIN_WALLETS } from "@/config/constants";
 
 function HomeContent() {
   const [activeTab, setActiveTab] = useState<TabType | null>("games");
   const { address } = useStacks();
-  const isAdmin = address && (address === CONTRACT_ADDRESS || address === "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM");
+  const isAdmin = address ? ADMIN_WALLETS.includes(address) : false;
   
   const searchParams = useSearchParams();
   const gameIdParam = searchParams.get('gameId');
