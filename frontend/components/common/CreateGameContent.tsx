@@ -148,6 +148,11 @@ export function CreateGameContent() {
                     MAX
                   </button>
                 </div>
+                {betAmount && !isNaN(parseFloat(betAmount)) && (
+                  <div className="flex justify-end text-[9px] text-gray-500 font-pixel mt-2 pr-1">
+                    Raw: {Math.floor(parseFloat(betAmount) * 1e6).toLocaleString()} micro-STX
+                  </div>
+                )}
                 {betExceedsBalance && (
                   <p className="mt-2 font-pixel text-[9px] text-red-500 uppercase tracking-wider flex items-center gap-1 animate-pulse">
                     <AlertTriangle className="w-3 h-3" /> Bet exceeds wallet balance
