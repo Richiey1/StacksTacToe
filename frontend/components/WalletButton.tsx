@@ -113,7 +113,9 @@ export function WalletButton({ wallet }: Props) {
         onClick={toggleDropdown}
         className="btn-retro flex items-center gap-2"
       >
-        <Wallet className="h-4 w-4" />
+        <div className="h-5 w-5 bg-orange-500/10 flex items-center justify-center shrink-0">
+          <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${address}`} alt="avatar" className="w-full h-full object-cover" />
+        </div>
         <span className="text-[10px] sm:text-xs">{label}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -123,8 +125,10 @@ export function WalletButton({ wallet }: Props) {
         <div className="absolute right-0 mt-2 w-64 bg-black border-4 border-white shadow-xl z-50">
           {/* Wallet Address */}
           <div className="px-4 py-3 border-b-2 border-white bg-gray-900">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-orange-500" />
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-orange-500/10 flex items-center justify-center shrink-0">
+                <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${address}`} alt="avatar" className="w-full h-full object-cover" />
+              </div>
               <p className="text-[10px] font-pixel text-orange-500 break-all">{address}</p>
             </div>
           </div>

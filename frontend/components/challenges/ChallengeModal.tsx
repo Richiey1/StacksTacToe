@@ -103,6 +103,11 @@ export function ChallengeModal({ isOpen, onClose }: ChallengeModalProps) {
                 MAX
               </button>
             </div>
+            {betAmount && !isNaN(parseFloat(betAmount)) && (
+              <div className="flex justify-end text-[9px] text-gray-500 font-mono mt-1 pr-1">
+                Raw: {Math.floor(parseFloat(betAmount) * 1e6).toLocaleString()} micro-STX
+              </div>
+            )}
             {betExceedsBalance && (
               <p className="text-[10px] text-red-500 mt-1 flex items-center gap-1 animate-pulse font-medium">
                 <AlertTriangle className="w-3 h-3" /> Exceeds wallet balance
