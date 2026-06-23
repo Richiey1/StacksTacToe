@@ -1,5 +1,6 @@
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "@/lib/stacksConfig";
+import { FUNCTION_NAMES } from "@/config/constants";
 import { openContractCall } from "@stacks/connect";
 import { uintCV, principalCV, PostConditionMode, Pc } from "@stacks/transactions";
 import { useCallback } from "react";
@@ -25,7 +26,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "create-game",
+        functionName: FUNCTION_NAMES.CREATE_GAME,
         functionArgs: [
           uintCV(amountMicroStx),
           uintCV(moveIndex),
@@ -55,7 +56,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "join-game",
+        functionName: FUNCTION_NAMES.JOIN_GAME,
         functionArgs: [uintCV(gameId), uintCV(moveIndex)],
         postConditions: [
           Pc.principal(address).willSendEq(amountMicroStx).ustx()
@@ -79,7 +80,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "play",
+        functionName: FUNCTION_NAMES.PLAY,
         functionArgs: [uintCV(gameId), uintCV(moveIndex)],
         postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
@@ -99,7 +100,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "forfeit-game",
+        functionName: FUNCTION_NAMES.FORFEIT_GAME,
         functionArgs: [uintCV(gameId)],
         postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
@@ -121,7 +122,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "claim-reward",
+        functionName: FUNCTION_NAMES.CLAIM_REWARD,
         functionArgs: [uintCV(gameId)],
         postConditionMode: PostConditionMode.Deny,
         onFinish: () => {
@@ -141,7 +142,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "set-platform-fee",
+        functionName: FUNCTION_NAMES.SET_PLATFORM_FEE,
         functionArgs: [uintCV(feePercent)],
         postConditionMode: PostConditionMode.Deny,
         onFinish: () => {},
@@ -158,7 +159,7 @@ export function useStacksTacToe() {
         network: NETWORK,
         contractAddress: CONTRACT_ADDRESS,
         contractName: CONTRACT_NAME,
-        functionName: "set-move-timeout",
+        functionName: FUNCTION_NAMES.SET_MOVE_TIMEOUT,
         functionArgs: [uintCV(timeoutDetails)],
         postConditionMode: PostConditionMode.Deny,
         onFinish: () => {},
@@ -174,7 +175,7 @@ export function useStacksTacToe() {
       network: NETWORK,
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
-      functionName: "pause-contract",
+      functionName: FUNCTION_NAMES.PAUSE_CONTRACT,
       functionArgs: [],
       postConditionMode: PostConditionMode.Deny,
       onFinish: () => {},
@@ -188,7 +189,7 @@ export function useStacksTacToe() {
       network: NETWORK,
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
-      functionName: "unpause-contract",
+      functionName: FUNCTION_NAMES.UNPAUSE_CONTRACT,
       functionArgs: [],
       postConditionMode: PostConditionMode.Deny,
       onFinish: () => {},

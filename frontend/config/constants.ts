@@ -12,3 +12,15 @@ export const ADMIN_WALLETS = [
 
 export const APP_NAME = 'StacksTacToe';
 export const APP_ICON = '/logo.png';
+
+export const FUNCTION_NAMES = {
+  CREATE_GAME: 'create-game',
+  JOIN_GAME: 'join-game',
+  PLAY: 'play',
+  FORFEIT_GAME: 'forfeit-game',
+  CLAIM_REWARD: 'claim-reward',
+  SET_PLATFORM_FEE: 'set-platform-fee',
+  SET_MOVE_TIMEOUT: 'set-move-timeout',
+  PAUSE_CONTRACT: 'pause-contract',
+  UNPAUSE_CONTRACT: 'unpause-contract'
+} as const;
