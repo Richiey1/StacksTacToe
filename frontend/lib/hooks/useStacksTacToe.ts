@@ -1,6 +1,6 @@
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "@/lib/stacksConfig";
-import { FUNCTION_NAMES } from "@/config/constants";
+import { FUNCTION_NAMES } from "@/lib/constants/contracts";
 import { openContractCall } from "@stacks/connect";
 import { uintCV, principalCV, PostConditionMode, Pc } from "@stacks/transactions";
 import { useCallback } from "react";

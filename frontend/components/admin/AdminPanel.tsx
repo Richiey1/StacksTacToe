@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useStacks } from "@/contexts/StacksProvider";
-import { useAdminData, useInvalidateGameQueries } from "@/hooks/useGameData";
-import { useStacksTacToe } from "@/hooks/useStacksTacToe";
+import { useAdminData } from '@/lib/hooks/useAdminData';
+import { useInvalidateGameQueries } from '@/lib/hooks/useInvalidateQueries';;
+import { useStacksTacToe } from "@/lib/hooks/useStacksTacToe";
 import { CONTRACT_ADDRESS } from "@/lib/stacksConfig";
 import { Shield, Settings, Activity, AlertTriangle, Play, Pause, Save, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";

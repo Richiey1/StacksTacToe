@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { User, Trophy, Coins, Swords, Shield, Star, Clock } from 'lucide-react';
 import { useStacks } from '@/contexts/StacksProvider';
-import { useLeaderboard, useGameList } from '@/hooks/useGameData';
+import { useLeaderboard } from '@/lib/hooks/useLeaderboard';
+import { useGameList } from '@/lib/hooks/useGameData';;
 import { formatStx } from '@/lib/gameUtils';
 
 export function PlayerProfileContent() {

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStacks } from "@/contexts/StacksProvider";
-import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { useGameBalance } from "@/hooks/useGameBalance";
+import { useStacksTacToe } from "@/lib/hooks/useStacksTacToe";
+import { useGameBalance } from "@/lib/hooks/useGameBalance";
 import { Loader2, Coins, AlertCircle, Wallet, Activity, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { formatStx } from "@/lib/gameUtils";

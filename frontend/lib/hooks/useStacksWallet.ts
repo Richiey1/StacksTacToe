@@ -7,7 +7,7 @@ import {
   isConnected,
   getLocalStorage,
 } from "@stacks/connect";
-import { STACKS_NETWORK } from "@/config/constants";
+import { STACKS_NETWORK } from "@/lib/constants/contracts";
 
 export type Network = "mainnet" | "testnet" | "disconnected";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, Trophy } from "lucide-react";
-import { usePlayerData } from "@/hooks/useGameData";
+import { usePlayerData } from '@/lib/hooks/usePlayerData';;
 
 interface PlayerDisplayProps {
   playerAddress: string;

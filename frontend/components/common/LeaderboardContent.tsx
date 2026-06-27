@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Crown, Medal, Award, Loader2, Trophy } from "lucide-react";
 import { LeaderboardSkeleton } from "@/components/ui/SkeletonLoaders";
-import { useLeaderboard } from "@/hooks/useGameData";
+import { useLeaderboard } from '@/lib/hooks/useLeaderboard';;
 import { LeaderboardFilters } from "@/components/leaderboard/LeaderboardFilters";
 import { PlayerProfileModal } from "@/components/leaderboard/PlayerProfileModal";
 

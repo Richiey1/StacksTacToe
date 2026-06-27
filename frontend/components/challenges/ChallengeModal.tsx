@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { X, Swords, Coins, Grid3x3, Wallet, AlertTriangle } from "lucide-react";
 import { useStacks } from "@/contexts/StacksProvider";
-import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { useGameBalance } from "@/hooks/useGameBalance";
+import { useStacksTacToe } from "@/lib/hooks/useStacksTacToe";
+import { useGameBalance } from "@/lib/hooks/useGameBalance";
 import { toast } from "react-hot-toast";
 
 interface ChallengeModalProps {

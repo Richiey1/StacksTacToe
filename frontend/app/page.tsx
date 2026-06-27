@@ -13,7 +13,7 @@ import { AdminPanel } from "@/components/admin/AdminPanel";
 import { TabType } from "@/components/common/TabNavigation";
 import { useStacks } from "@/contexts/StacksProvider";
 import { CONTRACT_ADDRESS } from "@/lib/stacksConfig";
-import { ADMIN_WALLETS } from "@/config/constants";
+import { ADMIN_WALLETS } from "@/lib/constants/contracts";
 
 function HomeContent() {
   const [activeTab, setActiveTab] = useState<TabType | null>("games");

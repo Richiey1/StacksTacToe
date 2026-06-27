@@ -4,7 +4,7 @@ import { Logo } from "@/components/Logo";
 import { NavLinks } from "@/components/NavLinks";
 import { NetworkBadge } from "@/components/NetworkBadge";
 import { WalletButton } from "@/components/WalletButton";
-import { useStacksWallet } from "@/hooks/useStacksWallet";
+import { useStacksWallet } from "@/lib/hooks/useStacksWallet";
 
 export function Navbar() {
   const wallet = useStacksWallet();

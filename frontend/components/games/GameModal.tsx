@@ -5,15 +5,13 @@ import { GameBoard, BoardState } from "@/components/games/GameBoard";
 import { CountdownTimer } from "@/components/games/CountdownTimer";
 import { ForfeitModal } from "@/components/games/ForfeitModal";
 import { JoinGameModal } from "@/components/games/JoinGameModal";
-import { useStacksTacToe } from "@/hooks/useStacksTacToe";
-import { 
-  useGame, 
-  usePlayerData, 
-  useBoardState, 
-  useTimeRemaining, 
-  useRewardClaimed,
-  useMoveTimeout
-} from "@/hooks/useGameData";
+import { useStacksTacToe } from "@/lib/hooks/useStacksTacToe";
+import { useGame } from '@/lib/hooks/useGameData';
+import { usePlayerData } from '@/lib/hooks/usePlayerData';
+import { useBoardState } from '@/lib/hooks/useBoardState';
+import { useTimeRemaining } from '@/lib/hooks/useTimeRemaining';
+import { useRewardClaimed } from '@/lib/hooks/useRewards';
+import { useMoveTimeout } from '@/lib/hooks/useTimeRemaining';;
 import { 
   canForfeitGame, 
   isGameActive, 
