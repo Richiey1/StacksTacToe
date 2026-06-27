@@ -4,7 +4,7 @@ import { FUNCTION_NAMES } from "@/lib/constants/contracts";
 import { openContractCall } from "@stacks/connect";
 import { uintCV, principalCV, PostConditionMode, Pc } from "@stacks/transactions";
 import { useCallback } from "react";
-import { useInvalidateGameQueries } from "./useGameData";
+import { useInvalidateGameQueries } from "./useInvalidateQueries";
 
 export function useStacksTacToe() {
   const { address } = useStacks();
