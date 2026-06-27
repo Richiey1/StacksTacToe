@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { useStacksWallet } from "@/lib/hooks/useStacksWallet";
 import { Copy, LogOut, Check, ChevronDown, Wallet } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/Button";
 
 type WalletState = ReturnType<typeof useStacksWallet>;
 
@@ -82,43 +83,46 @@ export function WalletButton({ wallet }: Props) {
 
   if (!isMounted) {
     return (
-      <button
+      <Button
         type="button"
         disabled
-        className="btn-retro disabled:opacity-60"
+        variant="retro"
+        className="disabled:opacity-60"
       >
         <span className="relative">LOADING...</span>
-      </button>
+      </Button>
     );
   }
 
   if (!isSignedIn) {
     return (
-      <button
+      <Button
         type="button"
         onClick={handleConnect}
         disabled={!isReady}
-        className="btn-retro disabled:cursor-not-allowed disabled:opacity-60"
+        variant="retro"
+        className="disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="relative">{label}</span>
-      </button>
+      </Button>
     );
   }
 
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Connected Wallet Button */}
-      <button
+      <Button
         type="button"
         onClick={toggleDropdown}
-        className="btn-retro flex items-center gap-2"
+        variant="retro"
+        className="flex items-center gap-2"
       >
         <div className="h-5 w-5 bg-orange-500/10 flex items-center justify-center shrink-0">
           <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${address}`} alt="avatar" className="w-full h-full object-cover" />
         </div>
         <span className="text-[10px] sm:text-xs">{label}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-      </button>
+      </Button>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
